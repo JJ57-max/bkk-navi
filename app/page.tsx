@@ -47,16 +47,13 @@ function MainContent() {
         }, 4000);
     };
 
-    // 2点間の距離（簡易Haversine等または緯度経度差）からバンコク圏内か判定する関数 (単位: km)
+    // 2点間の距離からバンコク圏内か判定する関数 (単位: km)
     const checkIsBangkokArea = (lat: number, lng: number) => {
-        // バンコク中心地 (サイアム)
         const bkkLat = 13.7460;
         const bkkLng = 100.5347;
-        // ざっくりとした距離計算 (1度 ≒ 111km)
         const dLat = Math.abs(lat - bkkLat) * 111;
         const dLng = Math.abs(lng - bkkLng) * 111 * Math.cos(bkkLat * (Math.PI / 180));
         const distance = Math.sqrt(dLat * dLat + dLng * dLng);
-        // 半径100km以内ならバンコク圏内とみなす
         return distance <= 100;
     };
 
@@ -74,7 +71,6 @@ function MainContent() {
                 const userLat = position.coords.latitude;
                 const userLng = position.coords.longitude;
 
-                // タイ（バンコク周辺）にいるかチェック
                 const inBkk = checkIsBangkokArea(userLat, userLng);
 
                 if (inBkk) {
@@ -84,7 +80,6 @@ function MainContent() {
                     updateUrlParams('あなたの現在地（GPS）', userLat, userLng);
                     showToast('📍 現在地（バンコク市内）を設定しました');
                 } else {
-                    // タイ国外（日本など）にいる場合 -> デモモード発動
                     setIsDemoMode(true);
                     setDestinationCoordinate({ lat: 13.7460, lng: 100.5347 }); // サイアム
                     setDestinationTitle('サイアム・パラゴン (デモモード)');
@@ -94,7 +89,6 @@ function MainContent() {
             },
             (error) => {
                 console.error('Geolocation error:', error);
-                // 拒否された場合やエラー時も安全にデモモードを維持
                 setIsDemoMode(true);
                 showToast('⚠️ 位置情報の取得に失敗しました（デモモードで動作中）');
             },
@@ -120,7 +114,6 @@ function MainContent() {
             if (title) {
                 setDestinationTitle(title);
             } else {
-                // 初回起動時に自動で現在地を取得してタイ国外判定を行う
                 handleGetMyLocation();
             }
 
@@ -263,8 +256,6 @@ function MainContent() {
 
     return (
         <main className="relative w-screen h-[100dvh] block bg-gray-100 overflow-hidden">
-            {/* モバイルブラウザのアドレスバーによる高さのズレを解消 */}
-            
             {/* 地図エリア */}
             <div className="absolute inset-0 z-0 w-full h-full pointer-events-auto">
                 <GoogleMapComponent 
@@ -278,9 +269,17 @@ function MainContent() {
                 />
             </div>
 
+            {/* デモモード中であることを示すうっすらした半透明バッジ */}
+            {isDemoMode && (
+                <div className="absolute top-24 left-1/2 -translate-x-1/2 z-20 bg-black/30 backdrop-blur-md text-white text-[11px] px-3 py-1 rounded-full shadow-md pointer-events-none flex items-center gap-1.5 border border-white/20">
+                    <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+                    <span>デモモード中（バンコク・サイアム基準）</span>
+                </div>
+            )}
+
             {/* トースト通知表示 */}
             {toastMessage && (
-                <div className="absolute top-20 left-1/2 -translate-x-1/2 z-30 bg-gray-900/90 text-white text-xs px-4 py-2 rounded-full shadow-2xl backdrop-blur-md animate-fade-in pointer-events-none">
+                <div className="absolute top-32 left-1/2 -translate-x-1/2 z-30 bg-gray-900/90 text-white text-xs px-4 py-2 rounded-full shadow-2xl backdrop-blur-md animate-fade-in pointer-events-none">
                     {toastMessage}
                 </div>
             )}
@@ -292,11 +291,6 @@ function MainContent() {
                         <div className="flex items-center gap-1.5">
                             <span>🛡️</span>
                             <span>バンコクおまもりコンパス</span>
-                            {isDemoMode && (
-                                <span className="bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded text-[10px]">
-                                    デモモード
-                                </span>
-                            )}
                         </div>
                         {/* 現地時間 & 天気ウィジェット */}
                         <div className="flex items-center gap-2 bg-gray-100 px-2.5 py-1 rounded-lg text-[11px] text-gray-700">
