@@ -14,9 +14,9 @@ import { allBangkokStations, Station } from '@/data/stations';
 function MainContent() {
     const [selectedMode, setSelectedMode] = useState<string>('transit');
     
-    // 初期値：マウント時にURLパラメータから安全に取得、なければサイアム・パラゴン
+    // 初期値：デフォルトはサイアム・パラゴン（デモモード起点）
     const [destinationCoordinate, setDestinationCoordinate] = useState({ lat: 13.7460, lng: 100.5347 });
-    const [destinationTitle, setDestinationTitle] = useState<string>('サイアム・パラゴン');
+    const [destinationTitle, setDestinationTitle] = useState<string>('サイアム・パラゴン (デモモード)');
 
     const [searchText, setSearchText] = useState<string>('');
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -24,8 +24,8 @@ function MainContent() {
     // バンコクの現在時刻 (UTC+7)
     const [bkkTime, setBkkTime] = useState<string>('');
 
-    // デモモード・通知用ステート
-    const [isDemoMode, setIsDemoMode] = useState<boolean>(false);
+    // 初期状態からデモモードを有効にする
+    const [isDemoMode, setIsDemoMode] = useState<boolean>(true);
     const [toastMessage, setToastMessage] = useState<string | null>(null);
 
     // マイ旅行プラン（行程表）の状態
@@ -57,7 +57,7 @@ function MainContent() {
         return distance <= 100;
     };
 
-    // 現在地（GPS）を取得して、タイ国外ならデモモードにする処理
+    // 「現在地」ボタンが押されたときのGPS取得処理
     const handleGetMyLocation = () => {
         if (!navigator.geolocation) {
             alert('お使いのブラウザは位置情報取得に対応していません');
@@ -74,29 +74,27 @@ function MainContent() {
                 const inBkk = checkIsBangkokArea(userLat, userLng);
 
                 if (inBkk) {
+                    // タイ国内（バンコク圏内）ならデモモードを解除して現在地に設定
                     setIsDemoMode(false);
                     setDestinationCoordinate({ lat: userLat, lng: userLng });
                     setDestinationTitle('あなたの現在地（GPS）');
                     updateUrlParams('あなたの現在地（GPS）', userLat, userLng);
                     showToast('📍 現在地（バンコク市内）を設定しました');
                 } else {
+                    // タイ国外にいる場合
                     setIsDemoMode(true);
-                    setDestinationCoordinate({ lat: 13.7460, lng: 100.5347 }); // サイアム
-                    setDestinationTitle('サイアム・パラゴン (デモモード)');
-                    updateUrlParams('サイアム・パラゴン (デモモード)', 13.7460, 100.5347);
-                    showToast('✈️ タイ国外からのアクセスのため【デモモード】（サイアム起点）で起動しました');
+                    showToast('✈️ 現在地がタイ国外（100km圏外）のためデモモードを維持します');
                 }
             },
             (error) => {
                 console.error('Geolocation error:', error);
-                setIsDemoMode(true);
-                showToast('⚠️ 位置情報の取得に失敗しました（デモモードで動作中）');
+                showToast('⚠️ 位置情報の取得に失敗しました');
             },
             { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
         );
     };
 
-    // 初回マウント時：URLパラメータ復元 ＆ 型安全なLocalStorage復元 ＆ 自動GPS/デモ判定
+    // 初回マウント時：URLパラメータ復元 ＆ 型安全なLocalStorage復元
     useEffect(() => {
         if (typeof window !== 'undefined') {
             const params = new URLSearchParams(window.location.search);
@@ -109,12 +107,12 @@ function MainContent() {
                 const parsedLng = parseFloat(lng);
                 if (!isNaN(parsedLat) && !isNaN(parsedLng)) {
                     setDestinationCoordinate({ lat: parsedLat, lng: parsedLng });
+                    // URLパラメータから直接指定された場合はデモモードを解除
+                    setIsDemoMode(false);
                 }
             }
             if (title) {
                 setDestinationTitle(title);
-            } else {
-                handleGetMyLocation();
             }
 
             // LocalStorageの安全な読み込みとバリデーション
@@ -213,6 +211,7 @@ function MainContent() {
         setSelectedCategory(null);
         setSearchText(''); 
         setShowDetailSheet(false);
+        setIsDemoMode(false); // スポット選択時はデモモード表示を解除
         updateUrlParams(landmark.name, lat, lng);
     };
 
@@ -226,6 +225,7 @@ function MainContent() {
         setSelectedCategory(null);
         setSearchText(''); 
         setShowDetailSheet(false);
+        setIsDemoMode(false);
         updateUrlParams(title, lat, lng);
     };
 
@@ -237,6 +237,7 @@ function MainContent() {
         setDestinationTitle(shop.name);
         setSearchText('');
         setShowDetailSheet(false);
+        setIsDemoMode(false);
         updateUrlParams(shop.name, lat, lng);
     };
 
@@ -264,22 +265,15 @@ function MainContent() {
                     onSelectArbitraryPoint={(title, lat, lng) => {
                         setDestinationCoordinate({ lat, lng });
                         setDestinationTitle(title);
+                        setIsDemoMode(false);
                         updateUrlParams(title, lat, lng);
                     }}
                 />
             </div>
 
-            {/* デモモード中であることを示すうっすらした半透明バッジ */}
-            {isDemoMode && (
-                <div className="absolute top-24 left-1/2 -translate-x-1/2 z-20 bg-black/30 backdrop-blur-md text-white text-[11px] px-3 py-1 rounded-full shadow-md pointer-events-none flex items-center gap-1.5 border border-white/20">
-                    <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
-                    <span>デモモード中（バンコク・サイアム基準）</span>
-                </div>
-            )}
-
             {/* トースト通知表示 */}
             {toastMessage && (
-                <div className="absolute top-32 left-1/2 -translate-x-1/2 z-30 bg-gray-900/90 text-white text-xs px-4 py-2 rounded-full shadow-2xl backdrop-blur-md animate-fade-in pointer-events-none">
+                <div className="absolute top-24 left-1/2 -translate-x-1/2 z-30 bg-gray-900/90 text-white text-xs px-4 py-2 rounded-full shadow-2xl backdrop-blur-md animate-fade-in pointer-events-none">
                     {toastMessage}
                 </div>
             )}
@@ -291,6 +285,13 @@ function MainContent() {
                         <div className="flex items-center gap-1.5">
                             <span>🛡️</span>
                             <span>バンコクおまもりコンパス</span>
+                            {/* ヘッダー横のDEMOバッジ */}
+                            {isDemoMode && (
+                                <span className="bg-amber-100 text-amber-700 border border-amber-300 px-1.5 py-0.5 rounded-full text-[9px] font-bold animate-pulse flex items-center gap-1">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                                    DEMO
+                                </span>
+                            )}
                         </div>
                         {/* 現地時間 & 天気ウィジェット */}
                         <div className="flex items-center gap-2 bg-gray-100 px-2.5 py-1 rounded-lg text-[11px] text-gray-700">
@@ -317,7 +318,7 @@ function MainContent() {
                         <button 
                             onClick={handleGetMyLocation}
                             className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-xl text-xs font-bold shadow-md flex items-center gap-1 whitespace-nowrap"
-                            title="現在地を取得"
+                            title="現地で現在地を取得"
                         >
                             <span>📍</span> 現在地
                         </button>
@@ -474,6 +475,7 @@ function MainContent() {
                 onSelectDestination={(title, lat, lng) => {
                     setDestinationCoordinate({ lat, lng });
                     setDestinationTitle(title);
+                    setIsDemoMode(false);
                     updateUrlParams(title, lat, lng);
                 }}
             />
