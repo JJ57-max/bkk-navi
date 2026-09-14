@@ -24,6 +24,10 @@ function MainContent() {
     // バンコクの現在時刻 (UTC+7)
     const [bkkTime, setBkkTime] = useState<string>('');
 
+    // デモモード・通知用ステート
+    const [isDemoMode, setIsDemoMode] = useState<boolean>(false);
+    const [toastMessage, setToastMessage] = useState<string | null>(null);
+
     // マイ旅行プラン（行程表）の状態
     const [itineraryItems, setItineraryItems] = useState<ItineraryItem[]>([]);
     const [showTravelPlanDrawer, setShowTravelPlanDrawer] = useState<boolean>(false);
@@ -35,7 +39,70 @@ function MainContent() {
 
     const categories = ["すべて", "観光・ナイトスポット", "寺院", "ショッピング", "空港"];
 
-    // 初回マウント時：URLパラメータ復元 ＆ 型安全なLocalStorage復元
+    // トーストを数秒で消すヘルパー
+    const showToast = (msg: string) => {
+        setToastMessage(msg);
+        setTimeout(() => {
+            setToastMessage(null);
+        }, 4000);
+    };
+
+    // 2点間の距離（簡易Haversine等または緯度経度差）からバンコク圏内か判定する関数 (単位: km)
+    const checkIsBangkokArea = (lat: number, lng: number) => {
+        // バンコク中心地 (サイアム)
+        const bkkLat = 13.7460;
+        const bkkLng = 100.5347;
+        // ざっくりとした距離計算 (1度 ≒ 111km)
+        const dLat = Math.abs(lat - bkkLat) * 111;
+        const dLng = Math.abs(lng - bkkLng) * 111 * Math.cos(bkkLat * (Math.PI / 180));
+        const distance = Math.sqrt(dLat * dLat + dLng * dLng);
+        // 半径100km以内ならバンコク圏内とみなす
+        return distance <= 100;
+    };
+
+    // 現在地（GPS）を取得して、タイ国外ならデモモードにする処理
+    const handleGetMyLocation = () => {
+        if (!navigator.geolocation) {
+            alert('お使いのブラウザは位置情報取得に対応していません');
+            return;
+        }
+
+        showToast('現在地を取得中...');
+
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const userLat = position.coords.latitude;
+                const userLng = position.coords.longitude;
+
+                // タイ（バンコク周辺）にいるかチェック
+                const inBkk = checkIsBangkokArea(userLat, userLng);
+
+                if (inBkk) {
+                    setIsDemoMode(false);
+                    setDestinationCoordinate({ lat: userLat, lng: userLng });
+                    setDestinationTitle('あなたの現在地（GPS）');
+                    updateUrlParams('あなたの現在地（GPS）', userLat, userLng);
+                    showToast('📍 現在地（バンコク市内）を設定しました');
+                } else {
+                    // タイ国外（日本など）にいる場合 -> デモモード発動
+                    setIsDemoMode(true);
+                    setDestinationCoordinate({ lat: 13.7460, lng: 100.5347 }); // サイアム
+                    setDestinationTitle('サイアム・パラゴン (デモモード)');
+                    updateUrlParams('サイアム・パラゴン (デモモード)', 13.7460, 100.5347);
+                    showToast('✈️ タイ国外からのアクセスのため【デモモード】（サイアム起点）で起動しました');
+                }
+            },
+            (error) => {
+                console.error('Geolocation error:', error);
+                // 拒否された場合やエラー時も安全にデモモードを維持
+                setIsDemoMode(true);
+                showToast('⚠️ 位置情報の取得に失敗しました（デモモードで動作中）');
+            },
+            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+        );
+    };
+
+    // 初回マウント時：URLパラメータ復元 ＆ 型安全なLocalStorage復元 ＆ 自動GPS/デモ判定
     useEffect(() => {
         if (typeof window !== 'undefined') {
             const params = new URLSearchParams(window.location.search);
@@ -52,6 +119,9 @@ function MainContent() {
             }
             if (title) {
                 setDestinationTitle(title);
+            } else {
+                // 初回起動時に自動で現在地を取得してタイ国外判定を行う
+                handleGetMyLocation();
             }
 
             // LocalStorageの安全な読み込みとバリデーション
@@ -193,7 +263,7 @@ function MainContent() {
 
     return (
         <main className="relative w-screen h-[100dvh] block bg-gray-100 overflow-hidden">
-            {/* 【懸念点2対策】 h-[100dvh] を用いてモバイルブラウザのアドレスバーによる高さのズレを解消 */}
+            {/* モバイルブラウザのアドレスバーによる高さのズレを解消 */}
             
             {/* 地図エリア */}
             <div className="absolute inset-0 z-0 w-full h-full pointer-events-auto">
@@ -208,13 +278,25 @@ function MainContent() {
                 />
             </div>
 
+            {/* トースト通知表示 */}
+            {toastMessage && (
+                <div className="absolute top-20 left-1/2 -translate-x-1/2 z-30 bg-gray-900/90 text-white text-xs px-4 py-2 rounded-full shadow-2xl backdrop-blur-md animate-fade-in pointer-events-none">
+                    {toastMessage}
+                </div>
+            )}
+
             {/* 上部コントロールレイヤー */}
             <div className="absolute top-0 left-0 right-0 z-10 flex flex-col p-4 gap-3 pointer-events-none">
                 <div className="pointer-events-auto bg-white/95 backdrop-blur-md p-4 rounded-2xl shadow-lg flex flex-col gap-2 max-w-md mx-auto w-full">
                     <div className="flex items-center justify-between text-xs font-bold text-emerald-600">
                         <div className="flex items-center gap-1.5">
                             <span>🛡️</span>
-                            <span>バンコクおまもりコンパス (Web版)</span>
+                            <span>バンコクおまもりコンパス</span>
+                            {isDemoMode && (
+                                <span className="bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded text-[10px]">
+                                    デモモード
+                                </span>
+                            )}
                         </div>
                         {/* 現地時間 & 天気ウィジェット */}
                         <div className="flex items-center gap-2 bg-gray-100 px-2.5 py-1 rounded-lg text-[11px] text-gray-700">
@@ -223,18 +305,28 @@ function MainContent() {
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-3 bg-gray-100 px-3 py-2 rounded-xl">
-                        <span className="text-blue-600 font-bold">🔍</span>
-                        <input 
-                            type="text" 
-                            placeholder="駅名・スポットを検索..." 
-                            value={searchText}
-                            onChange={(e) => setSearchText(e.target.value)}
-                            className="bg-transparent w-full outline-none text-sm text-gray-800"
-                        />
-                        {searchText && (
-                            <button onClick={() => setSearchText('')} className="text-gray-400 hover:text-gray-600">✕</button>
-                        )}
+                    <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-3 bg-gray-100 px-3 py-2 rounded-xl flex-1">
+                            <span className="text-blue-600 font-bold">🔍</span>
+                            <input 
+                                type="text" 
+                                placeholder="駅名・スポットを検索..." 
+                                value={searchText}
+                                onChange={(e) => setSearchText(e.target.value)}
+                                className="bg-transparent w-full outline-none text-sm text-gray-800"
+                            />
+                            {searchText && (
+                                <button onClick={() => setSearchText('')} className="text-gray-400 hover:text-gray-600">✕</button>
+                            )}
+                        </div>
+                        {/* 現在地（GPS）取得ボタン */}
+                        <button 
+                            onClick={handleGetMyLocation}
+                            className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-xl text-xs font-bold shadow-md flex items-center gap-1 whitespace-nowrap"
+                            title="現在地を取得"
+                        >
+                            <span>📍</span> 現在地
+                        </button>
                     </div>
                 </div>
 
