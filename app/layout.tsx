@@ -1,5 +1,6 @@
 // app/layout.tsx
 import type { Metadata, Viewport } from "next";
+import { GoogleAnalytics } from '@next/third-parties/google'; // インポートを追加
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -31,6 +32,8 @@ export default function RootLayout({
       <body className="antialiased overflow-hidden">
         {children}
       </body>
+      {/* Googleアナリティクスの測定IDを設定 */}
+      <GoogleAnalytics gaId="G-9KLS8XGZ7N" />
     </html>
   );
 }
