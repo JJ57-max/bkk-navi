@@ -8,6 +8,7 @@ import { allBangkokStations, Station } from '@/data/stations';
 interface GoogleMapProps {
     destinationCoordinate: { lat: number; lng: number };
     destinationTitle: string;
+    travelMode?: string; // 追加：移動手段
     onSelectArbitraryPoint?: (title: string, lat: number, lng: number) => void;
 }
 
@@ -133,8 +134,8 @@ function TransitLinesComponent() {
     return null;
 }
 
-// 目的地への経路を描画（長距離の場合はエラーを出さずに安全に処理）
-function CustomPolylineRouteComponent({ destination }: { destination: { lat: number; lng: number } }) {
+// 選択された移動手段に応じて動的にルートを描画
+function CustomPolylineRouteComponent({ destination, travelMode }: { destination: { lat: number; lng: number }, travelMode: string }) {
     const map = useMap();
     const [origin, setOrigin] = useState<{ lat: number; lng: number } | null>(null);
     const [pathCoordinates, setPathCoordinates] = useState<google.maps.LatLngLiteral[]>([]);
@@ -163,12 +164,21 @@ function CustomPolylineRouteComponent({ destination }: { destination: { lat: num
         if (!map || !origin) return;
         const directionsService = new google.maps.DirectionsService();
 
-        // 1. まず公共交通機関（TRANSIT）で検索
+        // 選択されたモードをGoogle MapsのTravelModeに変換
+        let googleTravelMode = google.maps.TravelMode.TRANSIT;
+        if (travelMode === 'walking') {
+            googleTravelMode = google.maps.TravelMode.WALKING;
+        } else if (travelMode === 'driving' || travelMode === 'taxi') {
+            googleTravelMode = google.maps.TravelMode.DRIVING;
+        } else if (travelMode === 'transit') {
+            googleTravelMode = google.maps.TravelMode.TRANSIT;
+        }
+
         directionsService.route(
             {
                 origin: origin,
                 destination: destination,
-                travelMode: google.maps.TravelMode.TRANSIT,
+                travelMode: googleTravelMode,
             },
             (result, status) => {
                 if (status === google.maps.DirectionsStatus.OK && result && result.routes[0]) {
@@ -178,38 +188,29 @@ function CustomPolylineRouteComponent({ destination }: { destination: { lat: num
                     }));
                     setPathCoordinates(points);
                 } else {
-                    // 2. 失敗した場合、車（DRIVING）で検索を試みる
-                    directionsService.route(
-                        {
-                            origin: origin,
-                            destination: destination,
-                            travelMode: google.maps.TravelMode.DRIVING,
-                        },
-                        (drivingResult, drivingStatus) => {
-                            if (drivingStatus === google.maps.DirectionsStatus.OK && drivingResult && drivingResult.routes[0]) {
-                                const points = drivingResult.routes[0].overview_path.map((p) => ({
-                                    lat: p.lat(),
-                                    lng: p.lng(),
-                                }));
-                                setPathCoordinates(points);
-                            } else {
-                                // 3. コーンケーンやチェンマイなどの長距離でAPIがルートを引けない場合は直線（測地線）を安全に描画
-                                setPathCoordinates([origin, destination]);
-                            }
-                        }
-                    );
+                    // 取得できない場合は直線にフォールバック
+                    setPathCoordinates([origin, destination]);
                 }
             }
         );
-    }, [map, origin, destination]);
+    }, [map, origin, destination, travelMode]);
 
     useEffect(() => {
         if (!map || pathCoordinates.length === 0) return;
 
+        // モードごとにラインの色を変更
+        const strokeColor = travelMode === 'walking' 
+            ? '#10b981' // 徒歩：エメラルド緑
+            : travelMode === 'taxi' 
+            ? '#f59e0b' // タクシー：オレンジ
+            : travelMode === 'driving'
+            ? '#ef4444' // 車：赤
+            : '#2563eb'; // 公共交通機関：青
+
         const polyline = new google.maps.Polyline({
             path: pathCoordinates,
             geodesic: true,
-            strokeColor: '#2563eb', // 青いハイライト線
+            strokeColor: strokeColor,
             strokeOpacity: 0.8,
             strokeWeight: 5,
             zIndex: 999,
@@ -219,12 +220,12 @@ function CustomPolylineRouteComponent({ destination }: { destination: { lat: num
         return () => {
             polyline.setMap(null);
         };
-    }, [map, pathCoordinates]);
+    }, [map, pathCoordinates, travelMode]);
 
     return null;
 }
 
-export default function GoogleMapComponent({ destinationCoordinate, destinationTitle, onSelectArbitraryPoint }: GoogleMapProps) {
+export default function GoogleMapComponent({ destinationCoordinate, destinationTitle, travelMode = 'transit', onSelectArbitraryPoint }: GoogleMapProps) {
     const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "AIzaSyCywzT_-wuzKVhv0PcgvxK06XFK5On3yh0";
     const [activeStation, setActiveStation] = useState<Station | null>(null);
     const [isDestinationOpen, setIsDestinationOpen] = useState<boolean>(false);
@@ -260,8 +261,8 @@ export default function GoogleMapComponent({ destinationCoordinate, destinationT
                     {/* 各路線の駅間を繋ぐ路線網ライン */}
                     <TransitLinesComponent />
 
-                    {/* 目的地へのハイライト線（長距離フォールバック対応） */}
-                    <CustomPolylineRouteComponent destination={destinationCoordinate} />
+                    {/* 目的地へのルート（移動モード連動） */}
+                    <CustomPolylineRouteComponent destination={destinationCoordinate} travelMode={travelMode} />
 
                     {/* 目的地ピン */}
                     <AdvancedMarker 

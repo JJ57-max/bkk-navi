@@ -74,14 +74,12 @@ function MainContent() {
                 const inBkk = checkIsBangkokArea(userLat, userLng);
 
                 if (inBkk) {
-                    // タイ国内（バンコク圏内）ならデモモードを解除して現在地に設定
                     setIsDemoMode(false);
                     setDestinationCoordinate({ lat: userLat, lng: userLng });
                     setDestinationTitle('あなたの現在地（GPS）');
                     updateUrlParams('あなたの現在地（GPS）', userLat, userLng);
                     showToast('📍 現在地（バンコク市内）を設定しました');
                 } else {
-                    // タイ国外にいる場合
                     setIsDemoMode(true);
                     showToast('✈️ 現在地がタイ国外（100km圏外）のためデモモードを維持します');
                 }
@@ -94,7 +92,7 @@ function MainContent() {
         );
     };
 
-    // 初回マウント時：URLパラメータ復元 ＆ 型安全なLocalStorage復元
+    // 初回マウント時：URLパラメータ復元 ＆ LocalStorage復元
     useEffect(() => {
         if (typeof window !== 'undefined') {
             const params = new URLSearchParams(window.location.search);
@@ -107,7 +105,6 @@ function MainContent() {
                 const parsedLng = parseFloat(lng);
                 if (!isNaN(parsedLat) && !isNaN(parsedLng)) {
                     setDestinationCoordinate({ lat: parsedLat, lng: parsedLng });
-                    // URLパラメータから直接指定された場合はデモモードを解除
                     setIsDemoMode(false);
                 }
             }
@@ -115,7 +112,6 @@ function MainContent() {
                 setDestinationTitle(title);
             }
 
-            // LocalStorageの安全な読み込みとバリデーション
             const savedPlan = localStorage.getItem('bkk_nav_itinerary');
             if (savedPlan) {
                 try {
@@ -153,7 +149,6 @@ function MainContent() {
         }
     };
 
-    // プランに追加
     const handleAddToPlan = (title: string, category: string, lat: number, lng: number, e: React.MouseEvent) => {
         e.stopPropagation();
         const newItem: ItineraryItem = {
@@ -166,7 +161,6 @@ function MainContent() {
         saveItinerary([...itineraryItems, newItem]);
     };
 
-    // プランから削除
     const handleRemoveFromPlan = (id: string) => {
         const filtered = itineraryItems.filter(item => item.id !== id);
         saveItinerary(filtered);
@@ -190,7 +184,6 @@ function MainContent() {
         return () => clearInterval(timer);
     }, []);
 
-    // ブラウザのURLを強制書き換え（ディープリンク）
     const updateUrlParams = (title: string, lat: number, lng: number) => {
         if (typeof window !== 'undefined') {
             const params = new URLSearchParams(window.location.search);
@@ -202,7 +195,6 @@ function MainContent() {
         }
     };
 
-    // ランドマーク選択時
     const handleSelectLandmark = (landmark: typeof bangkokLandmarks[0]) => {
         const lat = landmark.coordinate.latitude;
         const lng = landmark.coordinate.longitude;
@@ -211,11 +203,10 @@ function MainContent() {
         setSelectedCategory(null);
         setSearchText(''); 
         setShowDetailSheet(false);
-        setIsDemoMode(false); // スポット選択時はデモモード表示を解除
+        setIsDemoMode(false);
         updateUrlParams(landmark.name, lat, lng);
     };
 
-    // 駅・交通機関が選択されたとき
     const handleSelectStation = (station: Station) => {
         const lat = station.coordinate.latitude;
         const lng = station.coordinate.longitude;
@@ -229,7 +220,6 @@ function MainContent() {
         updateUrlParams(title, lat, lng);
     };
 
-    // 両替所ガイドからショップが選択されたとき
     const handleSelectExchangeShop = (shop: ExchangeShop) => {
         const lat = shop.coordinate.lat;
         const lng = shop.coordinate.lng;
@@ -241,7 +231,6 @@ function MainContent() {
         updateUrlParams(shop.name, lat, lng);
     };
 
-    // 検索フィルタリングロジック
     const filteredLandmarks = bangkokLandmarks.filter(l => {
         const matchCategory = selectedCategory && selectedCategory !== 'すべて' ? l.category === selectedCategory : true;
         const matchSearch = searchText ? l.name.toLowerCase().includes(searchText.toLowerCase()) : true;
@@ -257,11 +246,12 @@ function MainContent() {
 
     return (
         <main className="relative w-screen h-[100dvh] block bg-gray-100 overflow-hidden">
-            {/* 地図エリア */}
+            {/* 地図エリア（travelMode を渡すように変更） */}
             <div className="absolute inset-0 z-0 w-full h-full pointer-events-auto">
                 <GoogleMapComponent 
                     destinationCoordinate={destinationCoordinate}
                     destinationTitle={destinationTitle}
+                    travelMode={selectedMode}
                     onSelectArbitraryPoint={(title, lat, lng) => {
                         setDestinationCoordinate({ lat, lng });
                         setDestinationTitle(title);
@@ -285,7 +275,6 @@ function MainContent() {
                         <div className="flex items-center gap-1.5">
                             <span>🛡️</span>
                             <span>バンコクおまもりコンパス</span>
-                            {/* ヘッダー横のDEMOバッジ */}
                             {isDemoMode && (
                                 <span className="bg-amber-100 text-amber-700 border border-amber-300 px-1.5 py-0.5 rounded-full text-[9px] font-bold animate-pulse flex items-center gap-1">
                                     <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
@@ -293,7 +282,6 @@ function MainContent() {
                                 </span>
                             )}
                         </div>
-                        {/* 現地時間 & 天気ウィジェット */}
                         <div className="flex items-center gap-2 bg-gray-100 px-2.5 py-1 rounded-lg text-[11px] text-gray-700">
                             <span>🇹🇭 BKK {bkkTime}</span>
                             <span className="text-blue-500" title="スコールに注意">🌧️ 32°C</span>
@@ -314,7 +302,6 @@ function MainContent() {
                                 <button onClick={() => setSearchText('')} className="text-gray-400 hover:text-gray-600">✕</button>
                             )}
                         </div>
-                        {/* 現在地（GPS）取得ボタン */}
                         <button 
                             onClick={handleGetMyLocation}
                             className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-xl text-xs font-bold shadow-md flex items-center gap-1 whitespace-nowrap"
