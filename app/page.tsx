@@ -10,6 +10,7 @@ import TravelPlanDrawer, { ItineraryItem } from '@/components/TravelPlanDrawer';
 import { bangkokLandmarks } from '@/data/landmarks';
 import { ExchangeShop } from '@/data/guides';
 import { allBangkokStations, Station } from '@/data/stations';
+import { bangkokHotels, HotelItem } from '@/data/hotels'; // ホテルデータのインポート
 
 function MainContent() {
     const [selectedMode, setSelectedMode] = useState<string>('transit');
@@ -220,6 +221,19 @@ function MainContent() {
         updateUrlParams(title, lat, lng);
     };
 
+    const handleSelectHotel = (hotel: HotelItem) => {
+        const lat = hotel.coordinate.latitude;
+        const lng = hotel.coordinate.longitude;
+        const title = `${hotel.name} (${hotel.area})`;
+        setDestinationCoordinate({ lat, lng });
+        setDestinationTitle(title);
+        setSelectedCategory(null);
+        setSearchText('');
+        setShowDetailSheet(false);
+        setIsDemoMode(false);
+        updateUrlParams(title, lat, lng);
+    };
+
     const handleSelectExchangeShop = (shop: ExchangeShop) => {
         const lat = shop.coordinate.lat;
         const lng = shop.coordinate.lng;
@@ -242,11 +256,16 @@ function MainContent() {
         s.line.toLowerCase().includes(searchText.toLowerCase())
     ) : [];
 
+    const filteredHotels = searchText ? bangkokHotels.filter(h =>
+        h.name.toLowerCase().includes(searchText.toLowerCase()) ||
+        h.area.toLowerCase().includes(searchText.toLowerCase())
+    ) : [];
+
     const showDropdown = selectedCategory !== null || searchText.trim().length > 0;
 
     return (
         <main className="relative w-screen h-[100dvh] block bg-gray-100 overflow-hidden">
-            {/* 地図エリア（travelMode を渡すように変更） */}
+            {/* 地図エリア */}
             <div className="absolute inset-0 z-0 w-full h-full pointer-events-auto">
                 <GoogleMapComponent 
                     destinationCoordinate={destinationCoordinate}
@@ -293,7 +312,7 @@ function MainContent() {
                             <span className="text-blue-600 font-bold">🔍</span>
                             <input 
                                 type="text" 
-                                placeholder="駅名・スポットを検索..." 
+                                placeholder="駅名・スポット・ホテルを検索..." 
                                 value={searchText}
                                 onChange={(e) => setSearchText(e.target.value)}
                                 className="bg-transparent w-full outline-none text-sm text-gray-800"
@@ -361,6 +380,7 @@ function MainContent() {
                 {/* 検索・カテゴリリスト */}
                 {showDropdown && (
                     <div className="pointer-events-auto bg-white/95 backdrop-blur-md rounded-2xl shadow-xl max-w-md mx-auto w-full max-h-64 overflow-y-auto p-2 flex flex-col gap-1">
+                        {/* ランドマーク */}
                         {filteredLandmarks.map((landmark) => (
                             <div
                                 key={`landmark-${landmark.id}`}
@@ -375,7 +395,6 @@ function MainContent() {
                                     <button
                                         onClick={(e) => handleAddToPlan(landmark.name, landmark.category, landmark.coordinate.latitude, landmark.coordinate.longitude, e)}
                                         className="bg-blue-100 hover:bg-blue-600 hover:text-white text-blue-700 text-[10px] font-bold px-2 py-1 rounded-lg transition-colors"
-                                        title="マイプランに追加"
                                     >
                                         + プラン
                                     </button>
@@ -384,6 +403,7 @@ function MainContent() {
                             </div>
                         ))}
                             
+                        {/* 駅 */}
                         {filteredStations.map((station, idx) => (
                             <div
                                 key={`station-${idx}`}
@@ -398,7 +418,34 @@ function MainContent() {
                                     <button
                                         onClick={(e) => handleAddToPlan(`${station.name} (${station.line})`, station.line, station.coordinate.latitude, station.coordinate.longitude, e)}
                                         className="bg-blue-100 hover:bg-blue-600 hover:text-white text-blue-700 text-[10px] font-bold px-2 py-1 rounded-lg transition-colors"
-                                        title="マイプランに追加"
+                                    >
+                                        + プラン
+                                    </button>
+                                    <span className="text-blue-600 font-bold">➔</span>
+                                </div>
+                            </div>
+                        ))}
+
+                        {/* ホテル (星3〜星5) */}
+                        {filteredHotels.map((hotel) => (
+                            <div
+                                key={`hotel-${hotel.id}`}
+                                onClick={() => handleSelectHotel(hotel)}
+                                className="w-full text-left px-3 py-2.5 hover:bg-blue-50 rounded-xl flex justify-between items-center transition-colors border-b border-gray-100 last:border-none cursor-pointer group"
+                            >
+                                <div>
+                                    <div className="flex items-center gap-1.5">
+                                        <p className="text-sm font-bold text-gray-800">{hotel.name}</p>
+                                        <span className="text-[10px] bg-amber-100 text-amber-800 px-1.5 py-0.2 rounded font-bold">
+                                            {'★'.repeat(hotel.star)}
+                                        </span>
+                                    </div>
+                                    <p className="text-[10px] text-gray-500">{hotel.area} / {hotel.description}</p>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        onClick={(e) => handleAddToPlan(hotel.name, hotel.category, hotel.coordinate.latitude, hotel.coordinate.longitude, e)}
+                                        className="bg-blue-100 hover:bg-blue-600 hover:text-white text-blue-700 text-[10px] font-bold px-2 py-1 rounded-lg transition-colors"
                                     >
                                         + プラン
                                     </button>
@@ -407,8 +454,20 @@ function MainContent() {
                             </div>
                         ))}
                             
-                        {filteredLandmarks.length === 0 && filteredStations.length === 0 && (
-                            <div className="p-3 text-center text-sm text-gray-500">見つかりませんでした</div>
+                        {/* どこにもヒットしなかった場合のフリーワードAgoda検索フォールバック */}
+                        {filteredLandmarks.length === 0 && filteredStations.length === 0 && filteredHotels.length === 0 && searchText.trim().length > 0 && (
+                            <div className="p-4 flex flex-col items-center gap-2 text-center">
+                                <p className="text-xs text-gray-600">一致するスポットやホテルが見つかりませんでした</p>
+                                <a
+                                    href={`https://www.agoda.com/search?q=${encodeURIComponent(searchText)}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-4 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-md transition-colors"
+                                >
+                                    <span>🏨</span>
+                                    <span>「{searchText}」をAgodaで探す・予約する (PR)</span>
+                                </a>
+                            </div>
                         )}
                     </div>
                 )}
