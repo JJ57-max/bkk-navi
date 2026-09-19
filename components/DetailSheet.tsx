@@ -2,6 +2,7 @@
 'use client';
 
 import React from 'react';
+import { getAgodaSearchUrl } from '@/data/hotels'; // Agodaリンク生成関数のインポート
 
 interface DetailSheetProps {
     title: string;
@@ -62,14 +63,14 @@ export default function DetailSheet({
                     <p className="text-[10px] font-bold text-gray-400 tracking-wider">💡 現地で役立つおすすめサービス (PR)</p>
                     <div className="grid grid-cols-3 gap-2">
                         <a
-                            href="https://www.agoda.com" 
+                            href={getAgodaSearchUrl(title)} // 選択中の目的地名でAgoda検索URLを動的生成
                             target="_blank" 
                             rel="noopener noreferrer"
                             className="bg-blue-50 hover:bg-blue-100 text-blue-700 p-2.5 rounded-xl text-center flex flex-col items-center gap-1 transition-colors"
                         >
                             <span className="text-sm">🏨</span>
-                            <span className="text-[10px] font-bold">ホテル予約</span>
-                            <span className="text-[8px] text-blue-500">Agoda / Booking</span>
+                            <span className="text-[10px] font-bold">ホテルを検索</span>
+                            <span className="text-[8px] text-blue-500">Agoda (PR)</span>
                         </a>
                         <a
                             href="https://www.klook.com" 
