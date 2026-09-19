@@ -1,3 +1,5 @@
+// data/hotels.ts
+
 export interface HotelItem {
     id: string;
     name: string;
@@ -135,3 +137,17 @@ export const bangkokHotels: HotelItem[] = [
         description: '新都心ラマ9世エリアへのアクセスが良く、モダンで手頃なコスパホテル。'
     }
 ];
+
+// --- Agoda アフィリエイト連携 ---
+
+/**
+ * AgodaアフィリエイトCID
+ */
+const AGODA_CID = '1974942';
+
+/**
+ * キーワードからAgodaのアフィリエイト検索URLを生成する関数
+ */
+export const getAgodaSearchUrl = (keyword: string) => {
+    return `https://www.agoda.com/search?q=${encodeURIComponent(keyword)}&cid=${AGODA_CID}`;
+};
