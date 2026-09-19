@@ -146,8 +146,8 @@ export const bangkokHotels: HotelItem[] = [
 const AGODA_CID = '1974942';
 
 /**
- * キーワードからAgodaの検索用アフィリエイトURLを生成する関数
+ * 確実なCID付きAgodaトップページURLを生成する関数
  */
-export const getAgodaSearchUrl = (keyword: string) => {
-    return `https://www.agoda.com/search?q=${encodeURIComponent(keyword)}&cid=${AGODA_CID}&hl=ja`;
+export const getAgodaSearchUrl = (_keyword?: string) => {
+    return `https://www.agoda.com/ja-jp/?cid=${AGODA_CID}`;
 };
