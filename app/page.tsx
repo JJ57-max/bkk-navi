@@ -45,7 +45,7 @@ function MainContent() {
         setToastMessage(msg);
         setTimeout(() => {
             setToastMessage(null);
-        }, 4000);
+        }, 2500);
     };
 
     // 2点間の距離からバンコク圏内か判定する関数 (単位: km)
@@ -160,6 +160,7 @@ function MainContent() {
             lng
         };
         saveItinerary([...itineraryItems, newItem]);
+        showToast(`✨ 「${title}」をマイプランに追加しました！`);
     };
 
     const handleRemoveFromPlan = (id: string) => {
@@ -280,10 +281,11 @@ function MainContent() {
                 />
             </div>
 
-            {/* トースト通知表示 */}
+            {/* トースト通知表示（下部配置で視認性アップ） */}
             {toastMessage && (
-                <div className="absolute top-24 left-1/2 -translate-x-1/2 z-30 bg-gray-900/90 text-white text-xs px-4 py-2 rounded-full shadow-2xl backdrop-blur-md animate-fade-in pointer-events-none">
-                    {toastMessage}
+                <div className="absolute bottom-24 left-1/2 -translate-x-1/2 z-50 bg-gray-900/90 text-white text-xs font-bold px-4 py-2.5 rounded-2xl shadow-2xl backdrop-blur-md animate-bounce pointer-events-none border border-white/10 flex items-center gap-2">
+                    <span className="text-emerald-400">✨</span>
+                    <span>{toastMessage}</span>
                 </div>
             )}
 

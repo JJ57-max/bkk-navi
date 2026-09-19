@@ -146,8 +146,8 @@ export const bangkokHotels: HotelItem[] = [
 const AGODA_CID = '1974942';
 
 /**
- * バンコクの都市コード（9391）を指定してCID付きで直接誘導するURLを生成する関数
+ * バンコクの都市ページへCID付きで誘導するURLを生成する関数（エラー防止の安定版）
  */
 export const getAgodaSearchUrl = (_keyword?: string) => {
-    return `https://www.agoda.com/ja-jp/search?city=9391&cid=${AGODA_CID}`;
+    return `https://www.agoda.com/ja-jp/city/bangkok-th.html?cid=${AGODA_CID}`;
 };
