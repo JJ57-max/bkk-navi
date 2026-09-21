@@ -30,7 +30,6 @@ function MainContent() {
     const [agodaHotels, setAgodaHotels] = useState<any[]>([]);
     const [agodaLoading, setAgodaLoading] = useState<boolean>(true);
 
-    // Google Places APIからの外部検索結果
     const [googlePlaces, setGooglePlaces] = useState<any[]>([]);
     const [placesLoading, setPlacesLoading] = useState<boolean>(false);
 
@@ -53,7 +52,6 @@ function MainContent() {
         fetchAgodaHotelsDirectly();
     }, []);
 
-    // 検索窓の文字入力に応じて Google Places API を呼び出す（デボンス処理つき）
     useEffect(() => {
         if (!searchText || searchText.trim().length < 2) {
             setGooglePlaces([]);
@@ -79,7 +77,8 @@ function MainContent() {
         return () => clearTimeout(timer);
     }, [searchText]);
 
-    const categories = ["すべて", "観光・ナイトスポット", "寺院", "ショッピング", "空港"];
+    // ★「ホテル」カテゴリを追加
+    const categories = ["すべて", "観光・ナイトスポット", "寺院", "ショッピング", "ホテル", "空港"];
 
     const showToast = (msg: string) => {
         setToastMessage(msg);
@@ -245,22 +244,26 @@ function MainContent() {
 
     const query = searchText ? searchText.toLowerCase().trim() : '';
 
-    const filteredLandmarks = (bangkokLandmarks || []).filter(l => {
-        const matchCategory = selectedCategory && selectedCategory !== 'すべて' ? (l.category || '').includes(selectedCategory) : true;
+    // 「ホテル」カテゴリ選択時は観光地を非表示にする
+    const isLandmarkAllowed = !selectedCategory || (selectedCategory !== 'ホテル' && selectedCategory !== '空港' && (selectedCategory === 'すべて' || selectedCategory));
+    const filteredLandmarks = isLandmarkAllowed ? (bangkokLandmarks || []).filter(l => {
+        const matchCategory = selectedCategory && selectedCategory !== 'すべて' && selectedCategory !== 'ホテル' ? (l.category || '').includes(selectedCategory) : true;
         const matchSearch = query ? (l.name || '').toLowerCase().includes(query) || (l.category || '').toLowerCase().includes(query) : true;
         return matchCategory && matchSearch;
-    });
+    }) : [];
 
-    const filteredStations = (allBangkokStations || []).filter(s => {
-        const matchSearch = query ? (s.name || '').toLowerCase().includes(query) || (s.line || '').toLowerCase().includes(query) : true;
-        return (query ? matchSearch : (selectedCategory === 'すべて')) && matchSearch;
-    });
+    const filteredStations = query ? (allBangkokStations || []).filter(s => 
+        (s.name || '').toLowerCase().includes(query) || (s.line || '').toLowerCase().includes(query)
+    ) : [];
 
-    const filteredHotels = (agodaHotels || []).filter(h => {
+    // ★「ホテル」カテゴリが選ばれている、または「すべて」・検索時にホテルを表示
+    const isHotelAllowed = !selectedCategory || selectedCategory === 'すべて' || selectedCategory === 'ホテル' || query.length > 0;
+    const filteredHotels = isHotelAllowed ? (agodaHotels || []).filter(h => {
         const name = h.hotelName || h.name || '';
         const matchSearch = query ? name.toLowerCase().includes(query) || 'ホテル'.includes(query) || 'hotel'.includes(query) : true;
-        return matchSearch;
-    });
+        if (query && !matchSearch) return false;
+        return true;
+    }) : [];
 
     const showDropdown = selectedCategory !== null || searchText.trim().length > 0;
 
@@ -357,7 +360,6 @@ function MainContent() {
 
                 {showDropdown && (
                     <div className="pointer-events-auto bg-white/95 backdrop-blur-md rounded-2xl shadow-xl max-w-md mx-auto w-full max-h-72 overflow-y-auto p-2 flex flex-col gap-1 box-border">
-                        {/* 内部観光地・スポット */}
                         {filteredLandmarks.map((landmark) => {
                             const { lat, lng } = extractCoordinates(landmark);
                             return (
@@ -380,7 +382,6 @@ function MainContent() {
                             );
                         })}
                             
-                        {/* 内部駅 */}
                         {filteredStations.map((station, idx) => {
                             const { lat, lng } = extractCoordinates(station);
                             return (
@@ -403,7 +404,6 @@ function MainContent() {
                             );
                         })}
 
-                        {/* Google Places API 外部検索結果 */}
                         {placesLoading && (
                             <div className="p-2 text-center text-xs text-blue-600 font-bold">Googleマップからスポットを検索中...</div>
                         )}
@@ -432,11 +432,10 @@ function MainContent() {
                             );
                         })}
 
-                        {agodaLoading && (
+                        {agodaLoading && isHotelAllowed && (
                             <div className="p-3 text-center text-xs text-gray-500">ホテル情報を取得中...</div>
                         )}
 
-                        {/* ホテル */}
                         {!agodaLoading && filteredHotels.map((hotel: any, index: number) => {
                             const id = hotel.hotelId || hotel.id || index;
                             const name = hotel.hotelName || hotel.name || 'バンコクのホテル';
