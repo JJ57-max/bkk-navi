@@ -281,9 +281,16 @@ function MainContent() {
                             const res = await fetch(`/api/geocode?lat=${lat}&lng=${lng}`);
                             if (res.ok) {
                                 const data = await res.json();
-                                const resolvedTitle = data.address || tempTitle;
-                                setDestinationTitle(resolvedTitle);
-                                updateUrlParams(resolvedTitle, lat, lng);
+                                let resolvedAddress = data.address || tempTitle;
+                                
+                                // 末尾や文言に含まれる「タイ」や「Thailand」を完全に除去する
+                                resolvedAddress = resolvedAddress
+                                    .replace(/タイ王国|タイ$|タイ、|Thailand|, Thailand/g, '')
+                                    .replace(/,\s*$/, '')
+                                    .trim();
+
+                                setDestinationTitle(resolvedAddress);
+                                updateUrlParams(resolvedAddress, lat, lng);
                                 showToast(`📍 取得した地点を設定しました`);
                             } else {
                                 updateUrlParams(tempTitle, lat, lng);
