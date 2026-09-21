@@ -34,7 +34,7 @@ export async function GET(request: Request) {
       }
     }
 
-    // バンコクの主要ホテルを網羅した充実のフォールバックデータ（15軒以上）
+    // バンコクの主要ホテルを網羅した充実のフォールバックデータ
     if (!hotelsArray || hotelsArray.length === 0) {
       hotelsArray = [
         {
@@ -203,7 +203,7 @@ export async function GET(request: Request) {
           reviewScore: 9.1,
           discountPercentage: 12,
           latitude: 13.7422,
-      async    longitude: 100.5489,
+          longitude: 100.5489,
         },
         {
           hotelId: 11583,
