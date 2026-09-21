@@ -272,7 +272,9 @@ function MainContent() {
                     destinationTitle={destinationTitle}
                     travelMode={selectedMode}
                     onSelectArbitraryPoint={(title, lat, lng) => {
-                        const friendlyTitle = title.startsWith('指定地点') ? `バンコクの選択地点 (${lat.toFixed(4)}, ${lng.toFixed(4)})` : title;
+                        const friendlyTitle = title.startsWith('指定地点') 
+                            ? `バンコク指定エリア (${lat.toFixed(4)}, ${lng.toFixed(4)})` 
+                            : title;
                         setDestinationCoordinate({ lat, lng });
                         setDestinationTitle(friendlyTitle);
                         setIsDemoMode(false);
