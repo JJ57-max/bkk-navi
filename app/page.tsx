@@ -30,6 +30,10 @@ function MainContent() {
     const [agodaHotels, setAgodaHotels] = useState<any[]>([]);
     const [agodaLoading, setAgodaLoading] = useState<boolean>(true);
 
+    // Google Places APIからの外部検索結果
+    const [googlePlaces, setGooglePlaces] = useState<any[]>([]);
+    const [placesLoading, setPlacesLoading] = useState<boolean>(false);
+
     useEffect(() => {
         const fetchAgodaHotelsDirectly = async () => {
             try {
@@ -48,6 +52,32 @@ function MainContent() {
         };
         fetchAgodaHotelsDirectly();
     }, []);
+
+    // 検索窓の文字入力に応じて Google Places API を呼び出す（デボンス処理つき）
+    useEffect(() => {
+        if (!searchText || searchText.trim().length < 2) {
+            setGooglePlaces([]);
+            return;
+        }
+
+        const timer = setTimeout(async () => {
+            try {
+                setPlacesLoading(true);
+                const res = await fetch(`/api/places?query=${encodeURIComponent(searchText)}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    setGooglePlaces(Array.isArray(data) ? data : []);
+                }
+            } catch (err) {
+                console.error('Google Places Search Error:', err);
+                setGooglePlaces([]);
+            } finally {
+                setPlacesLoading(false);
+            }
+        }, 400);
+
+        return () => clearTimeout(timer);
+    }, [searchText]);
 
     const categories = ["すべて", "観光・ナイトスポット", "寺院", "ショッピング", "空港"];
 
@@ -157,10 +187,9 @@ function MainContent() {
         }
     };
 
-    // ★ あらゆるデータ構造の座標（lat/lng/latitude/longitude）を安全に取得するヘルパー
     const extractCoordinates = (item: any) => {
-        const lat = item.coordinate?.latitude ?? item.coordinate?.lat ?? item.lat ?? 13.7460;
-        const lng = item.coordinate?.longitude ?? item.coordinate?.lng ?? item.lng ?? 100.5347;
+        const lat = item.coordinate?.latitude ?? item.coordinate?.lat ?? item.latitude ?? item.lat ?? 13.7460;
+        const lng = item.coordinate?.longitude ?? item.coordinate?.lng ?? item.longitude ?? item.lng ?? 100.5347;
         return { lat: Number(lat), lng: Number(lng) };
     };
 
@@ -214,7 +243,6 @@ function MainContent() {
         showToast(`📍 「${name}」を目的地に設定しました`);
     };
 
-    // 検索クエリとカテゴリの安全なフィルタリング（ヒット数を大幅に拡充）
     const query = searchText ? searchText.toLowerCase().trim() : '';
 
     const filteredLandmarks = (bangkokLandmarks || []).filter(l => {
@@ -224,17 +252,14 @@ function MainContent() {
     });
 
     const filteredStations = (allBangkokStations || []).filter(s => {
-        const matchCategory = selectedCategory && selectedCategory !== 'すべて' ? selectedCategory.includes('駅') || selectedCategory === 'すべて' : true;
         const matchSearch = query ? (s.name || '').toLowerCase().includes(query) || (s.line || '').toLowerCase().includes(query) : true;
-        // カテゴリ選択時または検索ワードがある場合に駅も対象にする
         return (query ? matchSearch : (selectedCategory === 'すべて')) && matchSearch;
     });
 
     const filteredHotels = (agodaHotels || []).filter(h => {
         const name = h.hotelName || h.name || '';
-        const matchCategory = selectedCategory && selectedCategory !== 'すべて' ? selectedCategory === 'すべて' : true;
         const matchSearch = query ? name.toLowerCase().includes(query) || 'ホテル'.includes(query) || 'hotel'.includes(query) : true;
-        return matchCategory && matchSearch;
+        return matchSearch;
     });
 
     const showDropdown = selectedCategory !== null || searchText.trim().length > 0;
@@ -285,7 +310,7 @@ function MainContent() {
                             <span className="text-blue-600 font-bold shrink-0">🔍</span>
                             <input 
                                 type="text" 
-                                placeholder="駅名・スポット・ホテルを検索..." 
+                                placeholder="スポット・駅・ホテルを自由検索..." 
                                 value={searchText}
                                 onChange={(e) => setSearchText(e.target.value)}
                                 className="bg-transparent w-full outline-none text-sm text-gray-800 min-w-0"
@@ -332,7 +357,7 @@ function MainContent() {
 
                 {showDropdown && (
                     <div className="pointer-events-auto bg-white/95 backdrop-blur-md rounded-2xl shadow-xl max-w-md mx-auto w-full max-h-72 overflow-y-auto p-2 flex flex-col gap-1 box-border">
-                        {/* 観光地・スポット */}
+                        {/* 内部観光地・スポット */}
                         {filteredLandmarks.map((landmark) => {
                             const { lat, lng } = extractCoordinates(landmark);
                             return (
@@ -355,7 +380,7 @@ function MainContent() {
                             );
                         })}
                             
-                        {/* 駅 */}
+                        {/* 内部駅 */}
                         {filteredStations.map((station, idx) => {
                             const { lat, lng } = extractCoordinates(station);
                             return (
@@ -371,6 +396,35 @@ function MainContent() {
                                     <button
                                         onClick={(e) => handleAddToPlan(`${station.name} (${station.line})`, station.line, lat, lng, e)}
                                         className="bg-blue-100 hover:bg-blue-600 hover:text-white text-blue-700 text-[10px] font-bold px-2 py-1 rounded-lg transition-colors shrink-0"
+                                    >
+                                        + プラン
+                                    </button>
+                                </div>
+                            );
+                        })}
+
+                        {/* Google Places API 外部検索結果 */}
+                        {placesLoading && (
+                            <div className="p-2 text-center text-xs text-blue-600 font-bold">Googleマップからスポットを検索中...</div>
+                        )}
+                        {!placesLoading && googlePlaces.map((place) => {
+                            const { lat, lng } = extractCoordinates(place);
+                            return (
+                                <div
+                                    key={`place-${place.id}`}
+                                    onClick={() => handleSelectLandmark(place)}
+                                    className="w-full text-left px-3 py-2.5 hover:bg-emerald-50 rounded-xl flex justify-between items-center transition-colors border-b border-gray-100 last:border-none cursor-pointer group bg-emerald-50/40"
+                                >
+                                    <div className="min-w-0 flex-1 pr-2">
+                                        <div className="flex items-center gap-1.5">
+                                            <span className="text-[10px] bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded font-bold">Google</span>
+                                            <p className="text-sm font-bold text-gray-800 truncate">{place.name}</p>
+                                        </div>
+                                        <p className="text-[10px] text-gray-500 truncate mt-0.5">{place.address}</p>
+                                    </div>
+                                    <button
+                                        onClick={(e) => handleAddToPlan(place.name, 'Googleスポット', lat, lng, e)}
+                                        className="bg-emerald-100 hover:bg-emerald-600 hover:text-white text-emerald-700 text-[10px] font-bold px-2 py-1 rounded-lg transition-colors shrink-0"
                                     >
                                         + プラン
                                     </button>
@@ -436,7 +490,7 @@ function MainContent() {
                             );
                         })}
 
-                        {filteredLandmarks.length === 0 && filteredStations.length === 0 && filteredHotels.length === 0 && !agodaLoading && (
+                        {filteredLandmarks.length === 0 && filteredStations.length === 0 && filteredHotels.length === 0 && googlePlaces.length === 0 && !agodaLoading && !placesLoading && (
                             <div className="p-4 text-center text-xs text-gray-500">
                                 該当するスポットやホテルが見つかりませんでした
                             </div>

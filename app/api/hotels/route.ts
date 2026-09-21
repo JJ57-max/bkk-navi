@@ -1,3 +1,4 @@
+// app/api/hotels/route.ts
 import { NextResponse } from 'next/server';
 import { AGODA_CONFIG, getAgodaHeaders } from '@/lib/agoda';
 
