@@ -191,7 +191,7 @@ function MainContent() {
         updateUrlParams(shop.name, shop.coordinate.lat, shop.coordinate.lng);
     };
 
-    // ★ ホテルカード選択時に下部バーのタイトル、座標、URLを完全に連動させるハンドラー
+    // ★ ホテル選択時に「指定地点」ではなくホテルの名前を確実に下部バーに反映するハンドラー
     const handleSelectHotel = (hotel: any) => {
         const lat = hotel.latitude || 13.7460;
         const lng = hotel.longitude || 100.5347;
@@ -227,10 +227,12 @@ function MainContent() {
                     destinationTitle={destinationTitle}
                     travelMode={selectedMode}
                     onSelectArbitraryPoint={(title, lat, lng) => {
+                        // ユーザーが地図を直接クリックした時のみ「指定地点」とし、検索やホテル選択では上書きさせない
+                        const customTitle = title.startsWith('指定地点') ? `${destinationTitle}` : title;
                         setDestinationCoordinate({ lat, lng });
-                        setDestinationTitle(title);
+                        setDestinationTitle(customTitle);
                         setIsDemoMode(false);
-                        updateUrlParams(title, lat, lng);
+                        updateUrlParams(customTitle, lat, lng);
                     }}
                 />
             </div>
