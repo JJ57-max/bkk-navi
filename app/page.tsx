@@ -191,7 +191,7 @@ function MainContent() {
         updateUrlParams(shop.name, shop.coordinate.lat, shop.coordinate.lng);
     };
 
-    // ★ ホテル選択時に「指定地点」ではなくホテルの名前を確実に下部バーに反映するハンドラー
+    // ★ ホテルカードクリック時に目的地に設定し、ルートを表示するハンドラー
     const handleSelectHotel = (hotel: any) => {
         const lat = hotel.latitude || 13.7460;
         const lng = hotel.longitude || 100.5347;
@@ -203,7 +203,7 @@ function MainContent() {
         setShowDetailSheet(false);
         setIsDemoMode(false);
         updateUrlParams(name, lat, lng);
-        showToast(`🏨 「${name}」を目的地に設定しました`);
+        showToast(`📍 「${name}」を目的地に設定しました`);
     };
 
     const filteredLandmarks = bangkokLandmarks.filter(l => {
@@ -227,12 +227,11 @@ function MainContent() {
                     destinationTitle={destinationTitle}
                     travelMode={selectedMode}
                     onSelectArbitraryPoint={(title, lat, lng) => {
-                        // ユーザーが地図を直接クリックした時のみ「指定地点」とし、検索やホテル選択では上書きさせない
-                        const customTitle = title.startsWith('指定地点') ? `${destinationTitle}` : title;
+                        const friendlyTitle = title.startsWith('指定地点') ? `バンコクの選択地点 (${lat.toFixed(4)}, ${lng.toFixed(4)})` : title;
                         setDestinationCoordinate({ lat, lng });
-                        setDestinationTitle(customTitle);
+                        setDestinationTitle(friendlyTitle);
                         setIsDemoMode(false);
-                        updateUrlParams(customTitle, lat, lng);
+                        updateUrlParams(friendlyTitle, lat, lng);
                     }}
                 />
             </div>
@@ -353,9 +352,9 @@ function MainContent() {
                             </div>
                         ))}
 
-                        {/* Agoda API動的ホテルカード */}
+                        {/* ホテルカード（外部リンクを廃止し、クリックで目的地設定＋プラン追加ボタンのみに整理） */}
                         {agodaLoading && (
-                            <div className="p-3 text-center text-xs text-gray-500">Agodaの最新ホテル情報を取得中...</div>
+                            <div className="p-3 text-center text-xs text-gray-500">ホテル情報を取得中...</div>
                         )}
 
                         {!agodaLoading && agodaHotels
@@ -364,7 +363,6 @@ function MainContent() {
                                 const id = hotel.hotelId || hotel.id || index;
                                 const name = hotel.hotelName || hotel.name || 'バンコクのホテル';
                                 const img = hotel.imageURL || hotel.imageUrl || 'https://via.placeholder.com/150';
-                                const url = hotel.landingURL || hotel.url || '#';
                                 const price = hotel.dailyRate || hotel.price || 0;
                                 const currency = hotel.currency || 'JPY';
                                 const star = hotel.starRating || hotel.stars || 4;
@@ -375,11 +373,11 @@ function MainContent() {
                                     <div
                                         key={`agoda-${id}`}
                                         onClick={() => handleSelectHotel(hotel)}
-                                        className="w-full text-left p-2.5 hover:bg-blue-50 rounded-xl flex flex-col gap-2 transition-colors border-b border-gray-100 last:border-none group bg-blue-50/40 box-border cursor-pointer"
+                                        className="w-full text-left p-3 hover:bg-blue-50 rounded-xl flex items-center justify-between transition-colors border-b border-gray-100 last:border-none group bg-white shadow-sm cursor-pointer gap-3 box-border"
                                     >
-                                        <div className="flex gap-3 items-start">
+                                        <div className="flex gap-3 items-center min-w-0 flex-1">
                                             <div className="shrink-0 relative">
-                                                <img src={img} alt={name} className="w-16 h-16 object-cover rounded-lg shadow-sm border border-gray-200" />
+                                                <img src={img} alt={name} className="w-14 h-14 object-cover rounded-lg shadow-sm border border-gray-200" />
                                                 {discount > 0 && (
                                                     <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full shadow-sm">
                                                         {discount}% OFF
@@ -389,31 +387,22 @@ function MainContent() {
                                             
                                             <div className="flex-1 min-w-0">
                                                 <p className="text-sm font-bold text-gray-800 truncate">{name}</p>
-                                                <div className="flex items-center gap-1 my-1">
+                                                <div className="flex items-center gap-1 my-0.5">
                                                     <span className="text-[10px] bg-amber-100 text-amber-800 px-1 py-0.5 rounded font-bold shrink-0">
                                                         {'★'.repeat(Math.floor(star))}
                                                     </span>
                                                     <span className="text-[10px] text-gray-500">({score}/10)</span>
                                                 </div>
-                                                <p className="text-[12px] font-bold text-red-600">
+                                                <p className="text-[11px] font-bold text-red-600">
                                                     {currency} {Number(price).toLocaleString()}〜
                                                 </p>
                                             </div>
                                         </div>
                                         
-                                        <div className="flex gap-2">
-                                            <a
-                                                href={url}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                onClick={(e) => e.stopPropagation()}
-                                                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2 rounded-lg text-center transition-colors shadow-sm flex items-center justify-center gap-1.5"
-                                            >
-                                                <span>🏨</span> Agodaで詳細・予約 (PR)
-                                            </a>
+                                        <div className="flex flex-col gap-1.5 shrink-0">
                                             <button
                                                 onClick={(e) => handleAddToPlan(name, 'ホテル', hotel.latitude || 13.7460, hotel.longitude || 100.5347, e)}
-                                                className="bg-blue-100 hover:bg-blue-600 hover:text-white text-blue-700 text-xs font-bold px-3 py-2 rounded-lg transition-colors shrink-0"
+                                                className="bg-blue-100 hover:bg-blue-600 hover:text-white text-blue-700 text-[10px] font-bold px-2.5 py-1.5 rounded-lg transition-colors"
                                             >
                                                 + プラン
                                             </button>
