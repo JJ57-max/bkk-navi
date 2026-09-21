@@ -8,17 +8,18 @@ import { allBangkokStations, Station } from '@/data/stations';
 interface GoogleMapProps {
     destinationCoordinate: { lat: number; lng: number };
     destinationTitle: string;
-    travelMode?: string; // 追加：移動手段
+    travelMode?: string;
     onSelectArbitraryPoint?: (title: string, lat: number, lng: number) => void;
 }
 
-// 各路線の駅間を路線カラーの線で繋ぐ「路線網（路線図）描画コンポーネント」
+// バンコク都市圏内の路線網（路線図）描画コンポーネント（遠隔地向けは除外）
 function TransitLinesComponent() {
     const map = useMap();
 
     useEffect(() => {
         if (!map) return;
 
+        // バンコク都市圏の交通網のみに限定
         const linesData = [
             {
                 name: 'BTS Sukhumvit Line',
@@ -53,48 +54,6 @@ function TransitLinesComponent() {
                 stations: [
                     "パヤタイ (ARL)", "マッカサン", "ラムカムヘン", 
                     "フアマーク", "スワンナプーム空港"
-                ]
-            },
-            {
-                name: 'SRT Northern Line (チェンマイ方面)',
-                color: '#ef4444',
-                stations: [
-                    "クルンテピワット中央駅 (バンスー)", "アユタヤ駅", 
-                    "ロッブリー駅", "ピッサヌローク駅", "ランパーン駅", "チェンマイ駅"
-                ]
-            },
-            {
-                name: 'SRT Northeastern Line (東北方面)',
-                color: '#f59e0b',
-                stations: [
-                    "クルンテピワット中央駅 (バンスー)", "チャチュンサオ駅", 
-                    "パクチョン駅 (カオヤイ近郊)", "ナコンラチャシマ駅 (コラート)", 
-                    "コンケン駅", "ウドンタニ駅", "ノンカイ駅 (ラオス国境)", "ウボンラチャタニ駅"
-                ]
-            },
-            {
-                name: 'SRT Eastern Line (パタヤ方面)',
-                color: '#06b6d4',
-                stations: [
-                    "フワランポーン駅 (国鉄旧中央駅)", "チャチュンサオ駅", 
-                    "チョンブリー駅", "シラチャ駅", "パタヤ駅", "パタヤใต้ (南パタヤ/プール・ター・ルアン)"
-                ]
-            },
-            {
-                name: 'SRT Kanchanaburi Line (泰緬鉄道ルート)',
-                color: '#84cc16',
-                stations: [
-                    "トンブリー駅 (西方路線起点)", "ナコンパトム駅", 
-                    "カンチャナブリー駅", "クウェー川橋駅", "ナムトック駅 (終点/滝)"
-                ]
-            },
-            {
-                name: 'SRT Southern Line (ホアヒン・南部方面)',
-                color: '#8b5cf6',
-                stations: [
-                    "フワランポーン駅 (国鉄旧中央駅)", "ナコンパトム駅", 
-                    "ホアヒン駅", "チュムポーン駅", 
-                    "スラートターニー駅 (サムイ島玄関口)", "ハジャイ駅"
                 ]
             }
         ];
@@ -134,7 +93,7 @@ function TransitLinesComponent() {
     return null;
 }
 
-// 選択された移動手段に応じて動的にルートを描画（白抜き縁取りの2重線で視認性を劇的に向上）
+// 選択された移動手段に応じて動的にルートを描画
 function CustomPolylineRouteComponent({ destination, travelMode }: { destination: { lat: number; lng: number }, travelMode: string }) {
     const map = useMap();
     const [origin, setOrigin] = useState<{ lat: number; lng: number } | null>(null);
@@ -187,7 +146,6 @@ function CustomPolylineRouteComponent({ destination, travelMode }: { destination
                     }));
                     setPathCoordinates(points);
                 } else {
-                    // ★ 変更：ルートが取得できない場合（長距離の公共交通機関など）は直線を引かず空にする
                     setPathCoordinates([]);
                 }
             }
@@ -197,27 +155,24 @@ function CustomPolylineRouteComponent({ destination, travelMode }: { destination
     useEffect(() => {
         if (!map || pathCoordinates.length === 0) return;
 
-        // モードごとのメインカラー設定
         const strokeColor = travelMode === 'walking' 
-            ? '#059669' // 徒歩：濃いエメラルド緑
+            ? '#059669' 
             : travelMode === 'taxi' 
-            ? '#d97706' // タクシー：濃いオレンジ
+            ? '#d97706' 
             : travelMode === 'driving'
-            ? '#dc2626' // 車：赤
-            : '#2563eb'; // 公共交通機関：鮮やかな青
+            ? '#dc2626' 
+            : '#2563eb'; 
 
-        // 1. 下敷きとなる太めの白いボーダー（縁取り）ライン
         const borderPolyline = new google.maps.Polyline({
             path: pathCoordinates,
             geodesic: true,
             strokeColor: '#ffffff',
             strokeOpacity: 0.9,
-            strokeWeight: 8, // メインより太くする
+            strokeWeight: 8,
             zIndex: 998,
             map: map,
         });
 
-        // 2. その上を走るメインカラーのライン
         const mainPolyline = new google.maps.Polyline({
             path: pathCoordinates,
             geodesic: true,
@@ -270,7 +225,7 @@ export default function GoogleMapComponent({ destinationCoordinate, destinationT
                     scaleControl={true}
                     onClick={handleMapClick}
                 >
-                    {/* 各路線の駅間を繋ぐ路線網ライン */}
+                    {/* バンコク都市圏の路線網ラインのみ描画 */}
                     <TransitLinesComponent />
 
                     {/* 目的地へのルート（白抜き縁取り付き・移動モード連動） */}
@@ -293,58 +248,74 @@ export default function GoogleMapComponent({ destinationCoordinate, destinationT
                         </div>
                     </AdvancedMarker>
 
-                    {/* 全駅・船・バスピン */}
-                    {allBangkokStations.map((station, index) => {
-                        const getStationStyle = (line: string) => {
-                            switch (line) {
-                                case 'BTS': return { color: '#22c55e', icon: '🚆' }; 
-                                case 'MRT': return { color: '#3b82f6', icon: '🚆' }; 
-                                case 'ARL': return { color: '#a855f7', icon: '🚆' }; 
-                                case 'SRT': return { color: '#78716c', icon: '🚆' }; 
-                                case 'Boat': return { color: '#06b6d4', icon: '🚢' }; 
-                                case 'Bus': return { color: '#f59e0b', icon: '🚌' }; 
-                                default: return { color: '#f97316', icon: '📍' };    
+                    {/* バンコク都市圏および主要な駅・船・バスピン（遠隔地の地方駅を除外） */}
+                    {allBangkokStations
+                        .filter(station => {
+                            // SRT（国鉄長距離）および地方都市の駅を完全に除外
+                            if (station.line === 'SRT') return false;
+                            const name = station.name;
+                            const remoteKeywords = [
+                                'チェンマイ', 'コンケン', 'パタヤ', 'ホアヒン', 'カンチャナブリー', 
+                                'ウボンラチャタニ', 'ノンカイ', 'ウドンタニ', 'チュムポーン', 
+                                'スラートターニー', 'ハジャイ', 'ナムトック', 'クウェー川', 
+                                'ピッサヌローク', 'ランパーン', 'ロッブリー', 'アユタヤ', 
+                                'ナコンラチャシマ', 'チャチュンサオ', 'ナコンパトム'
+                            ];
+                            if (remoteKeywords.some(keyword => name.includes(keyword))) {
+                                return false;
                             }
-                        };
+                            return true;
+                        })
+                        .map((station, index) => {
+                            const getStationStyle = (line: string) => {
+                                switch (line) {
+                                    case 'BTS': return { color: '#22c55e', icon: '🚆' }; 
+                                    case 'MRT': return { color: '#3b82f6', icon: '🚆' }; 
+                                    case 'ARL': return { color: '#a855f7', icon: '🚆' }; 
+                                    case 'Boat': return { color: '#06b6d4', icon: '🚢' }; 
+                                    case 'Bus': return { color: '#f59e0b', icon: '🚌' }; 
+                                    default: return { color: '#f97316', icon: '📍' };    
+                                }
+                            };
 
-                        const style = getStationStyle(station.line);
-                        const isSelected = activeStation?.name === station.name && activeStation?.line === station.line;
-                        const adjustedLat = station.coordinate.latitude + OFFSET;
-                        const adjustedLng = station.coordinate.longitude + OFFSET;
+                            const style = getStationStyle(station.line);
+                            const isSelected = activeStation?.name === station.name && activeStation?.line === station.line;
+                            const adjustedLat = station.coordinate.latitude + OFFSET;
+                            const adjustedLng = station.coordinate.longitude + OFFSET;
 
-                        return (
-                            <AdvancedMarker 
-                                key={index} 
-                                position={{ lat: adjustedLat, lng: adjustedLng }}
-                                onClick={() => {
-                                    setActiveStation(station);
-                                    setIsDestinationOpen(false);
-                                }}
-                            >
-                                <div 
-                                    className="flex flex-col items-center relative p-2 cursor-pointer"
-                                    style={{ zIndex: isSelected ? 100 : 10 }}
+                            return (
+                                <AdvancedMarker 
+                                    key={index} 
+                                    position={{ lat: adjustedLat, lng: adjustedLng }}
+                                    onClick={() => {
+                                        setActiveStation(station);
+                                        setIsDestinationOpen(false);
+                                    }}
                                 >
                                     <div 
-                                        style={{ backgroundColor: style.color }}
-                                        className={`text-white rounded-full flex items-center justify-center shadow-md border-2 border-white transition-all duration-200 ${
-                                            isSelected ? 'w-9 h-9 text-sm scale-110 shadow-lg' : 'w-7 h-7 text-xs'
-                                        }`}
+                                        className="flex flex-col items-center relative p-2 cursor-pointer"
+                                        style={{ zIndex: isSelected ? 100 : 10 }}
                                     >
-                                        {style.icon}
-                                    </div>
-                                    
-                                    {isSelected && (
-                                        <div className="absolute top-full mt-1 px-3 py-1.5 rounded-lg bg-white border border-gray-300 shadow-2xl whitespace-nowrap z-50">
-                                            <span className="text-xs font-extrabold text-gray-900">
-                                                {station.name} ({station.line})
-                                            </span>
+                                        <div 
+                                            style={{ backgroundColor: style.color }}
+                                            className={`text-white rounded-full flex items-center justify-center shadow-md border-2 border-white transition-all duration-200 ${
+                                                isSelected ? 'w-9 h-9 text-sm scale-110 shadow-lg' : 'w-7 h-7 text-xs'
+                                            }`}
+                                        >
+                                            {style.icon}
                                         </div>
-                                    )}
-                                </div>
-                            </AdvancedMarker>
-                        );
-                    })}
+                                        
+                                        {isSelected && (
+                                            <div className="absolute top-full mt-1 px-3 py-1.5 rounded-lg bg-white border border-gray-300 shadow-2xl whitespace-nowrap z-50">
+                                                <span className="text-xs font-extrabold text-gray-900">
+                                                    {station.name} ({station.line})
+                                                </span>
+                                            </div>
+                                        )}
+                                    </div>
+                                </AdvancedMarker>
+                            );
+                        })}
                 </Map>
             </div>
         </APIProvider>
