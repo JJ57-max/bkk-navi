@@ -187,7 +187,8 @@ function CustomPolylineRouteComponent({ destination, travelMode }: { destination
                     }));
                     setPathCoordinates(points);
                 } else {
-                    setPathCoordinates([origin, destination]);
+                    // ★ 変更：ルートが取得できない場合（長距離の公共交通機関など）は直線を引かず空にする
+                    setPathCoordinates([]);
                 }
             }
         );
