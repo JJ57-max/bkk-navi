@@ -34,14 +34,14 @@ export async function GET(request: Request) {
       }
     }
 
-    // 個別座標と個別リンクを持たせたフォールバックデータ
     if (!hotelsArray || hotelsArray.length === 0) {
       hotelsArray = [
         {
           hotelId: 48641,
           hotelName: 'サイアム ケンプンスキー ホテル バンコク',
           imageURL: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=300&q=80',
-          landingURL: `https://www.agoda.com/partners/partnersearch.aspx?pcs=1&cid=${AGODA_CONFIG.siteId}&hid=48641`,
+          // 正確なAgodaパートナー個別ホテルリンク
+          landingURL: `https://www.agoda.com/partners/partnersearch.aspx?pcs=1&cid=${AGODA_CONFIG.siteId}&hid=48641&checkin=2026-11-01&checkout=2026-11-02`,
           dailyRate: 45000,
           currency: 'JPY',
           starRating: 5,
@@ -54,7 +54,7 @@ export async function GET(request: Request) {
           hotelId: 528741,
           hotelName: 'マリオット ホテル スクンビット',
           imageURL: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=300&q=80',
-          landingURL: `https://www.agoda.com/partners/partnersearch.aspx?pcs=1&cid=${AGODA_CONFIG.siteId}&hid=528741`,
+          landingURL: `https://www.agoda.com/partners/partnersearch.aspx?pcs=1&cid=${AGODA_CONFIG.siteId}&hid=528741&checkin=2026-11-01&checkout=2026-11-02`,
           dailyRate: 28000,
           currency: 'JPY',
           starRating: 4.5,
@@ -67,7 +67,7 @@ export async function GET(request: Request) {
           hotelId: 386221,
           hotelName: 'イーステイン グランデ ホテル サトーン',
           imageURL: 'https://images.unsplash.com/photo-1591088398332-8a7791972843?auto=format&fit=crop&w=300&q=80',
-          landingURL: `https://www.agoda.com/partners/partnersearch.aspx?pcs=1&cid=${AGODA_CONFIG.siteId}&hid=386221`,
+          landingURL: `https://www.agoda.com/partners/partnersearch.aspx?pcs=1&cid=${AGODA_CONFIG.siteId}&hid=386221&checkin=2026-11-01&checkout=2026-11-02`,
           dailyRate: 19000,
           currency: 'JPY',
           starRating: 4,
@@ -80,7 +80,7 @@ export async function GET(request: Request) {
           hotelId: 6871,
           hotelName: 'デュシタニ バンコク',
           imageURL: 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=300&q=80',
-          landingURL: `https://www.agoda.com/partners/partnersearch.aspx?pcs=1&cid=${AGODA_CONFIG.siteId}&hid=6871`,
+          landingURL: `https://www.agoda.com/partners/partnersearch.aspx?pcs=1&cid=${AGODA_CONFIG.siteId}&hid=6871&checkin=2026-11-01&checkout=2026-11-02`,
           dailyRate: 35000,
           currency: 'JPY',
           starRating: 5,

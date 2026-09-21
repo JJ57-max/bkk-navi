@@ -27,7 +27,6 @@ function MainContent() {
     const [showThaiCard, setShowThaiCard] = useState<boolean>(false);
     const [activeGuide, setActiveGuide] = useState<'exchange' | 'squall' | 'manner' | null>(null);
 
-    // Agoda API動的取得ステート
     const [agodaHotels, setAgodaHotels] = useState<any[]>([]);
     const [agodaLoading, setAgodaLoading] = useState<boolean>(true);
 
@@ -192,7 +191,7 @@ function MainContent() {
         updateUrlParams(shop.name, shop.coordinate.lat, shop.coordinate.lng);
     };
 
-    // ★ ホテル選択時に下部指定地点・地図・URLを連動させるハンドラー
+    // ★ ホテルカード選択時に下部バーのタイトル、座標、URLを完全に連動させるハンドラー
     const handleSelectHotel = (hotel: any) => {
         const lat = hotel.latitude || 13.7460;
         const lng = hotel.longitude || 100.5347;
@@ -204,7 +203,7 @@ function MainContent() {
         setShowDetailSheet(false);
         setIsDemoMode(false);
         updateUrlParams(name, lat, lng);
-        showToast(`🏨 「${name}」を指定地点に設定しました`);
+        showToast(`🏨 「${name}」を目的地に設定しました`);
     };
 
     const filteredLandmarks = bangkokLandmarks.filter(l => {
