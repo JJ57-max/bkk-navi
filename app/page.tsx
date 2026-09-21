@@ -157,16 +157,17 @@ function MainContent() {
         }
     };
 
-    const handleSelectLandmark = (landmark: typeof bangkokLandmarks[0]) => {
-        const lat = landmark.coordinate.latitude;
-        const lng = landmark.coordinate.longitude;
+    const handleSelectLandmark = (landmark: any) => {
+        const lat = landmark.coordinate?.latitude || 13.7460;
+        const lng = landmark.coordinate?.longitude || 100.5347;
+        const name = landmark.name || 'スポット';
         setDestinationCoordinate({ lat, lng });
-        setDestinationTitle(landmark.name);
+        setDestinationTitle(name);
         setSelectedCategory(null);
         setSearchText('');
         setShowDetailSheet(false);
         setIsDemoMode(false);
-        updateUrlParams(landmark.name, lat, lng);
+        updateUrlParams(name, lat, lng);
     };
 
     const handleSelectStation = (station: Station) => {
@@ -205,16 +206,24 @@ function MainContent() {
         showToast(`📍 「${name}」を目的地に設定しました`);
     };
 
-    const filteredLandmarks = bangkokLandmarks.filter(l => {
+    // 安全なフィルタリング処理
+    const query = searchText ? searchText.toLowerCase().trim() : '';
+
+    const filteredLandmarks = (bangkokLandmarks || []).filter(l => {
         const matchCategory = selectedCategory && selectedCategory !== 'すべて' ? l.category === selectedCategory : true;
-        const matchSearch = searchText ? l.name.toLowerCase().includes(searchText.toLowerCase()) : true;
+        const matchSearch = query ? (l.name || '').toLowerCase().includes(query) || (l.category || '').toLowerCase().includes(query) : true;
         return matchCategory && matchSearch;
     });
 
-    const filteredStations = searchText ? allBangkokStations.filter(s => 
-        s.name.toLowerCase().includes(searchText.toLowerCase()) || 
-        s.line.toLowerCase().includes(searchText.toLowerCase())
+    const filteredStations = query ? (allBangkokStations || []).filter(s => 
+        (s.name || '').toLowerCase().includes(query) || 
+        (s.line || '').toLowerCase().includes(query)
     ) : [];
+
+    const filteredHotels = (agodaHotels || []).filter(h => {
+        const name = h.hotelName || h.name || '';
+        return query ? name.toLowerCase().includes(query) : true;
+    });
 
     const showDropdown = selectedCategory !== null || searchText.trim().length > 0;
 
@@ -353,59 +362,63 @@ function MainContent() {
                             <div className="p-3 text-center text-xs text-gray-500">ホテル情報を取得中...</div>
                         )}
 
-                        {!agodaLoading && agodaHotels
-                            .filter(h => searchText ? (h.hotelName || h.name || '').toLowerCase().includes(searchText.toLowerCase()) : true)
-                            .map((hotel: any, index: number) => {
-                                const id = hotel.hotelId || hotel.id || index;
-                                const name = hotel.hotelName || hotel.name || 'バンコクのホテル';
-                                const img = hotel.imageURL || hotel.imageUrl || 'https://via.placeholder.com/150';
-                                const price = hotel.dailyRate || hotel.price || 0;
-                                const currency = hotel.currency || 'JPY';
-                                const star = hotel.starRating || hotel.stars || 4;
-                                const score = hotel.reviewScore || 8.0;
-                                const discount = hotel.discountPercentage || 0;
+                        {!agodaLoading && filteredHotels.map((hotel: any, index: number) => {
+                            const id = hotel.hotelId || hotel.id || index;
+                            const name = hotel.hotelName || hotel.name || 'バンコクのホテル';
+                            const img = hotel.imageURL || hotel.imageUrl || 'https://via.placeholder.com/150';
+                            const price = hotel.dailyRate || hotel.price || 0;
+                            const currency = hotel.currency || 'JPY';
+                            const star = hotel.starRating || hotel.stars || 4;
+                            const score = hotel.reviewScore || 8.0;
+                            const discount = hotel.discountPercentage || 0;
 
-                                return (
-                                    <div
-                                        key={`agoda-${id}`}
-                                        onClick={() => handleSelectHotel(hotel)}
-                                        className="w-full text-left p-3 hover:bg-blue-50 rounded-xl flex items-center justify-between transition-colors border-b border-gray-100 last:border-none group bg-white shadow-sm cursor-pointer gap-3 box-border"
-                                    >
-                                        <div className="flex gap-3 items-center min-w-0 flex-1">
-                                            <div className="shrink-0 relative">
-                                                <img src={img} alt={name} className="w-14 h-14 object-cover rounded-lg shadow-sm border border-gray-200" />
-                                                {discount > 0 && (
-                                                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full shadow-sm">
-                                                        {discount}% OFF
-                                                    </span>
-                                                )}
-                                            </div>
-                                            
-                                            <div className="flex-1 min-w-0">
-                                                <p className="text-sm font-bold text-gray-800 truncate">{name}</p>
-                                                <div className="flex items-center gap-1 my-0.5">
-                                                    <span className="text-[10px] bg-amber-100 text-amber-800 px-1 py-0.5 rounded font-bold shrink-0">
-                                                        {'★'.repeat(Math.floor(star))}
-                                                    </span>
-                                                    <span className="text-[10px] text-gray-500">({score}/10)</span>
-                                                </div>
-                                                <p className="text-[11px] font-bold text-red-600">
-                                                    {currency} {Number(price).toLocaleString()}〜
-                                                </p>
-                                            </div>
+                            return (
+                                <div
+                                    key={`agoda-${id}`}
+                                    onClick={() => handleSelectHotel(hotel)}
+                                    className="w-full text-left p-3 hover:bg-blue-50 rounded-xl flex items-center justify-between transition-colors border-b border-gray-100 last:border-none group bg-white shadow-sm cursor-pointer gap-3 box-border"
+                                >
+                                    <div className="flex gap-3 items-center min-w-0 flex-1">
+                                        <div className="shrink-0 relative">
+                                            <img src={img} alt={name} className="w-14 h-14 object-cover rounded-lg shadow-sm border border-gray-200" />
+                                            {discount > 0 && (
+                                                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full shadow-sm">
+                                                    {discount}% OFF
+                                                </span>
+                                            )}
                                         </div>
                                         
-                                        <div className="flex flex-col gap-1.5 shrink-0">
-                                            <button
-                                                onClick={(e) => handleAddToPlan(name, 'ホテル', hotel.latitude || 13.7460, hotel.longitude || 100.5347, e)}
-                                                className="bg-blue-100 hover:bg-blue-600 hover:text-white text-blue-700 text-[10px] font-bold px-2.5 py-1.5 rounded-lg transition-colors"
-                                            >
-                                                + プラン
-                                            </button>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-sm font-bold text-gray-800 truncate">{name}</p>
+                                            <div className="flex items-center gap-1 my-0.5">
+                                                <span className="text-[10px] bg-amber-100 text-amber-800 px-1 py-0.5 rounded font-bold shrink-0">
+                                                    {'★'.repeat(Math.floor(star))}
+                                                </span>
+                                                <span className="text-[10px] text-gray-500">({score}/10)</span>
+                                            </div>
+                                            <p className="text-[11px] font-bold text-red-600">
+                                                {currency} {Number(price).toLocaleString()}〜
+                                            </p>
                                         </div>
                                     </div>
-                                );
-                            })}
+                                    
+                                    <div className="flex flex-col gap-1.5 shrink-0">
+                                        <button
+                                            onClick={(e) => handleAddToPlan(name, 'ホテル', hotel.latitude || 13.7460, hotel.longitude || 100.5347, e)}
+                                            className="bg-blue-100 hover:bg-blue-600 hover:text-white text-blue-700 text-[10px] font-bold px-2.5 py-1.5 rounded-lg transition-colors"
+                                        >
+                                            + プラン
+                                        </button>
+                                    </div>
+                                </div>
+                            );
+                        })}
+
+                        {filteredLandmarks.length === 0 && filteredStations.length === 0 && filteredHotels.length === 0 && !agodaLoading && (
+                            <div className="p-4 text-center text-xs text-gray-500">
+                                該当するスポットやホテルが見つかりませんでした
+                            </div>
+                        )}
                     </div>
                 )}
             </div>
