@@ -1,6 +1,9 @@
+// data/thaiInfo.ts
+
 export function getThaiInfo(name: string): { thaiName: string; note: string } {
     const lowerName = name.toLowerCase();
     
+    // --- 既存の豊富な辞書データ ---
     if (lowerName.includes("ワット・アルン") || lowerName.includes("暁の寺") || lowerName.includes("arun")) {
         return { thaiName: "วัดอรุณราชวราราม", note: "อยู่ริมแม่น้ำเจ้าพระยา ฝั่งธนบุรี" };
     } else if (lowerName.includes("プラケオ") || lowerName.includes("エメラルド") || lowerName.includes("phra kaew")) {
@@ -48,8 +51,10 @@ export function getThaiInfo(name: string): { thaiName: string; note: string } {
         return { thaiName: "คิง เพาเวอร์ มหานคร", note: "อยู่ที่สถานี BTS ช่องนนทรี" };
     }
     
-    // ショッピング
-    else if (lowerName.includes("アイコンサイアム") || lowerName.includes("iconsiam")) {
+    // ショッピング（MBKなどを追加）
+    else if (lowerName.includes("mbk") || lowerName.includes("エムビーケー") || lowerName.includes("mbkセンター")) {
+        return { thaiName: "มาบุญครอง (MBK Center)", note: "อยู่ใกล้สนามกีฬาแห่งชาติ (National Stadium)" };
+    } else if (lowerName.includes("アイコンサイアム") || lowerName.includes("iconsiam")) {
         return { thaiName: "ไอคอนสยาม", note: "อยู่ริมแม่น้ำเจ้าพระยา ถนนเจริญนคร" };
     } else if (lowerName.includes("サイアム・パラゴン") || lowerName.includes("siam paragon") || lowerName.includes("パラゴン")) {
         return { thaiName: "สยามพารากอน", note: "อยู่ที่สถานี BTS สยาม" };
@@ -76,7 +81,11 @@ export function getThaiInfo(name: string): { thaiName: string; note: string } {
         return { thaiName: "สนามบินดอนเมือง", note: "อาคารผู้โดยสารขาออก" };
     }
     
-    return { thaiName: "", note: "" };
+    // ★ 辞書にないスポットが選ばれた場合のフォールバック（英語名や名称をそのまま安全に表示）
+    return { 
+        thaiName: name, 
+        note: "Bangkok, Thailand (運転手に見せてください)" 
+    };
 }
 
 export function getTips(name: string): string | null {
@@ -91,5 +100,6 @@ export function getTips(name: string): string | null {
     if (name.includes("ヤワラート")) { return "夕方以降は屋台街に変身。フカヒレ、燕の巣、シーフードが絶品。"; }
     if (name.includes("チャトゥチャック")) { return "土日開催。1万5千以上の露店が並ぶメガマーケット。"; }
     if (name.includes("ラークラバン")) { return "スワンナプーム空港までARLで1駅（約6分）。周辺にローカル市場あり。"; }
+    if (name.toLowerCase().includes("mbk")) { return "東南アジア最大級のショッピングモール。お土産探しに最適。"; }
     return null;
 }
