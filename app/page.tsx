@@ -11,6 +11,7 @@ import { bangkokLandmarks } from '@/data/landmarks';
 import { ExchangeShop } from '@/data/guides';
 import { allBangkokStations, Station } from '@/data/stations';
 import { bangkokHotels, HotelItem } from '@/data/hotels'; // ホテルデータのインポート
+import { useAgodaHotels } from '@/hooks/useAgodaHotels'; // ★Agoda API連携フックのインポート
 
 function MainContent() {
     const [selectedMode, setSelectedMode] = useState<string>('transit');
@@ -37,6 +38,9 @@ function MainContent() {
     const [showDetailSheet, setShowDetailSheet] = useState<boolean>(false);
     const [showThaiCard, setShowThaiCard] = useState<boolean>(false);
     const [activeGuide, setActiveGuide] = useState<'exchange' | 'squall' | 'manner' | null>(null);
+
+    // ★Agoda APIから動的にホテル（画像・価格・予約リンク）を取得
+    const { hotels: agodaHotels, loading: agodaLoading } = useAgodaHotels();
 
     const categories = ["すべて", "観光・ナイトスポット", "寺院", "ショッピング", "空港"];
 
@@ -381,7 +385,7 @@ function MainContent() {
 
                 {/* 検索・カテゴリリスト */}
                 {showDropdown && (
-                    <div className="pointer-events-auto bg-white/95 backdrop-blur-md rounded-2xl shadow-xl max-w-md mx-auto w-full max-h-64 overflow-y-auto p-2 flex flex-col gap-1">
+                    <div className="pointer-events-auto bg-white/95 backdrop-blur-md rounded-2xl shadow-xl max-w-md mx-auto w-full max-h-80 overflow-y-auto p-2 flex flex-col gap-1">
                         {/* ランドマーク */}
                         {filteredLandmarks.map((landmark) => (
                             <div
@@ -428,7 +432,7 @@ function MainContent() {
                             </div>
                         ))}
 
-                        {/* ホテル (星3〜星5) */}
+                        {/* ローカルホテルリスト */}
                         {filteredHotels.map((hotel) => (
                             <div
                                 key={`hotel-${hotel.id}`}
@@ -455,9 +459,67 @@ function MainContent() {
                                 </div>
                             </div>
                         ))}
+
+                        {/* ★ Agoda API連携の動的ホテルカード (Image Link ＆ 予約リンク) */}
+                        {agodaLoading && (
+                            <div className="p-3 text-center text-xs text-gray-500">Agodaの最新ホテル情報を取得中...</div>
+                        )}
+
+                        {agodaHotels && agodaHotels
+                            .filter(h => searchText ? h.hotelName.toLowerCase().includes(searchText.toLowerCase()) : true)
+                            .slice(0, 5)
+                            .map((hotel) => (
+                            <div
+                                key={`agoda-${hotel.hotelId}`}
+                                className="w-full text-left p-3 hover:bg-blue-50 rounded-xl flex flex-col gap-2 transition-colors border-b border-gray-100 last:border-none group bg-blue-50/30"
+                            >
+                                <div className="flex gap-3 items-start">
+                                    {/* ① Image Linkの役割（写真をタップでAgodaへ） */}
+                                    <a href={hotel.landingURL} target="_blank" rel="noopener noreferrer" className="shrink-0 relative">
+                                        <img src={hotel.imageURL} alt={hotel.hotelName} className="w-16 h-16 object-cover rounded-lg shadow-sm border border-gray-200" />
+                                        {hotel.discountPercentage > 0 && (
+                                            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full shadow-sm">
+                                                {hotel.discountPercentage}% OFF
+                                            </span>
+                                        )}
+                                    </a>
+                                    
+                                    {/* ホテル情報 */}
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-1.5 mb-1">
+                                            <p className="text-sm font-bold text-gray-800 line-clamp-1">{hotel.hotelName}</p>
+                                        </div>
+                                        <div className="flex items-center gap-1 mb-1">
+                                            <span className="text-[10px] bg-amber-100 text-amber-800 px-1 py-0.5 rounded font-bold whitespace-nowrap">
+                                                {'★'.repeat(Math.floor(hotel.starRating))}
+                                            </span>
+                                            <span className="text-[10px] text-gray-500">({hotel.reviewScore}/10)</span>
+                                        </div>
+                                        <p className="text-[12px] font-bold text-red-600">
+                                            {hotel.currency} {hotel.dailyRate.toLocaleString()}〜
+                                            {hotel.discountPercentage > 0 && (
+                                                <span className="text-[10px] text-gray-400 line-through ml-1.5 font-normal">
+                                                    {hotel.crossedOutRate.toLocaleString()}
+                                                </span>
+                                            )}
+                                        </p>
+                                    </div>
+                                </div>
+                                
+                                {/* ② アフィリエイト予約ボタン */}
+                                <a
+                                    href={hotel.landingURL}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="w-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2.5 rounded-lg text-center transition-colors shadow-sm flex items-center justify-center gap-1.5 mt-1"
+                                >
+                                    <span>🏨</span> Agodaで詳細を見る・予約する (公式価格・PR)
+                                </a>
+                            </div>
+                        ))}
                             
-                        {/* どこにもヒットしなかった場合のフリーワードAgoda検索フォールバック */}
-                        {filteredLandmarks.length === 0 && filteredStations.length === 0 && filteredHotels.length === 0 && searchText.trim().length > 0 && (
+                        {/* どこにもヒットしなかった場合のフォールバック */}
+                        {filteredLandmarks.length === 0 && filteredStations.length === 0 && filteredHotels.length === 0 && agodaHotels.length === 0 && searchText.trim().length > 0 && !agodaLoading && (
                             <div className="p-4 flex flex-col items-center gap-2 text-center">
                                 <p className="text-xs text-gray-600">一致するスポットやホテルが見つかりませんでした</p>
                                 <a
