@@ -85,7 +85,7 @@ export default function GuideModal({
                                 </div>
                             ))}
 
-                            {/* 両替所ガイド専用のお得なPRセクション（Wise ＆ eSIM） */}
+                            {/* 両替所ガイド専用のお得なPRセクション（Wise ＆ eSIM ＆ 移動のGrab訴求） */}
                             <div className="mt-2 pt-3 border-t border-gray-100 flex flex-col gap-2">
                                 <p className="text-[10px] text-gray-400 font-bold px-1">現金と合わせてお得な準備サービス (PR)</p>
                                 <div className="grid grid-cols-2 gap-2">
@@ -111,6 +111,17 @@ export default function GuideModal({
                                         <span className="text-[9px] text-indigo-600 font-medium">街歩き中のネット確保</span>
                                     </a>
                                 </div>
+
+                                {/* 両替・資金調達の文脈に絞ったGrab/配車アプリのPRカード */}
+                                <a 
+                                    href="https://www.klook.com" 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="block bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-2.5 rounded-2xl text-center shadow-md hover:opacity-95 transition-opacity mt-1"
+                                >
+                                    <p className="font-bold text-xs">🚗 両替後の移動に：Grab / Bolt 配車アプリ (PR)</p>
+                                    <p className="text-[9px] text-blue-100 mt-0.5">高レート両替所からの安全なキャッシュレス移動を事前準備</p>
+                                </a>
                             </div>
                         </div>
                     )}
@@ -144,30 +155,17 @@ export default function GuideModal({
                                 <p><b>3. タクシーの乗車</b>: 乗る前に必ず「メーター（By Meter?）」と確認するか、配車アプリ（Grab / Bolt）の利用が安心です。</p>
                             </div>
 
-                            {/* 配車アプリを安全に使うための自衛策ボックス */}
+                            {/* 配車アプリを安全に使うための自衛策ボックス（マナーガイド内には自衛策のみをすっきり掲載） */}
                             <div className="bg-blue-50 border border-blue-200 p-3 rounded-2xl text-blue-900 text-[11px] mt-1">
                                 <span className="font-bold block mb-1">🚗 Grab / Boltを安全に使いこなすコツ</span>
                                 <ul className="list-disc pl-4 space-y-1 text-blue-800">
-                                    <li><b>ナンバー照合</b>: 乗車前にアプリ表示と実際の車のナンバーを必ず確認[cite: 9]。</li>
-                                    <li><b>アプリ決済推奨</b>: クレジットカード紐付けで、お釣りやぼったくりのトラブルを回避[cite: 9]。</li>
-                                    <li><b>GPSの確認</b>: 乗車中もスマホのマップで正しいルートを通っているかチェック[cite: 9]。</li>
+                                    <li><b>ナンバー照合</b>: 乗車前にアプリ表示と実際の車のナンバーを必ず確認。</li>
+                                    <li><b>アプリ決済推奨</b>: クレジットカード紐付けで、お釣りやぼったくりのトラブルを回避。</li>
+                                    <li><b>GPSの確認</b>: 乗車中もスマホのマップで正しいルートを通っているかチェック。</li>
                                 </ul>
                             </div>
                         </div>
                     )}
-
-                    {/* スポンサー・トラベルPR枠 */}
-                    <div className="mt-2 border-t pt-3">
-                        <a 
-                            href="https://www.klook.com" 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="block bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-3 rounded-2xl text-center shadow-md hover:opacity-95 transition-opacity"
-                        >
-                            <p className="font-bold text-xs">🚗 バンコク移動の必需品：Grab / Bolt 配車アプリ ＆ 空港送迎 (PR)</p>
-                            <p className="text-[9px] text-blue-100 mt-0.5">ぼったくりなし・安心のキャッシュレス移動を事前準備</p>
-                        </a>
-                    </div>
                 </div>
 
                 {/* フッター閉じるボタン */}
