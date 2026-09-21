@@ -134,10 +134,8 @@ function MainContent() {
     };
 
     const handleRemoveFromPlan = (id: string) => {
-        setItineraryItems(itineraryItems.filter(item => item.id !== id));
-        if (typeof window !== 'undefined') {
-            localStorage.setItem('bkk_nav_itinerary', JSON.stringify(itineraryItems.filter(item => item.id !== id)));
-        }
+        const updated = itineraryItems.filter(item => item.id !== id);
+        saveItinerary(updated);
     };
 
     useEffect(() => {
@@ -205,7 +203,8 @@ function MainContent() {
         s.line.toLowerCase().includes(searchText.toLowerCase())
     ) : [];
 
-    const showDropdown = selectedCategory !== null || searchText.trim().length > 0;
+    // ★ 修正: 検索窓に文字が入っている、カテゴリ選択中、またはAgodaホテルを表示すべき状態のときに必ずドロップダウンを開く
+    const showDropdown = selectedCategory !== null || searchText.trim().length > 0 || agodaHotels.length > 0 || agodaLoading;
 
     return (
         <main className="relative w-screen h-[100dvh] block bg-gray-100 overflow-hidden">
@@ -339,62 +338,64 @@ function MainContent() {
                             </div>
                         ))}
 
-                        {/* ★ 静的ローカルホテルを排除し、Agoda API動的ホテルカードのみを表示 */}
+                        {/* Agoda API動的ホテルカード */}
                         {agodaLoading && (
                             <div className="p-3 text-center text-xs text-gray-500">Agodaの最新ホテル情報を取得中...</div>
                         )}
 
-                        {!agodaLoading && agodaHotels.map((hotel: any, index: number) => {
-                            const id = hotel.hotelId || hotel.id || index;
-                            const name = hotel.hotelName || hotel.name || 'バンコクのホテル';
-                            const img = hotel.imageURL || hotel.imageUrl || 'https://via.placeholder.com/150';
-                            const url = hotel.landingURL || hotel.url || '#';
-                            const price = hotel.dailyRate || hotel.price || 0;
-                            const currency = hotel.currency || 'JPY';
-                            const star = hotel.starRating || hotel.stars || 4;
-                            const score = hotel.reviewScore || 8.0;
-                            const discount = hotel.discountPercentage || 0;
+                        {!agodaLoading && agodaHotels
+                            .filter(h => searchText ? (h.hotelName || h.name || '').toLowerCase().includes(searchText.toLowerCase()) : true)
+                            .map((hotel: any, index: number) => {
+                                const id = hotel.hotelId || hotel.id || index;
+                                const name = hotel.hotelName || hotel.name || 'バンコクのホテル';
+                                const img = hotel.imageURL || hotel.imageUrl || 'https://via.placeholder.com/150';
+                                const url = hotel.landingURL || hotel.url || '#';
+                                const price = hotel.dailyRate || hotel.price || 0;
+                                const currency = hotel.currency || 'JPY';
+                                const star = hotel.starRating || hotel.stars || 4;
+                                const score = hotel.reviewScore || 8.0;
+                                const discount = hotel.discountPercentage || 0;
 
-                            return (
-                                <div
-                                    key={`agoda-${id}`}
-                                    className="w-full text-left p-2.5 hover:bg-blue-50 rounded-xl flex flex-col gap-2 transition-colors border-b border-gray-100 last:border-none group bg-blue-50/40 box-border"
-                                >
-                                    <div className="flex gap-3 items-start">
-                                        <a href={url} target="_blank" rel="noopener noreferrer" className="shrink-0 relative">
-                                            <img src={img} alt={name} className="w-16 h-16 object-cover rounded-lg shadow-sm border border-gray-200" />
-                                            {discount > 0 && (
-                                                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full shadow-sm">
-                                                    {discount}% OFF
-                                                </span>
-                                            )}
-                                        </a>
-                                        
-                                        <div className="flex-1 min-w-0">
-                                            <p className="text-sm font-bold text-gray-800 truncate">{name}</p>
-                                            <div className="flex items-center gap-1 my-1">
-                                                <span className="text-[10px] bg-amber-100 text-amber-800 px-1 py-0.5 rounded font-bold shrink-0">
-                                                    {'★'.repeat(Math.floor(star))}
-                                                </span>
-                                                <span className="text-[10px] text-gray-500">({score}/10)</span>
-                                            </div>
-                                            <p className="text-[12px] font-bold text-red-600">
-                                                {currency} {Number(price).toLocaleString()}〜
-                                            </p>
-                                        </div>
-                                    </div>
-                                    
-                                    <a
-                                        href={url}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="w-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2 rounded-lg text-center transition-colors shadow-sm flex items-center justify-center gap-1.5"
+                                return (
+                                    <div
+                                        key={`agoda-${id}`}
+                                        className="w-full text-left p-2.5 hover:bg-blue-50 rounded-xl flex flex-col gap-2 transition-colors border-b border-gray-100 last:border-none group bg-blue-50/40 box-border"
                                     >
-                                        <span>🏨</span> Agodaで詳細を見る・予約する (公式価格・PR)
-                                    </a>
-                                </div>
-                            );
-                        })}
+                                        <div className="flex gap-3 items-start">
+                                            <a href={url} target="_blank" rel="noopener noreferrer" className="shrink-0 relative">
+                                                <img src={img} alt={name} className="w-16 h-16 object-cover rounded-lg shadow-sm border border-gray-200" />
+                                                {discount > 0 && (
+                                                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full shadow-sm">
+                                                        {discount}% OFF
+                                                    </span>
+                                                )}
+                                            </a>
+                                            
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-sm font-bold text-gray-800 truncate">{name}</p>
+                                                <div className="flex items-center gap-1 my-1">
+                                                    <span className="text-[10px] bg-amber-100 text-amber-800 px-1 py-0.5 rounded font-bold shrink-0">
+                                                        {'★'.repeat(Math.floor(star))}
+                                                    </span>
+                                                    <span className="text-[10px] text-gray-500">({score}/10)</span>
+                                                </div>
+                                                <p className="text-[12px] font-bold text-red-600">
+                                                    {currency} {Number(price).toLocaleString()}〜
+                                                </p>
+                                            </div>
+                                        </div>
+                                        
+                                        <a
+                                            href={url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="w-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2 rounded-lg text-center transition-colors shadow-sm flex items-center justify-center gap-1.5"
+                                        >
+                                            <span>🏨</span> Agodaで詳細を見る・予約する (公式価格・PR)
+                                        </a>
+                                    </div>
+                                );
+                            })}
                     </div>
                 )}
             </div>
