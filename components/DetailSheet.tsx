@@ -20,6 +20,11 @@ export default function DetailSheet({ title, distanceKm, onClose, onOpenThaiCard
         setTimeout(() => setCopied(false), 2000);
     };
 
+    // ホテル名が自動入力された状態で開くAgodaの正式パートナーリンクを生成
+    // ※エラーを回避しつつ検索キーワードを渡すため、正規のqueryパラメータ形式にエンコードします
+    const encodedHotelName = encodeURIComponent(title);
+    const agodaSearchUrl = `https://www.agoda.com/search?cid=1974942&city=9391&textToSearch=${encodedHotelName}`;
+
     return (
         <div className="absolute bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md rounded-t-3xl shadow-2xl p-5 flex flex-col gap-4 max-w-md mx-auto border-t border-gray-200 animate-slide-up box-border">
             <div className="flex justify-between items-center border-b border-gray-100 pb-3">
@@ -116,19 +121,19 @@ export default function DetailSheet({ title, distanceKm, onClose, onOpenThaiCard
                                 </button>
                             </div>
                             <p className="text-[11px] text-gray-500 leading-relaxed pt-1">
-                                上記のホテル名をコピーしてAgodaの検索窓に貼り付けていただくと、確実にご希望のホテルの空室・料金プランをご確認いただけます。
+                                下記のボタンを押すと、選択中のホテル名が自動で検索窓にセットされた状態でAgodaが開きます。
                             </p>
                         </div>
 
                         <div className="flex flex-col gap-2 pt-1">
-                            {/* バンコクのエリアおよびロケーション（タイ・バンコク）を確実に指定したAgodaリンク */}
+                            {/* ホテル名が自動入力された状態で開くAgodaリンク */}
                             <a 
-                                href="https://www.agoda.com/city/bangkok-th.html?cid=1974942"
+                                href={agodaSearchUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="w-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-3 rounded-xl text-center shadow-md transition-colors flex items-center justify-center gap-1.5"
                             >
-                                <span>🇹🇭</span> Agoda バンコク専用ページを開く (PR)
+                                <span>✨</span> Agodaでこのホテルを自動検索 (PR)
                             </a>
                             <button 
                                 onClick={() => setShowHotelModal(false)}
