@@ -3,15 +3,15 @@ import { AGODA_CONFIG, getAgodaHeaders } from '@/lib/agoda';
 
 export async function GET(request: Request) {
   try {
-    // Agoda APIの正しい仕様（checkInDate / checkOutDate）に修正
+    // 検索日を11月に変更し、確実にヒットするように調整
     const requestBody = {
       criteria: {
         cityId: 9391, // バンコク
-        checkInDate: '2026-10-01',
-        checkOutDate: '2026-10-02',
+        checkInDate: '2026-11-01',
+        checkOutDate: '2026-11-02',
         currency: 'JPY',
         language: 'ja-jp',
-        maxResult: 5,
+        maxResult: 10,
       },
     };
 
@@ -32,9 +32,10 @@ export async function GET(request: Request) {
     }
 
     const data = JSON.parse(responseText);
+    console.log('Agoda Raw API Response:', data); // バックエンド側のログも確認用に出力
     
-    // Agodaのデータ構造から results 配列だけを抽出してフロントに返す
-    const hotelsArray = data.results || [];
+    // results、またはそのまま配列であればそれを返す
+    const hotelsArray = data.results || (Array.isArray(data) ? data : (data.hotelList || []));
     
     return NextResponse.json(hotelsArray);
 
