@@ -10,7 +10,6 @@ import TravelPlanDrawer, { ItineraryItem } from '@/components/TravelPlanDrawer';
 import { bangkokLandmarks } from '@/data/landmarks';
 import { ExchangeShop } from '@/data/guides';
 import { allBangkokStations, Station } from '@/data/stations';
-import { bangkokHotels, HotelItem } from '@/data/hotels';
 
 function MainContent() {
     const [selectedMode, setSelectedMode] = useState<string>('transit');
@@ -92,7 +91,6 @@ function MainContent() {
         );
     };
 
-    // 初期化時：URLパラメータ ＆ LocalStorage復元
     useEffect(() => {
         if (typeof window !== 'undefined') {
             const params = new URLSearchParams(window.location.search);
@@ -136,7 +134,10 @@ function MainContent() {
     };
 
     const handleRemoveFromPlan = (id: string) => {
-        saveItinerary(itineraryItems.filter(item => item.id !== id));
+        setItineraryItems(itineraryItems.filter(item => item.id !== id));
+        if (typeof window !== 'undefined') {
+            localStorage.setItem('bkk_nav_itinerary', JSON.stringify(itineraryItems.filter(item => item.id !== id)));
+        }
     };
 
     useEffect(() => {
@@ -184,19 +185,6 @@ function MainContent() {
         updateUrlParams(title, lat, lng);
     };
 
-    const handleSelectHotel = (hotel: HotelItem) => {
-        const lat = hotel.coordinate.latitude;
-        const lng = hotel.coordinate.longitude;
-        const title = `${hotel.name} (${hotel.area})`;
-        setDestinationCoordinate({ lat, lng });
-        setDestinationTitle(title);
-        setSelectedCategory(null);
-        setSearchText('');
-        setShowDetailSheet(false);
-        setIsDemoMode(false);
-        updateUrlParams(title, lat, lng);
-    };
-
     const handleSelectExchangeShop = (shop: ExchangeShop) => {
         setDestinationCoordinate({ lat: shop.coordinate.lat, lng: shop.coordinate.lng });
         setDestinationTitle(shop.name);
@@ -215,11 +203,6 @@ function MainContent() {
     const filteredStations = searchText ? allBangkokStations.filter(s => 
         s.name.toLowerCase().includes(searchText.toLowerCase()) || 
         s.line.toLowerCase().includes(searchText.toLowerCase())
-    ) : [];
-
-    const filteredHotels = searchText ? bangkokHotels.filter(h =>
-        h.name.toLowerCase().includes(searchText.toLowerCase()) ||
-        h.area.toLowerCase().includes(searchText.toLowerCase())
     ) : [];
 
     const showDropdown = selectedCategory !== null || searchText.trim().length > 0;
@@ -356,32 +339,7 @@ function MainContent() {
                             </div>
                         ))}
 
-                        {/* ローカルホテル */}
-                        {filteredHotels.map((hotel) => (
-                            <div
-                                key={`hotel-${hotel.id}`}
-                                onClick={() => handleSelectHotel(hotel)}
-                                className="w-full text-left px-3 py-2.5 hover:bg-blue-50 rounded-xl flex justify-between items-center transition-colors border-b border-gray-100 last:border-none cursor-pointer group"
-                            >
-                                <div className="min-w-0 flex-1 pr-2">
-                                    <div className="flex items-center gap-1.5">
-                                        <p className="text-sm font-bold text-gray-800 truncate">{hotel.name}</p>
-                                        <span className="text-[10px] bg-amber-100 text-amber-800 px-1.5 py-0.2 rounded font-bold shrink-0">
-                                            {'★'.repeat(hotel.star)}
-                                        </span>
-                                    </div>
-                                    <p className="text-[10px] text-gray-500 truncate">{hotel.area} / {hotel.description}</p>
-                                </div>
-                                <button
-                                    onClick={(e) => handleAddToPlan(hotel.name, hotel.category, hotel.coordinate.latitude, hotel.coordinate.longitude, e)}
-                                    className="bg-blue-100 hover:bg-blue-600 hover:text-white text-blue-700 text-[10px] font-bold px-2 py-1 rounded-lg transition-colors shrink-0"
-                                >
-                                    + プラン
-                                </button>
-                            </div>
-                        ))}
-
-                        {/* Agoda API動的ホテルカード */}
+                        {/* ★ 静的ローカルホテルを排除し、Agoda API動的ホテルカードのみを表示 */}
                         {agodaLoading && (
                             <div className="p-3 text-center text-xs text-gray-500">Agodaの最新ホテル情報を取得中...</div>
                         )}
