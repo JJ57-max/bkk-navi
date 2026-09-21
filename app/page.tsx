@@ -271,14 +271,27 @@ function MainContent() {
                     destinationCoordinate={destinationCoordinate}
                     destinationTitle={destinationTitle}
                     travelMode={selectedMode}
-                    onSelectArbitraryPoint={(title, lat, lng) => {
-                        const friendlyTitle = title.startsWith('指定地点') 
-                            ? `バンコク指定エリア (${lat.toFixed(4)}, ${lng.toFixed(4)})` 
-                            : title;
+                    onSelectArbitraryPoint={async (title, lat, lng) => {
+                        const tempTitle = `指定エリア (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
                         setDestinationCoordinate({ lat, lng });
-                        setDestinationTitle(friendlyTitle);
+                        setDestinationTitle(tempTitle);
                         setIsDemoMode(false);
-                        updateUrlParams(friendlyTitle, lat, lng);
+
+                        try {
+                            const res = await fetch(`/api/geocode?lat=${lat}&lng=${lng}`);
+                            if (res.ok) {
+                                const data = await res.json();
+                                const resolvedTitle = data.address || tempTitle;
+                                setDestinationTitle(resolvedTitle);
+                                updateUrlParams(resolvedTitle, lat, lng);
+                                showToast(`📍 取得した地点を設定しました`);
+                            } else {
+                                updateUrlParams(tempTitle, lat, lng);
+                            }
+                        } catch (err) {
+                            console.error('Geocode fetch error:', err);
+                            updateUrlParams(tempTitle, lat, lng);
+                        }
                     }}
                 />
             </div>
