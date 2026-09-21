@@ -192,6 +192,21 @@ function MainContent() {
         updateUrlParams(shop.name, shop.coordinate.lat, shop.coordinate.lng);
     };
 
+    // ★ ホテル選択時に下部指定地点・地図・URLを連動させるハンドラー
+    const handleSelectHotel = (hotel: any) => {
+        const lat = hotel.latitude || 13.7460;
+        const lng = hotel.longitude || 100.5347;
+        const name = hotel.hotelName || hotel.name || 'バンコクのホテル';
+        setDestinationCoordinate({ lat, lng });
+        setDestinationTitle(name);
+        setSelectedCategory(null);
+        setSearchText('');
+        setShowDetailSheet(false);
+        setIsDemoMode(false);
+        updateUrlParams(name, lat, lng);
+        showToast(`🏨 「${name}」を指定地点に設定しました`);
+    };
+
     const filteredLandmarks = bangkokLandmarks.filter(l => {
         const matchCategory = selectedCategory && selectedCategory !== 'すべて' ? l.category === selectedCategory : true;
         const matchSearch = searchText ? l.name.toLowerCase().includes(searchText.toLowerCase()) : true;
@@ -203,8 +218,7 @@ function MainContent() {
         s.line.toLowerCase().includes(searchText.toLowerCase())
     ) : [];
 
-    // ★ 修正: 検索窓に文字が入っている、カテゴリ選択中、またはAgodaホテルを表示すべき状態のときに必ずドロップダウンを開く
-    const showDropdown = selectedCategory !== null || searchText.trim().length > 0 || agodaHotels.length > 0 || agodaLoading;
+    const showDropdown = selectedCategory !== null || searchText.trim().length > 0;
 
     return (
         <main className="relative w-screen h-[100dvh] block bg-gray-100 overflow-hidden">
@@ -359,17 +373,18 @@ function MainContent() {
                                 return (
                                     <div
                                         key={`agoda-${id}`}
-                                        className="w-full text-left p-2.5 hover:bg-blue-50 rounded-xl flex flex-col gap-2 transition-colors border-b border-gray-100 last:border-none group bg-blue-50/40 box-border"
+                                        onClick={() => handleSelectHotel(hotel)}
+                                        className="w-full text-left p-2.5 hover:bg-blue-50 rounded-xl flex flex-col gap-2 transition-colors border-b border-gray-100 last:border-none group bg-blue-50/40 box-border cursor-pointer"
                                     >
                                         <div className="flex gap-3 items-start">
-                                            <a href={url} target="_blank" rel="noopener noreferrer" className="shrink-0 relative">
+                                            <div className="shrink-0 relative">
                                                 <img src={img} alt={name} className="w-16 h-16 object-cover rounded-lg shadow-sm border border-gray-200" />
                                                 {discount > 0 && (
                                                     <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full shadow-sm">
                                                         {discount}% OFF
                                                     </span>
                                                 )}
-                                            </a>
+                                            </div>
                                             
                                             <div className="flex-1 min-w-0">
                                                 <p className="text-sm font-bold text-gray-800 truncate">{name}</p>
@@ -385,14 +400,23 @@ function MainContent() {
                                             </div>
                                         </div>
                                         
-                                        <a
-                                            href={url}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="w-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2 rounded-lg text-center transition-colors shadow-sm flex items-center justify-center gap-1.5"
-                                        >
-                                            <span>🏨</span> Agodaで詳細を見る・予約する (公式価格・PR)
-                                        </a>
+                                        <div className="flex gap-2">
+                                            <a
+                                                href={url}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                onClick={(e) => e.stopPropagation()}
+                                                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2 rounded-lg text-center transition-colors shadow-sm flex items-center justify-center gap-1.5"
+                                            >
+                                                <span>🏨</span> Agodaで詳細・予約 (PR)
+                                            </a>
+                                            <button
+                                                onClick={(e) => handleAddToPlan(name, 'ホテル', hotel.latitude || 13.7460, hotel.longitude || 100.5347, e)}
+                                                className="bg-blue-100 hover:bg-blue-600 hover:text-white text-blue-700 text-xs font-bold px-3 py-2 rounded-lg transition-colors shrink-0"
+                                            >
+                                                + プラン
+                                            </button>
+                                        </div>
                                     </div>
                                 );
                             })}
