@@ -1,4 +1,4 @@
-// app/page.tsx のホテルカード部分の抜粋・全体統合版
+// app/page.tsx
 'use client';
 
 import React, { useState, useEffect, Suspense } from 'react';
