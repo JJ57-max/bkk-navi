@@ -3,7 +3,7 @@
 export function getThaiInfo(name: string): { thaiName: string; note: string } {
     const lowerName = name.toLowerCase();
     
-    // --- 既存の豊富な辞書データ ---
+    // --- 1. 個別の主要スポット・寺院・ナイトスポット ---
     if (lowerName.includes("ワット・アルン") || lowerName.includes("暁の寺") || lowerName.includes("arun")) {
         return { thaiName: "วัดอรุณราชวราราม", note: "อยู่ริมแม่น้ำเจ้าพระยา ฝั่งธนบุรี" };
     } else if (lowerName.includes("プラケオ") || lowerName.includes("エメラルド") || lowerName.includes("phra kaew")) {
@@ -51,7 +51,7 @@ export function getThaiInfo(name: string): { thaiName: string; note: string } {
         return { thaiName: "คิง เพาเวอร์ มหานคร", note: "อยู่ที่สถานี BTS ช่องนนทรี" };
     }
     
-    // ショッピング（MBKなどを追加）
+    // ショッピングモール
     else if (lowerName.includes("mbk") || lowerName.includes("エムビーケー") || lowerName.includes("mbkセンター")) {
         return { thaiName: "มาบุญครอง (MBK Center)", note: "อยู่ใกล้สนามกีฬาแห่งชาติ (National Stadium)" };
     } else if (lowerName.includes("アイコンサイアム") || lowerName.includes("iconsiam")) {
@@ -80,11 +80,28 @@ export function getThaiInfo(name: string): { thaiName: string; note: string } {
     } else if (lowerName.includes("ドンムアン") || lowerName.includes("don mueang")) {
         return { thaiName: "สนามบินดอนเมือง", note: "อาคารผู้โดยสารขาออก" };
     }
+
+    // --- 2. 自動キーワード判定（どんな未知のスポットやホテルも自動でタイ語化） ---
+    else if (lowerName.includes("ホテル") || lowerName.includes("hotel") || lowerName.includes("resort") || lowerName.includes("リゾート")) {
+        return { thaiName: `โรงแรม ${name}`, note: "Hotel / กรุณาไปส่งที่โรงแรมนี้" };
+    } else if (lowerName.includes("病院") || lowerName.includes("hospital") || lowerName.includes("clinic") || lowerName.includes("クリニック")) {
+        return { thaiName: `โรงพยาบาล ${name}`, note: "Hospital / ไปโรงพยาบาล" };
+    } else if (lowerName.includes("駅") || lowerName.includes("station") || lowerName.includes("bts") || lowerName.includes("mrt")) {
+        return { thaiName: `สถานี ${name}`, note: "Train Station / สถานีรถไฟฟ้า" };
+    } else if (lowerName.includes("寺") || lowerName.includes("temple") || lowerName.includes("วัด")) {
+        return { thaiName: `วัด ${name}`, note: "Temple / วัดในกรุงเทพฯ" };
+    } else if (lowerName.includes("市場") || lowerName.includes("market") || lowerName.includes("ตลาด")) {
+        return { thaiName: `ตลาด ${name}`, note: "Market / ตลาดในกรุงเทพฯ" };
+    } else if (lowerName.includes("モール") || lowerName.includes("mall") || lowerName.includes("center") || lowerName.includes("センター") || lowerName.includes("plaza") || lowerName.includes("プラザ")) {
+        return { thaiName: `ห้างสรรพสินค้า ${name}`, note: "Shopping Center / ศูนย์การค้า" };
+    } else if (lowerName.includes("通り") || lowerName.includes("road") || lowerName.includes("soi") || lowerName.includes("ソイ")) {
+        return { thaiName: `ถนน ${name}`, note: "Road / ซอยในกรุงเทพฯ" };
+    }
     
-    // ★ 辞書にないスポットが選ばれた場合のフォールバック（英語名や名称をそのまま安全に表示）
+    // --- 3. 完全な未知のスポットの最終フォールバック ---
     return { 
         thaiName: name, 
-        note: "Bangkok, Thailand (運転手に見せてください)" 
+        note: "Bangkok, Thailand (Please drive to this location / กรุณาไปส่งที่นี่)" 
     };
 }
 
