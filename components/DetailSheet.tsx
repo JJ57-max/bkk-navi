@@ -121,14 +121,14 @@ export default function DetailSheet({ title, distanceKm, onClose, onOpenThaiCard
                         </div>
 
                         <div className="flex flex-col gap-2 pt-1">
-                            {/* エラーにならない安全なAgodaトップ（アフィリエイトID付き） */}
+                            {/* バンコクのエリアおよびロケーション（タイ・バンコク）を確実に指定したAgodaリンク */}
                             <a 
-                                href="https://www.agoda.com/?cid=1974942"
+                                href="https://www.agoda.com/city/bangkok-th.html?cid=1974942"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="w-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-3 rounded-xl text-center shadow-md transition-colors flex items-center justify-center gap-1.5"
                             >
-                                <span>🌐</span> Agoda 公式サイトを開く (PR)
+                                <span>🇹🇭</span> Agoda バンコク専用ページを開く (PR)
                             </a>
                             <button 
                                 onClick={() => setShowHotelModal(false)}
