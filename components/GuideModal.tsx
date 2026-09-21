@@ -143,6 +143,16 @@ export default function GuideModal({
                                 <p><b>2. チップの習慣</b>: 高級レストランやマッサージではお気持ち程度（20〜100バーツ紙幣）を渡すとスマートです。</p>
                                 <p><b>3. タクシーの乗車</b>: 乗る前に必ず「メーター（By Meter?）」と確認するか、配車アプリ（Grab / Bolt）の利用が安心です。</p>
                             </div>
+
+                            {/* 配車アプリを安全に使うための自衛策ボックス */}
+                            <div className="bg-blue-50 border border-blue-200 p-3 rounded-2xl text-blue-900 text-[11px] mt-1">
+                                <span className="font-bold block mb-1">🚗 Grab / Boltを安全に使いこなすコツ</span>
+                                <ul className="list-disc pl-4 space-y-1 text-blue-800">
+                                    <li><b>ナンバー照合</b>: 乗車前にアプリ表示と実際の車のナンバーを必ず確認[cite: 9]。</li>
+                                    <li><b>アプリ決済推奨</b>: クレジットカード紐付けで、お釣りやぼったくりのトラブルを回避[cite: 9]。</li>
+                                    <li><b>GPSの確認</b>: 乗車中もスマホのマップで正しいルートを通っているかチェック[cite: 9]。</li>
+                                </ul>
+                            </div>
                         </div>
                     )}
 
