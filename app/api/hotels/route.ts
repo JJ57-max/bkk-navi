@@ -1,29 +1,18 @@
 import { NextResponse } from 'next/server';
 import { AGODA_CONFIG, getAgodaHeaders } from '@/lib/agoda';
 
-const BANGKOK_CITY_ID = 9391; // バンコクの都市ID
-
 export async function GET(request: Request) {
   try {
-    const { searchParams } = new URL(request.url);
-    
-    // 確実に未来の日付になるよう設定（例: 1ヶ月後など）
-    const checkinDate = searchParams.get('checkin') || '2026-10-01';
-    const checkoutDate = searchParams.get('checkout') || '2026-10-02';
-
-    // Agoda Affiliate API (lt_v1) の仕様に合わせた正確なリクエストボディ
+    // Agoda Affiliate API (lt_v1) の必須最小限のスキーマ構造
     const requestBody = {
       criteria: {
-        cityId: BANGKOK_CITY_ID,
-        checkinDate: checkinDate,
-        checkoutDate: checkoutDate, // キー名を標準的な "checkoutDate" に修正
-        currency: 'JPY',
-        language: 'ja-jp',
-        maxResult: 10,
-        numberOfAdult: 2,
-        numberOfChildren: 0,
-        sortBy: 'Recommended',
-      },
+        cityId: 9391, // バンコクの都市ID
+        checkinDate: "2026-10-01",
+        checkoutDate: "2026-10-02",
+        currency: "JPY",
+        language: "ja-jp",
+        maxResult: 5
+      }
     };
 
     const response = await fetch(AGODA_CONFIG.endpoint, {
@@ -32,16 +21,17 @@ export async function GET(request: Request) {
       body: JSON.stringify(requestBody),
     });
 
+    const responseText = await response.text();
+
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Agoda API Error Response:', errorText);
+      console.error('Agoda API Error Response:', responseText);
       return NextResponse.json(
-        { error: `Agoda API Error: ${response.status}`, details: errorText },
+        { error: `Agoda API Error: ${response.status}`, details: responseText },
         { status: response.status }
       );
     }
 
-    const data = await response.json();
+    const data = JSON.parse(responseText);
     return NextResponse.json(data);
 
   } catch (error: any) {
