@@ -3,16 +3,16 @@ import { AGODA_CONFIG, getAgodaHeaders } from '@/lib/agoda';
 
 export async function GET(request: Request) {
   try {
-    // Agoda Affiliate API (lt_v1) の必須最小限のスキーマ構造
+    // Agoda APIの正しい仕様（checkInDate / checkOutDate）に修正
     const requestBody = {
       criteria: {
-        cityId: 9391, // バンコクの都市ID
-        checkinDate: "2026-10-01",
-        checkoutDate: "2026-10-02",
-        currency: "JPY",
-        language: "ja-jp",
-        maxResult: 5
-      }
+        cityId: 9391, // バンコク
+        checkInDate: '2026-10-01',
+        checkOutDate: '2026-10-02',
+        currency: 'JPY',
+        language: 'ja-jp',
+        maxResult: 5,
+      },
     };
 
     const response = await fetch(AGODA_CONFIG.endpoint, {
