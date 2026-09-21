@@ -15,12 +15,13 @@ export function useAgodaHotels() {
                 }
                 
                 const data = await res.json();
+                console.log('API Response Data:', data); // ← 取得データの中身をコンソールに出力
                 
-                // APIのレスポンスが配列か、オブジェクト（{ results: [...] } 等）かのブレを完全に吸収して抽出
                 const hotelList = Array.isArray(data) 
                     ? data 
                     : (data.results || data.hotelList || data.data || []);
                     
+                console.log('Parsed Hotel List:', hotelList); // ← パース後の配列を出力
                 setHotels(hotelList);
             } catch (error) {
                 console.error('Agoda API Fetch Error:', error);
