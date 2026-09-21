@@ -54,19 +54,25 @@ export default function DetailSheet({ title, distanceKm, onClose, onOpenThaiCard
             </div>
 
             {/* 距離・所要時間・タクシー料金の目安カード */}
-            <div className="grid grid-cols-3 gap-2 bg-gray-50 p-3 rounded-2xl border border-gray-100 text-center">
-                <div>
-                    <p className="text-[10px] text-gray-500 font-bold">直線距離</p>
-                    <p className="text-xs font-extrabold text-gray-800 mt-0.5">約 {distanceKm} km</p>
+            <div className="bg-gray-50 p-3 rounded-2xl border border-gray-100 flex flex-col gap-2">
+                <div className="grid grid-cols-3 gap-2 text-center">
+                    <div>
+                        <p className="text-[10px] text-gray-500 font-bold">直線距離</p>
+                        <p className="text-xs font-extrabold text-gray-800 mt-0.5">約 {distanceKm} km</p>
+                    </div>
+                    <div>
+                        <p className="text-[10px] text-gray-500 font-bold">移動の目安時間</p>
+                        <p className="text-xs font-extrabold text-emerald-600 mt-0.5">{calculateDuration(distanceKm)}</p>
+                    </div>
+                    <div>
+                        <p className="text-[10px] text-gray-500 font-bold">タクシー料金相場</p>
+                        <p className="text-xs font-extrabold text-blue-600 mt-0.5">{calculateTaxiFare(distanceKm)}</p>
+                    </div>
                 </div>
-                <div>
-                    <p className="text-[10px] text-gray-500 font-bold">移動の目安時間</p>
-                    <p className="text-xs font-extrabold text-emerald-600 mt-0.5">{calculateDuration(distanceKm)}</p>
-                </div>
-                <div>
-                    <p className="text-[10px] text-gray-500 font-bold">タクシー料金相場</p>
-                    <p className="text-xs font-extrabold text-blue-600 mt-0.5">{calculateTaxiFare(distanceKm)}</p>
-                </div>
+                {/* 渋滞に関する注意書き */}
+                <p className="text-[9px] text-gray-400 text-center border-t border-gray-200/60 pt-1.5">
+                    ※バンコク市内の交通渋滞やルートにより、時間・料金は変動します。
+                </p>
             </div>
 
             <button 
