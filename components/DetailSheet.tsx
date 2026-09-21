@@ -116,19 +116,19 @@ export default function DetailSheet({ title, distanceKm, onClose, onOpenThaiCard
                                 </button>
                             </div>
                             <p className="text-[11px] text-gray-500 leading-relaxed pt-1">
-                                上記のホテル名をコピーしてAgodaで検索するか、以下の公式提携リンクから最新の空室状況・料金プランをご確認いただけます。
+                                上記のホテル名をコピーしてAgodaの検索窓に貼り付けていただくと、確実にご希望のホテルの空室・料金プランをご確認いただけます。
                             </p>
                         </div>
 
                         <div className="flex flex-col gap-2 pt-1">
-                            {/* バンコク都市IDを指定した安全なAgodaパートナーリンク */}
+                            {/* エラーにならない安全なAgodaトップ（アフィリエイトID付き） */}
                             <a 
-                                href="https://www.agoda.com/partners/partnersearch.aspx?pcs=1&cid=1974942&city=9391"
+                                href="https://www.agoda.com/?cid=1974942"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="w-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-3 rounded-xl text-center shadow-md transition-colors flex items-center justify-center gap-1.5"
                             >
-                                <span>🌐</span> Agoda バンコク宿泊施設一覧を開く (PR)
+                                <span>🌐</span> Agoda 公式サイトを開く (PR)
                             </a>
                             <button 
                                 onClick={() => setShowHotelModal(false)}
