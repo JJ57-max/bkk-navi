@@ -20,6 +20,24 @@ export default function DetailSheet({ title, distanceKm, onClose, onOpenThaiCard
         setTimeout(() => setCopied(false), 2000);
     };
 
+    // 距離に応じたタクシー料金の目安を算出 (初乗り35バーツ＋加算の簡易計算)
+    const calculateTaxiFare = (km: number) => {
+        if (km <= 1) return '約 40〜50 バーツ';
+        const base = 35;
+        const add = (km - 1) * 6.5; // 1kmあたりの目安加算
+        const total = Math.round(base + add);
+        return `約 ${total}〜${total + 30} バーツ`;
+    };
+
+    // 距離に応じた所要時間の目安 (渋滞考慮)
+    const calculateDuration = (km: number) => {
+        const minutes = Math.round(km * 4 + 10); // 街中の混雑を考慮した目安
+        if (minutes >= 60) {
+            return `約 ${(minutes / 60).toFixed(1)} 時間`;
+        }
+        return `約 ${minutes} 分`;
+    };
+
     return (
         <div className="absolute bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md rounded-t-3xl shadow-2xl p-5 flex flex-col gap-4 max-w-md mx-auto border-t border-gray-200 animate-slide-up box-border">
             <div className="flex justify-between items-center border-b border-gray-100 pb-3">
@@ -35,14 +53,19 @@ export default function DetailSheet({ title, distanceKm, onClose, onOpenThaiCard
                 </button>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 bg-gray-50 p-3 rounded-2xl border border-gray-100 text-center">
+            {/* 距離・所要時間・タクシー料金の目安カード */}
+            <div className="grid grid-cols-3 gap-2 bg-gray-50 p-3 rounded-2xl border border-gray-100 text-center">
                 <div>
-                    <p className="text-[10px] text-gray-500 font-bold">推定直線距離</p>
-                    <p className="text-sm font-extrabold text-gray-800">約 {distanceKm} km</p>
+                    <p className="text-[10px] text-gray-500 font-bold">直線距離</p>
+                    <p className="text-xs font-extrabold text-gray-800 mt-0.5">約 {distanceKm} km</p>
                 </div>
                 <div>
-                    <p className="text-[10px] text-gray-500 font-bold">移動の目安</p>
-                    <p className="text-sm font-extrabold text-emerald-600">快適アクセス</p>
+                    <p className="text-[10px] text-gray-500 font-bold">移動の目安時間</p>
+                    <p className="text-xs font-extrabold text-emerald-600 mt-0.5">{calculateDuration(distanceKm)}</p>
+                </div>
+                <div>
+                    <p className="text-[10px] text-gray-500 font-bold">タクシー料金相場</p>
+                    <p className="text-xs font-extrabold text-blue-600 mt-0.5">{calculateTaxiFare(distanceKm)}</p>
                 </div>
             </div>
 
@@ -121,7 +144,6 @@ export default function DetailSheet({ title, distanceKm, onClose, onOpenThaiCard
                         </div>
 
                         <div className="flex flex-col gap-2 pt-1">
-                            {/* エラーの起きない安全なバンコク専用ページURL */}
                             <a 
                                 href="https://www.agoda.com/city/bangkok-th.html?cid=1974942"
                                 target="_blank"
