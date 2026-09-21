@@ -134,7 +134,7 @@ function TransitLinesComponent() {
     return null;
 }
 
-// 選択された移動手段に応じて動的にルートを描画
+// 選択された移動手段に応じて動的にルートを描画（白抜き縁取りの2重線で視認性を劇的に向上）
 function CustomPolylineRouteComponent({ destination, travelMode }: { destination: { lat: number; lng: number }, travelMode: string }) {
     const map = useMap();
     const [origin, setOrigin] = useState<{ lat: number; lng: number } | null>(null);
@@ -164,7 +164,6 @@ function CustomPolylineRouteComponent({ destination, travelMode }: { destination
         if (!map || !origin) return;
         const directionsService = new google.maps.DirectionsService();
 
-        // 選択されたモードをGoogle MapsのTravelModeに変換
         let googleTravelMode = google.maps.TravelMode.TRANSIT;
         if (travelMode === 'walking') {
             googleTravelMode = google.maps.TravelMode.WALKING;
@@ -188,7 +187,6 @@ function CustomPolylineRouteComponent({ destination, travelMode }: { destination
                     }));
                     setPathCoordinates(points);
                 } else {
-                    // 取得できない場合は直線にフォールバック
                     setPathCoordinates([origin, destination]);
                 }
             }
@@ -198,27 +196,40 @@ function CustomPolylineRouteComponent({ destination, travelMode }: { destination
     useEffect(() => {
         if (!map || pathCoordinates.length === 0) return;
 
-        // モードごとにラインの色を変更
+        // モードごとのメインカラー設定
         const strokeColor = travelMode === 'walking' 
-            ? '#10b981' // 徒歩：エメラルド緑
+            ? '#059669' // 徒歩：濃いエメラルド緑
             : travelMode === 'taxi' 
-            ? '#f59e0b' // タクシー：オレンジ
+            ? '#d97706' // タクシー：濃いオレンジ
             : travelMode === 'driving'
-            ? '#ef4444' // 車：赤
-            : '#2563eb'; // 公共交通機関：青
+            ? '#dc2626' // 車：赤
+            : '#2563eb'; // 公共交通機関：鮮やかな青
 
-        const polyline = new google.maps.Polyline({
+        // 1. 下敷きとなる太めの白いボーダー（縁取り）ライン
+        const borderPolyline = new google.maps.Polyline({
+            path: pathCoordinates,
+            geodesic: true,
+            strokeColor: '#ffffff',
+            strokeOpacity: 0.9,
+            strokeWeight: 8, // メインより太くする
+            zIndex: 998,
+            map: map,
+        });
+
+        // 2. その上を走るメインカラーのライン
+        const mainPolyline = new google.maps.Polyline({
             path: pathCoordinates,
             geodesic: true,
             strokeColor: strokeColor,
-            strokeOpacity: 0.8,
+            strokeOpacity: 1.0,
             strokeWeight: 5,
             zIndex: 999,
             map: map,
         });
 
         return () => {
-            polyline.setMap(null);
+            borderPolyline.setMap(null);
+            mainPolyline.setMap(null);
         };
     }, [map, pathCoordinates, travelMode]);
 
@@ -261,7 +272,7 @@ export default function GoogleMapComponent({ destinationCoordinate, destinationT
                     {/* 各路線の駅間を繋ぐ路線網ライン */}
                     <TransitLinesComponent />
 
-                    {/* 目的地へのルート（移動モード連動） */}
+                    {/* 目的地へのルート（白抜き縁取り付き・移動モード連動） */}
                     <CustomPolylineRouteComponent destination={destinationCoordinate} travelMode={travelMode} />
 
                     {/* 目的地ピン */}
