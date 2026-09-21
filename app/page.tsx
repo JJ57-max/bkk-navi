@@ -157,9 +157,15 @@ function MainContent() {
         }
     };
 
+    // ★ あらゆるデータ構造の座標（lat/lng/latitude/longitude）を安全に取得するヘルパー
+    const extractCoordinates = (item: any) => {
+        const lat = item.coordinate?.latitude ?? item.coordinate?.lat ?? item.lat ?? 13.7460;
+        const lng = item.coordinate?.longitude ?? item.coordinate?.lng ?? item.lng ?? 100.5347;
+        return { lat: Number(lat), lng: Number(lng) };
+    };
+
     const handleSelectLandmark = (landmark: any) => {
-        const lat = landmark.coordinate?.latitude || 13.7460;
-        const lng = landmark.coordinate?.longitude || 100.5347;
+        const { lat, lng } = extractCoordinates(landmark);
         const name = landmark.name || 'スポット';
         setDestinationCoordinate({ lat, lng });
         setDestinationTitle(name);
@@ -168,12 +174,12 @@ function MainContent() {
         setShowDetailSheet(false);
         setIsDemoMode(false);
         updateUrlParams(name, lat, lng);
+        showToast(`📍 「${name}」を目的地に設定しました`);
     };
 
-    const handleSelectStation = (station: Station) => {
-        const lat = station.coordinate.latitude;
-        const lng = station.coordinate.longitude;
-        const title = `${station.name} (${station.line})`;
+    const handleSelectStation = (station: any) => {
+        const { lat, lng } = extractCoordinates(station);
+        const title = `${station.name || '駅'} (${station.line || 'BTS/MRT'})`;
         setDestinationCoordinate({ lat, lng });
         setDestinationTitle(title);
         setSelectedCategory(null);
@@ -181,20 +187,22 @@ function MainContent() {
         setShowDetailSheet(false);
         setIsDemoMode(false);
         updateUrlParams(title, lat, lng);
+        showToast(`📍 「${title}」を目的地に設定しました`);
     };
 
     const handleSelectExchangeShop = (shop: ExchangeShop) => {
-        setDestinationCoordinate({ lat: shop.coordinate.lat, lng: shop.coordinate.lng });
+        const { lat, lng } = extractCoordinates(shop);
+        setDestinationCoordinate({ lat, lng });
         setDestinationTitle(shop.name);
         setSearchText('');
         setShowDetailSheet(false);
         setIsDemoMode(false);
-        updateUrlParams(shop.name, shop.coordinate.lat, shop.coordinate.lng);
+        updateUrlParams(shop.name, lat, lng);
+        showToast(`📍 「${shop.name}」を目的地に設定しました`);
     };
 
     const handleSelectHotel = (hotel: any) => {
-        const lat = hotel.latitude || 13.7460;
-        const lng = hotel.longitude || 100.5347;
+        const { lat, lng } = extractCoordinates(hotel);
         const name = hotel.hotelName || hotel.name || 'バンコクのホテル';
         setDestinationCoordinate({ lat, lng });
         setDestinationTitle(name);
@@ -206,23 +214,27 @@ function MainContent() {
         showToast(`📍 「${name}」を目的地に設定しました`);
     };
 
-    // 安全なフィルタリング処理
+    // 検索クエリとカテゴリの安全なフィルタリング（ヒット数を大幅に拡充）
     const query = searchText ? searchText.toLowerCase().trim() : '';
 
     const filteredLandmarks = (bangkokLandmarks || []).filter(l => {
-        const matchCategory = selectedCategory && selectedCategory !== 'すべて' ? l.category === selectedCategory : true;
+        const matchCategory = selectedCategory && selectedCategory !== 'すべて' ? (l.category || '').includes(selectedCategory) : true;
         const matchSearch = query ? (l.name || '').toLowerCase().includes(query) || (l.category || '').toLowerCase().includes(query) : true;
         return matchCategory && matchSearch;
     });
 
-    const filteredStations = query ? (allBangkokStations || []).filter(s => 
-        (s.name || '').toLowerCase().includes(query) || 
-        (s.line || '').toLowerCase().includes(query)
-    ) : [];
+    const filteredStations = (allBangkokStations || []).filter(s => {
+        const matchCategory = selectedCategory && selectedCategory !== 'すべて' ? selectedCategory.includes('駅') || selectedCategory === 'すべて' : true;
+        const matchSearch = query ? (s.name || '').toLowerCase().includes(query) || (s.line || '').toLowerCase().includes(query) : true;
+        // カテゴリ選択時または検索ワードがある場合に駅も対象にする
+        return (query ? matchSearch : (selectedCategory === 'すべて')) && matchSearch;
+    });
 
     const filteredHotels = (agodaHotels || []).filter(h => {
         const name = h.hotelName || h.name || '';
-        return query ? name.toLowerCase().includes(query) : true;
+        const matchCategory = selectedCategory && selectedCategory !== 'すべて' ? selectedCategory === 'すべて' : true;
+        const matchSearch = query ? name.toLowerCase().includes(query) || 'ホテル'.includes(query) || 'hotel'.includes(query) : true;
+        return matchCategory && matchSearch;
     });
 
     const showDropdown = selectedCategory !== null || searchText.trim().length > 0;
@@ -320,48 +332,57 @@ function MainContent() {
 
                 {showDropdown && (
                     <div className="pointer-events-auto bg-white/95 backdrop-blur-md rounded-2xl shadow-xl max-w-md mx-auto w-full max-h-72 overflow-y-auto p-2 flex flex-col gap-1 box-border">
-                        {filteredLandmarks.map((landmark) => (
-                            <div
-                                key={`landmark-${landmark.id}`}
-                                onClick={() => handleSelectLandmark(landmark)}
-                                className="w-full text-left px-3 py-2.5 hover:bg-blue-50 rounded-xl flex justify-between items-center transition-colors border-b border-gray-100 last:border-none cursor-pointer group"
-                            >
-                                <div className="min-w-0 flex-1 pr-2">
-                                    <p className="text-sm font-bold text-gray-800 truncate">{landmark.name}</p>
-                                    <p className="text-[10px] text-gray-500">{landmark.category}</p>
-                                </div>
-                                <button
-                                    onClick={(e) => handleAddToPlan(landmark.name, landmark.category, landmark.coordinate.latitude, landmark.coordinate.longitude, e)}
-                                    className="bg-blue-100 hover:bg-blue-600 hover:text-white text-blue-700 text-[10px] font-bold px-2 py-1 rounded-lg transition-colors shrink-0"
+                        {/* 観光地・スポット */}
+                        {filteredLandmarks.map((landmark) => {
+                            const { lat, lng } = extractCoordinates(landmark);
+                            return (
+                                <div
+                                    key={`landmark-${landmark.id || landmark.name}`}
+                                    onClick={() => handleSelectLandmark(landmark)}
+                                    className="w-full text-left px-3 py-2.5 hover:bg-blue-50 rounded-xl flex justify-between items-center transition-colors border-b border-gray-100 last:border-none cursor-pointer group"
                                 >
-                                    + プラン
-                                </button>
-                            </div>
-                        ))}
+                                    <div className="min-w-0 flex-1 pr-2">
+                                        <p className="text-sm font-bold text-gray-800 truncate">{landmark.name}</p>
+                                        <p className="text-[10px] text-gray-500">{landmark.category}</p>
+                                    </div>
+                                    <button
+                                        onClick={(e) => handleAddToPlan(landmark.name, landmark.category || 'スポット', lat, lng, e)}
+                                        className="bg-blue-100 hover:bg-blue-600 hover:text-white text-blue-700 text-[10px] font-bold px-2 py-1 rounded-lg transition-colors shrink-0"
+                                    >
+                                        + プラン
+                                    </button>
+                                </div>
+                            );
+                        })}
                             
-                        {filteredStations.map((station, idx) => (
-                            <div
-                                key={`station-${idx}`}
-                                onClick={() => handleSelectStation(station)}
-                                className="w-full text-left px-3 py-2.5 hover:bg-blue-50 rounded-xl flex justify-between items-center transition-colors border-b border-gray-100 last:border-none cursor-pointer group"
-                            >
-                                <div className="min-w-0 flex-1 pr-2">
-                                    <p className="text-sm font-bold text-gray-800 truncate">{station.name}</p>
-                                    <p className="text-[10px] text-gray-500">{station.line}</p>
-                                </div>
-                                <button
-                                    onClick={(e) => handleAddToPlan(`${station.name} (${station.line})`, station.line, station.coordinate.latitude, station.coordinate.longitude, e)}
-                                    className="bg-blue-100 hover:bg-blue-600 hover:text-white text-blue-700 text-[10px] font-bold px-2 py-1 rounded-lg transition-colors shrink-0"
+                        {/* 駅 */}
+                        {filteredStations.map((station, idx) => {
+                            const { lat, lng } = extractCoordinates(station);
+                            return (
+                                <div
+                                    key={`station-${idx}`}
+                                    onClick={() => handleSelectStation(station)}
+                                    className="w-full text-left px-3 py-2.5 hover:bg-blue-50 rounded-xl flex justify-between items-center transition-colors border-b border-gray-100 last:border-none cursor-pointer group"
                                 >
-                                    + プラン
-                                </button>
-                            </div>
-                        ))}
+                                    <div className="min-w-0 flex-1 pr-2">
+                                        <p className="text-sm font-bold text-gray-800 truncate">{station.name}</p>
+                                        <p className="text-[10px] text-gray-500">{station.line}</p>
+                                    </div>
+                                    <button
+                                        onClick={(e) => handleAddToPlan(`${station.name} (${station.line})`, station.line, lat, lng, e)}
+                                        className="bg-blue-100 hover:bg-blue-600 hover:text-white text-blue-700 text-[10px] font-bold px-2 py-1 rounded-lg transition-colors shrink-0"
+                                    >
+                                        + プラン
+                                    </button>
+                                </div>
+                            );
+                        })}
 
                         {agodaLoading && (
                             <div className="p-3 text-center text-xs text-gray-500">ホテル情報を取得中...</div>
                         )}
 
+                        {/* ホテル */}
                         {!agodaLoading && filteredHotels.map((hotel: any, index: number) => {
                             const id = hotel.hotelId || hotel.id || index;
                             const name = hotel.hotelName || hotel.name || 'バンコクのホテル';
@@ -371,6 +392,7 @@ function MainContent() {
                             const star = hotel.starRating || hotel.stars || 4;
                             const score = hotel.reviewScore || 8.0;
                             const discount = hotel.discountPercentage || 0;
+                            const { lat, lng } = extractCoordinates(hotel);
 
                             return (
                                 <div
@@ -404,7 +426,7 @@ function MainContent() {
                                     
                                     <div className="flex flex-col gap-1.5 shrink-0">
                                         <button
-                                            onClick={(e) => handleAddToPlan(name, 'ホテル', hotel.latitude || 13.7460, hotel.longitude || 100.5347, e)}
+                                            onClick={(e) => handleAddToPlan(name, 'ホテル', lat, lng, e)}
                                             className="bg-blue-100 hover:bg-blue-600 hover:text-white text-blue-700 text-[10px] font-bold px-2.5 py-1.5 rounded-lg transition-colors"
                                         >
                                             + プラン
