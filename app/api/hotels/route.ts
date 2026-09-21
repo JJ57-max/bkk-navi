@@ -32,7 +32,11 @@ export async function GET(request: Request) {
     }
 
     const data = JSON.parse(responseText);
-    return NextResponse.json(data);
+    
+    // Agodaのデータ構造から results 配列だけを抽出してフロントに返す
+    const hotelsArray = data.results || [];
+    
+    return NextResponse.json(hotelsArray);
 
   } catch (error: any) {
     console.error('Failed to fetch Agoda hotels:', error);
