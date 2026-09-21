@@ -10,6 +10,7 @@ import TravelPlanDrawer, { ItineraryItem } from '@/components/TravelPlanDrawer';
 import { bangkokLandmarks } from '@/data/landmarks';
 import { ExchangeShop } from '@/data/guides';
 import { allBangkokStations, Station } from '@/data/stations';
+import { bangkokHotels, HotelItem } from '@/data/hotels';
 
 function MainContent() {
     const [selectedMode, setSelectedMode] = useState<string>('transit');
@@ -27,7 +28,7 @@ function MainContent() {
     const [showThaiCard, setShowThaiCard] = useState<boolean>(false);
     const [activeGuide, setActiveGuide] = useState<'exchange' | 'squall' | 'manner' | null>(null);
 
-    // ★ 直接APIを呼び出してホテルデータを取得するステート
+    // Agoda API動的取得ステート
     const [agodaHotels, setAgodaHotels] = useState<any[]>([]);
     const [agodaLoading, setAgodaLoading] = useState<boolean>(true);
 
@@ -38,8 +39,6 @@ function MainContent() {
                 const res = await fetch('/api/hotels');
                 if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
                 const data = await res.json();
-                console.log('Direct API Response Data:', data);
-                
                 const hotelList = Array.isArray(data) ? data : (data.results || data.hotelList || data.data || []);
                 setAgodaHotels(hotelList);
             } catch (err) {
@@ -81,10 +80,11 @@ function MainContent() {
                     setIsDemoMode(false);
                     setDestinationCoordinate({ lat: userLat, lng: userLng });
                     setDestinationTitle('あなたの現在地（GPS）');
-                    showToast('📍 現在地を設定しました');
+                    updateUrlParams('あなたの現在地（GPS）', userLat, userLng);
+                    showToast('📍 現在地（バンコク市内）を設定しました');
                 } else {
                     setIsDemoMode(true);
-                    showToast('✈️ タイ国外のためデモモードを維持します');
+                    showToast('✈️ 現在地がタイ国外のためデモモードを維持します');
                 }
             },
             () => showToast('⚠️ 位置情報の取得に失敗しました'),
@@ -92,6 +92,7 @@ function MainContent() {
         );
     };
 
+    // 初期化時：URLパラメータ ＆ LocalStorage復元
     useEffect(() => {
         if (typeof window !== 'undefined') {
             const params = new URLSearchParams(window.location.search);
@@ -111,7 +112,8 @@ function MainContent() {
             const savedPlan = localStorage.getItem('bkk_nav_itinerary');
             if (savedPlan) {
                 try {
-                    setItineraryItems(JSON.parse(savedPlan));
+                    const parsed = JSON.parse(savedPlan);
+                    if (Array.isArray(parsed)) setItineraryItems(parsed);
                 } catch (e) {
                     localStorage.removeItem('bkk_nav_itinerary');
                 }
@@ -128,9 +130,13 @@ function MainContent() {
 
     const handleAddToPlan = (title: string, category: string, lat: number, lng: number, e: React.MouseEvent) => {
         e.stopPropagation();
-        const newItem: ItineraryItem = { id: `${Date.now()}`, title, category, lat, lng };
+        const newItem: ItineraryItem = { id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`, title, category, lat, lng };
         saveItinerary([...itineraryItems, newItem]);
         showToast(`✨ 「${title}」をマイプランに追加しました！`);
+    };
+
+    const handleRemoveFromPlan = (id: string) => {
+        saveItinerary(itineraryItems.filter(item => item.id !== id));
     };
 
     useEffect(() => {
@@ -143,6 +149,63 @@ function MainContent() {
         return () => clearInterval(timer);
     }, []);
 
+    const updateUrlParams = (title: string, lat: number, lng: number) => {
+        if (typeof window !== 'undefined') {
+            const params = new URLSearchParams(window.location.search);
+            params.set('title', title);
+            params.set('lat', lat.toString());
+            params.set('lng', lng.toString());
+            window.history.replaceState({}, '', `${window.location.pathname}?${params.toString()}`);
+        }
+    };
+
+    const handleSelectLandmark = (landmark: typeof bangkokLandmarks[0]) => {
+        const lat = landmark.coordinate.latitude;
+        const lng = landmark.coordinate.longitude;
+        setDestinationCoordinate({ lat, lng });
+        setDestinationTitle(landmark.name);
+        setSelectedCategory(null);
+        setSearchText('');
+        setShowDetailSheet(false);
+        setIsDemoMode(false);
+        updateUrlParams(landmark.name, lat, lng);
+    };
+
+    const handleSelectStation = (station: Station) => {
+        const lat = station.coordinate.latitude;
+        const lng = station.coordinate.longitude;
+        const title = `${station.name} (${station.line})`;
+        setDestinationCoordinate({ lat, lng });
+        setDestinationTitle(title);
+        setSelectedCategory(null);
+        setSearchText('');
+        setShowDetailSheet(false);
+        setIsDemoMode(false);
+        updateUrlParams(title, lat, lng);
+    };
+
+    const handleSelectHotel = (hotel: HotelItem) => {
+        const lat = hotel.coordinate.latitude;
+        const lng = hotel.coordinate.longitude;
+        const title = `${hotel.name} (${hotel.area})`;
+        setDestinationCoordinate({ lat, lng });
+        setDestinationTitle(title);
+        setSelectedCategory(null);
+        setSearchText('');
+        setShowDetailSheet(false);
+        setIsDemoMode(false);
+        updateUrlParams(title, lat, lng);
+    };
+
+    const handleSelectExchangeShop = (shop: ExchangeShop) => {
+        setDestinationCoordinate({ lat: shop.coordinate.lat, lng: shop.coordinate.lng });
+        setDestinationTitle(shop.name);
+        setSearchText('');
+        setShowDetailSheet(false);
+        setIsDemoMode(false);
+        updateUrlParams(shop.name, shop.coordinate.lat, shop.coordinate.lng);
+    };
+
     const filteredLandmarks = bangkokLandmarks.filter(l => {
         const matchCategory = selectedCategory && selectedCategory !== 'すべて' ? l.category === selectedCategory : true;
         const matchSearch = searchText ? l.name.toLowerCase().includes(searchText.toLowerCase()) : true;
@@ -152,6 +215,11 @@ function MainContent() {
     const filteredStations = searchText ? allBangkokStations.filter(s => 
         s.name.toLowerCase().includes(searchText.toLowerCase()) || 
         s.line.toLowerCase().includes(searchText.toLowerCase())
+    ) : [];
+
+    const filteredHotels = searchText ? bangkokHotels.filter(h =>
+        h.name.toLowerCase().includes(searchText.toLowerCase()) ||
+        h.area.toLowerCase().includes(searchText.toLowerCase())
     ) : [];
 
     const showDropdown = selectedCategory !== null || searchText.trim().length > 0;
@@ -167,6 +235,7 @@ function MainContent() {
                         setDestinationCoordinate({ lat, lng });
                         setDestinationTitle(title);
                         setIsDemoMode(false);
+                        updateUrlParams(title, lat, lng);
                     }}
                 />
             </div>
@@ -178,44 +247,42 @@ function MainContent() {
                 </div>
             )}
 
-            <div className="absolute top-0 left-0 right-0 z-10 flex flex-col p-4 gap-3 pointer-events-none">
-                <div className="pointer-events-auto bg-white/95 backdrop-blur-md p-4 rounded-2xl shadow-lg flex flex-col gap-2 max-w-md mx-auto w-full">
+            <div className="absolute top-0 left-0 right-0 z-10 flex flex-col p-3 gap-2 pointer-events-none">
+                <div className="pointer-events-auto bg-white/95 backdrop-blur-md p-3.5 rounded-2xl shadow-lg flex flex-col gap-2 max-w-md mx-auto w-full box-border">
                     <div className="flex items-center justify-between text-xs font-bold text-emerald-600">
-                        <div className="flex items-center gap-1.5">
+                        <div className="flex items-center gap-1.5 min-w-0">
                             <span>🛡️</span>
-                            <span>バンコクおまもりコンパス</span>
+                            <span className="truncate">バンコクおまもりコンパス</span>
                             {isDemoMode && (
-                                <span className="bg-amber-100 text-amber-700 border border-amber-300 px-1.5 py-0.5 rounded-full text-[9px] font-bold animate-pulse flex items-center gap-1">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                                <span className="bg-amber-100 text-amber-700 border border-amber-300 px-1.5 py-0.5 rounded-full text-[9px] font-bold shrink-0">
                                     DEMO
                                 </span>
                             )}
                         </div>
-                        <div className="flex items-center gap-2 bg-gray-100 px-2.5 py-1 rounded-lg text-[11px] text-gray-700">
-                            <span>🇹🇭 BKK {bkkTime}</span>
-                            <span className="text-blue-500">🌧️ 32°C</span>
+                        <div className="flex items-center gap-1.5 bg-gray-100 px-2 py-1 rounded-lg text-[11px] text-gray-700 shrink-0">
+                            <span>🇹🇭 {bkkTime}</span>
                         </div>
                     </div>
 
                     <div className="flex items-center gap-2">
-                        <div className="flex items-center gap-3 bg-gray-100 px-3 py-2 rounded-xl flex-1">
-                            <span className="text-blue-600 font-bold">🔍</span>
+                        <div className="flex items-center gap-2 bg-gray-100 px-3 py-2 rounded-xl flex-1 min-w-0">
+                            <span className="text-blue-600 font-bold shrink-0">🔍</span>
                             <input 
                                 type="text" 
                                 placeholder="駅名・スポット・ホテルを検索..." 
                                 value={searchText}
                                 onChange={(e) => setSearchText(e.target.value)}
-                                className="bg-transparent w-full outline-none text-sm text-gray-800"
+                                className="bg-transparent w-full outline-none text-sm text-gray-800 min-w-0"
                             />
                             {searchText && (
-                                <button onClick={() => setSearchText('')} className="text-gray-400 hover:text-gray-600">✕</button>
+                                <button onClick={() => setSearchText('')} className="text-gray-400 hover:text-gray-600 shrink-0">✕</button>
                             )}
                         </div>
                         <button 
                             onClick={handleGetMyLocation}
-                            className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-xl text-xs font-bold shadow-md flex items-center gap-1 whitespace-nowrap"
+                            className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-xl text-xs font-bold shadow-md shrink-0"
                         >
-                            <span>📍</span> 現在地
+                            📍 現在地
                         </button>
                     </div>
                 </div>
@@ -223,14 +290,14 @@ function MainContent() {
                 <div className="pointer-events-auto flex gap-2 overflow-x-auto pb-1 px-2 no-scrollbar max-w-md mx-auto w-full items-center">
                     <button
                         onClick={() => setShowTravelPlanDrawer(true)}
-                        className="whitespace-nowrap px-3 py-1.5 rounded-xl bg-blue-600 text-white text-xs font-bold shadow-md flex items-center gap-1.5"
+                        className="whitespace-nowrap px-3 py-1.5 rounded-xl bg-blue-600 text-white text-xs font-bold shadow-md flex items-center gap-1.5 shrink-0"
                     >
                         <span>📋</span> マイプラン ({itineraryItems.length})
                     </button>
-                    <div className="h-4 w-[1px] bg-gray-300 mx-0.5"></div>
-                    <button onClick={() => setActiveGuide('exchange')} className="whitespace-nowrap px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold shadow-sm">💴 両替</button>
-                    <button onClick={() => setActiveGuide('squall')} className="whitespace-nowrap px-3 py-1.5 rounded-xl bg-cyan-50 text-cyan-700 border border-cyan-200 text-xs font-bold shadow-sm">🌧️ 避難</button>
-                    <button onClick={() => setActiveGuide('manner')} className="whitespace-nowrap px-3 py-1.5 rounded-xl bg-orange-50 text-orange-700 border border-orange-200 text-xs font-bold shadow-sm">📖 マナー</button>
+                    <div className="h-4 w-[1px] bg-gray-300 mx-0.5 shrink-0"></div>
+                    <button onClick={() => setActiveGuide('exchange')} className="whitespace-nowrap px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold shadow-sm shrink-0">💴 両替</button>
+                    <button onClick={() => setActiveGuide('squall')} className="whitespace-nowrap px-3 py-1.5 rounded-xl bg-cyan-50 text-cyan-700 border border-cyan-200 text-xs font-bold shadow-sm shrink-0">🌧️ 避難</button>
+                    <button onClick={() => setActiveGuide('manner')} className="whitespace-nowrap px-3 py-1.5 rounded-xl bg-orange-50 text-orange-700 border border-orange-200 text-xs font-bold shadow-sm shrink-0">📖 マナー</button>
                 </div>
 
                 <div className="pointer-events-auto flex gap-2 overflow-x-auto pb-1 px-2 no-scrollbar max-w-md mx-auto w-full">
@@ -238,7 +305,7 @@ function MainContent() {
                         <button
                             key={category}
                             onClick={() => setSelectedCategory(selectedCategory === category ? null : category)}
-                            className={`whitespace-nowrap px-4 py-1.5 rounded-full text-xs font-semibold shadow-sm transition-all ${
+                            className={`whitespace-nowrap px-4 py-1.5 rounded-full text-xs font-semibold shadow-sm transition-all shrink-0 ${
                                 selectedCategory === category ? 'bg-blue-600 text-white' : 'bg-white/95 backdrop-blur-md text-gray-700 hover:bg-white'
                             }`}
                         >
@@ -248,56 +315,73 @@ function MainContent() {
                 </div>
 
                 {showDropdown && (
-                    <div className="pointer-events-auto bg-white/95 backdrop-blur-md rounded-2xl shadow-xl max-w-md mx-auto w-full max-h-80 overflow-y-auto p-2 flex flex-col gap-1">
+                    <div className="pointer-events-auto bg-white/95 backdrop-blur-md rounded-2xl shadow-xl max-w-md mx-auto w-full max-h-72 overflow-y-auto p-2 flex flex-col gap-1 box-border">
+                        {/* 観光地 */}
                         {filteredLandmarks.map((landmark) => (
                             <div
                                 key={`landmark-${landmark.id}`}
-                                onClick={() => {
-                                    setDestinationCoordinate({ lat: landmark.coordinate.latitude, lng: landmark.coordinate.longitude });
-                                    setDestinationTitle(landmark.name);
-                                    setSearchText('');
-                                    setShowDetailSheet(false);
-                                }}
+                                onClick={() => handleSelectLandmark(landmark)}
                                 className="w-full text-left px-3 py-2.5 hover:bg-blue-50 rounded-xl flex justify-between items-center transition-colors border-b border-gray-100 last:border-none cursor-pointer group"
                             >
-                                <div>
-                                    <p className="text-sm font-bold text-gray-800">{landmark.name}</p>
+                                <div className="min-w-0 flex-1 pr-2">
+                                    <p className="text-sm font-bold text-gray-800 truncate">{landmark.name}</p>
                                     <p className="text-[10px] text-gray-500">{landmark.category}</p>
                                 </div>
                                 <button
                                     onClick={(e) => handleAddToPlan(landmark.name, landmark.category, landmark.coordinate.latitude, landmark.coordinate.longitude, e)}
-                                    className="bg-blue-100 hover:bg-blue-600 hover:text-white text-blue-700 text-[10px] font-bold px-2 py-1 rounded-lg transition-colors"
+                                    className="bg-blue-100 hover:bg-blue-600 hover:text-white text-blue-700 text-[10px] font-bold px-2 py-1 rounded-lg transition-colors shrink-0"
                                 >
                                     + プラン
                                 </button>
                             </div>
                         ))}
                             
+                        {/* 駅 */}
                         {filteredStations.map((station, idx) => (
                             <div
                                 key={`station-${idx}`}
-                                onClick={() => {
-                                    setDestinationCoordinate({ lat: station.coordinate.latitude, lng: station.coordinate.longitude });
-                                    setDestinationTitle(`${station.name} (${station.line})`);
-                                    setSearchText('');
-                                    setShowDetailSheet(false);
-                                }}
+                                onClick={() => handleSelectStation(station)}
                                 className="w-full text-left px-3 py-2.5 hover:bg-blue-50 rounded-xl flex justify-between items-center transition-colors border-b border-gray-100 last:border-none cursor-pointer group"
                             >
-                                <div>
-                                    <p className="text-sm font-bold text-gray-800">{station.name}</p>
+                                <div className="min-w-0 flex-1 pr-2">
+                                    <p className="text-sm font-bold text-gray-800 truncate">{station.name}</p>
                                     <p className="text-[10px] text-gray-500">{station.line}</p>
                                 </div>
                                 <button
                                     onClick={(e) => handleAddToPlan(`${station.name} (${station.line})`, station.line, station.coordinate.latitude, station.coordinate.longitude, e)}
-                                    className="bg-blue-100 hover:bg-blue-600 hover:text-white text-blue-700 text-[10px] font-bold px-2 py-1 rounded-lg transition-colors"
+                                    className="bg-blue-100 hover:bg-blue-600 hover:text-white text-blue-700 text-[10px] font-bold px-2 py-1 rounded-lg transition-colors shrink-0"
                                 >
                                     + プラン
                                 </button>
                             </div>
                         ))}
 
-                        {/* ★ Agoda API動的ホテルカード (直接組み込み) */}
+                        {/* ローカルホテル */}
+                        {filteredHotels.map((hotel) => (
+                            <div
+                                key={`hotel-${hotel.id}`}
+                                onClick={() => handleSelectHotel(hotel)}
+                                className="w-full text-left px-3 py-2.5 hover:bg-blue-50 rounded-xl flex justify-between items-center transition-colors border-b border-gray-100 last:border-none cursor-pointer group"
+                            >
+                                <div className="min-w-0 flex-1 pr-2">
+                                    <div className="flex items-center gap-1.5">
+                                        <p className="text-sm font-bold text-gray-800 truncate">{hotel.name}</p>
+                                        <span className="text-[10px] bg-amber-100 text-amber-800 px-1.5 py-0.2 rounded font-bold shrink-0">
+                                            {'★'.repeat(hotel.star)}
+                                        </span>
+                                    </div>
+                                    <p className="text-[10px] text-gray-500 truncate">{hotel.area} / {hotel.description}</p>
+                                </div>
+                                <button
+                                    onClick={(e) => handleAddToPlan(hotel.name, hotel.category, hotel.coordinate.latitude, hotel.coordinate.longitude, e)}
+                                    className="bg-blue-100 hover:bg-blue-600 hover:text-white text-blue-700 text-[10px] font-bold px-2 py-1 rounded-lg transition-colors shrink-0"
+                                >
+                                    + プラン
+                                </button>
+                            </div>
+                        ))}
+
+                        {/* Agoda API動的ホテルカード */}
                         {agodaLoading && (
                             <div className="p-3 text-center text-xs text-gray-500">Agodaの最新ホテル情報を取得中...</div>
                         )}
@@ -316,7 +400,7 @@ function MainContent() {
                             return (
                                 <div
                                     key={`agoda-${id}`}
-                                    className="w-full text-left p-3 hover:bg-blue-50 rounded-xl flex flex-col gap-2 transition-colors border-b border-gray-100 last:border-none group bg-blue-50/40"
+                                    className="w-full text-left p-2.5 hover:bg-blue-50 rounded-xl flex flex-col gap-2 transition-colors border-b border-gray-100 last:border-none group bg-blue-50/40 box-border"
                                 >
                                     <div className="flex gap-3 items-start">
                                         <a href={url} target="_blank" rel="noopener noreferrer" className="shrink-0 relative">
@@ -328,10 +412,10 @@ function MainContent() {
                                             )}
                                         </a>
                                         
-                                        <div className="flex-1">
-                                            <p className="text-sm font-bold text-gray-800 line-clamp-1">{name}</p>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-sm font-bold text-gray-800 truncate">{name}</p>
                                             <div className="flex items-center gap-1 my-1">
-                                                <span className="text-[10px] bg-amber-100 text-amber-800 px-1 py-0.5 rounded font-bold">
+                                                <span className="text-[10px] bg-amber-100 text-amber-800 px-1 py-0.5 rounded font-bold shrink-0">
                                                     {'★'.repeat(Math.floor(star))}
                                                 </span>
                                                 <span className="text-[10px] text-gray-500">({score}/10)</span>
@@ -361,17 +445,17 @@ function MainContent() {
                 <div className="absolute bottom-20 left-0 right-0 z-10 px-4 flex justify-center pointer-events-none">
                     <button
                         onClick={() => setShowDetailSheet(true)}
-                        className="pointer-events-auto bg-white/95 backdrop-blur-md px-6 py-3 rounded-2xl shadow-xl flex items-center gap-3 text-sm font-bold text-gray-800 hover:bg-white transition-all"
+                        className="pointer-events-auto bg-white/95 backdrop-blur-md px-5 py-3 rounded-2xl shadow-xl flex items-center gap-2 text-xs md:text-sm font-bold text-gray-800 hover:bg-white transition-all max-w-md w-full justify-center"
                     >
                         <span>📍</span>
-                        <span>{destinationTitle} の詳細 ＆ アクセス相場を見る</span>
-                        <span className="text-blue-600">▲</span>
+                        <span className="truncate">{destinationTitle} の詳細 ＆ アクセス相場</span>
+                        <span className="text-blue-600 shrink-0">▲</span>
                     </button>
                 </div>
             )}
 
             <div className="absolute bottom-4 left-0 right-0 z-10 px-4 flex justify-center pointer-events-none">
-                <div className="pointer-events-auto bg-white/95 backdrop-blur-md p-2 rounded-2xl shadow-xl flex gap-2 max-w-md w-full">
+                <div className="pointer-events-auto bg-white/95 backdrop-blur-md p-2 rounded-2xl shadow-xl flex gap-1.5 max-w-md w-full box-border">
                     {[
                         { mode: 'transit', label: '公共機関', icon: '🚆' },
                         { mode: 'walking', label: '徒歩', icon: '🚶' },
@@ -381,12 +465,12 @@ function MainContent() {
                         <button
                             key={m.mode}
                             onClick={() => setSelectedMode(m.mode)}
-                            className={`flex-1 flex flex-col items-center py-2 rounded-xl text-xs font-semibold transition-all ${
+                            className={`flex-1 flex flex-col items-center py-1.5 rounded-xl text-[11px] font-semibold transition-all ${
                                 selectedMode === m.mode ? 'bg-blue-600 text-white shadow-md' : 'text-gray-700 hover:bg-gray-100'
                             }`}
                         >
                             <span className="text-sm">{m.icon}</span>
-                            <span>{m.label}</span>
+                            <span className="truncate">{m.label}</span>
                         </button>
                     ))}
                 </div>
@@ -396,11 +480,12 @@ function MainContent() {
                 isOpen={showTravelPlanDrawer}
                 onClose={() => setShowTravelPlanDrawer(false)}
                 items={itineraryItems}
-                onRemoveItem={(id) => saveItinerary(itineraryItems.filter(item => item.id !== id))}
+                onRemoveItem={handleRemoveFromPlan}
                 onSelectDestination={(title, lat, lng) => {
                     setDestinationCoordinate({ lat, lng });
                     setDestinationTitle(title);
                     setIsDemoMode(false);
+                    updateUrlParams(title, lat, lng);
                 }}
             />
 
@@ -412,11 +497,7 @@ function MainContent() {
                 <ThaiDriverCardModal destinationTitle={destinationTitle} onClose={() => setShowThaiCard(false)} />
             )}
 
-            <GuideModal type={activeGuide} onClose={() => setActiveGuide(null)} onSelectExchangeShop={(shop) => {
-                setDestinationCoordinate({ lat: shop.coordinate.lat, lng: shop.coordinate.lng });
-                setDestinationTitle(shop.name);
-                setShowDetailSheet(false);
-            }} />
+            <GuideModal type={activeGuide} onClose={() => setActiveGuide(null)} onSelectExchangeShop={handleSelectExchangeShop} />
         </main>
     );
 }
