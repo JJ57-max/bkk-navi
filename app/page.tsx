@@ -1,4 +1,4 @@
-// app/page.tsx
+// app/page.tsx のホテルカード部分の抜粋・全体統合版
 'use client';
 
 import React, { useState, useEffect, Suspense } from 'react';
@@ -191,7 +191,6 @@ function MainContent() {
         updateUrlParams(shop.name, shop.coordinate.lat, shop.coordinate.lng);
     };
 
-    // ★ ホテルカードクリック時に目的地に設定し、ルートを表示するハンドラー
     const handleSelectHotel = (hotel: any) => {
         const lat = hotel.latitude || 13.7460;
         const lng = hotel.longitude || 100.5347;
@@ -312,7 +311,6 @@ function MainContent() {
 
                 {showDropdown && (
                     <div className="pointer-events-auto bg-white/95 backdrop-blur-md rounded-2xl shadow-xl max-w-md mx-auto w-full max-h-72 overflow-y-auto p-2 flex flex-col gap-1 box-border">
-                        {/* 観光地 */}
                         {filteredLandmarks.map((landmark) => (
                             <div
                                 key={`landmark-${landmark.id}`}
@@ -332,7 +330,6 @@ function MainContent() {
                             </div>
                         ))}
                             
-                        {/* 駅 */}
                         {filteredStations.map((station, idx) => (
                             <div
                                 key={`station-${idx}`}
@@ -352,7 +349,6 @@ function MainContent() {
                             </div>
                         ))}
 
-                        {/* ホテルカード（外部リンクを廃止し、クリックで目的地設定＋プラン追加ボタンのみに整理） */}
                         {agodaLoading && (
                             <div className="p-3 text-center text-xs text-gray-500">ホテル情報を取得中...</div>
                         )}

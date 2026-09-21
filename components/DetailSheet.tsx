@@ -14,9 +14,6 @@ export default function DetailSheet({ title, distanceKm, onClose, onOpenThaiCard
     const [showHotelModal, setShowHotelModal] = useState<boolean>(false);
     const [copied, setCopied] = useState<boolean>(false);
 
-    // ホテル関連かどうかを判定
-    const isHotel = title.includes('ホテル') || title.includes('ケンプンスキー') || title.includes('マリオット') || title.includes('イーステイン') || title.includes('デュシタニ');
-
     const handleCopyTitle = () => {
         navigator.clipboard.writeText(title);
         setCopied(true);
@@ -125,12 +122,12 @@ export default function DetailSheet({ title, distanceKm, onClose, onOpenThaiCard
 
                         <div className="flex flex-col gap-2 pt-1">
                             <a 
-                                href={`https://www.agoda.com/partners/partnersearch.aspx?pcs=1&cid=1974942&city=9391`}
+                                href="https://www.agoda.com/partners/partnersearch.aspx?pcs=1&cid=1974942"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="w-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-3 rounded-xl text-center shadow-md transition-colors flex items-center justify-center gap-1.5"
                             >
-                                <span>🌐</span> Agoda バンコク宿泊施設一覧を開く (PR)
+                                <span>🌐</span> Agoda 公式サイトを開く (PR)
                             </a>
                             <button 
                                 onClick={() => setShowHotelModal(false)}
