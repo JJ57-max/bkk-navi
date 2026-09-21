@@ -77,7 +77,6 @@ function MainContent() {
         return () => clearTimeout(timer);
     }, [searchText]);
 
-    // ★「ホテル」カテゴリを追加
     const categories = ["すべて", "観光・ナイトスポット", "寺院", "ショッピング", "ホテル", "空港"];
 
     const showToast = (msg: string) => {
@@ -244,7 +243,6 @@ function MainContent() {
 
     const query = searchText ? searchText.toLowerCase().trim() : '';
 
-    // 「ホテル」カテゴリ選択時は観光地を非表示にする
     const isLandmarkAllowed = !selectedCategory || (selectedCategory !== 'ホテル' && selectedCategory !== '空港' && (selectedCategory === 'すべて' || selectedCategory));
     const filteredLandmarks = isLandmarkAllowed ? (bangkokLandmarks || []).filter(l => {
         const matchCategory = selectedCategory && selectedCategory !== 'すべて' && selectedCategory !== 'ホテル' ? (l.category || '').includes(selectedCategory) : true;
@@ -256,7 +254,6 @@ function MainContent() {
         (s.name || '').toLowerCase().includes(query) || (s.line || '').toLowerCase().includes(query)
     ) : [];
 
-    // ★「ホテル」カテゴリが選ばれている、または「すべて」・検索時にホテルを表示
     const isHotelAllowed = !selectedCategory || selectedCategory === 'すべて' || selectedCategory === 'ホテル' || query.length > 0;
     const filteredHotels = isHotelAllowed ? (agodaHotels || []).filter(h => {
         const name = h.hotelName || h.name || '';
@@ -547,7 +544,29 @@ function MainContent() {
             />
 
             {showDetailSheet && (
-                <DetailSheet title={destinationTitle} distanceKm={3.5} onClose={() => setShowDetailSheet(false)} onOpenThaiCard={() => setShowThaiCard(true)} />
+                <DetailSheet 
+                    title={destinationTitle} 
+                    distanceKm={(() => {
+                        const startLat = 13.7460;
+                        const startLng = 100.5347;
+                        const destLat = destinationCoordinate.lat;
+                        const destLng = destinationCoordinate.lng;
+
+                        const R = 6371;
+                        const dLat = (destLat - startLat) * (Math.PI / 180);
+                        const dLng = (destLng - startLng) * (Math.PI / 180);
+                        const a = 
+                            Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                            Math.cos(startLat * (Math.PI / 180)) * Math.cos(destLat * (Math.PI / 180)) *
+                            Math.sin(dLng / 2) * Math.sin(dLng / 2);
+                        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+                        const distance = R * c;
+
+                        return Math.round(distance * 10) / 10;
+                    })()} 
+                    onClose={() => setShowDetailSheet(false)} 
+                    onOpenThaiCard={() => setShowThaiCard(true)} 
+                />
             )}
 
             {showThaiCard && (
