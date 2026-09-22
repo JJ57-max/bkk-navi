@@ -13,6 +13,11 @@ export const metadata: Metadata = {
     statusBarStyle: "default",
     title: "BKKナビ",
   },
+  // ブックマークやスマホのホーム画面用アイコンの明示的な設定
+  icons: {
+    icon: "/icon.png",
+    apple: "/icon.png",
+  },
 };
 
 export const viewport: Viewport = {
@@ -33,15 +38,15 @@ export default function RootLayout({
       <body className="antialiased overflow-hidden">
         {children}
       </body>
-      {/* Googleアナリティクスの測定IDを設定[cite: 13] */}
+      {/* Googleアナリティクスの測定IDを設定 */}
       <GoogleAnalytics gaId="G-9KLS8XGZ7N" />
       
-      {/* Airalo（Impact）トラッキングスクリプト[cite: 13] */}
+      {/* Airalo（Impact）トラッキングスクリプト */}
       <Script id="impact-tracking" strategy="afterInteractive">
         {`(function(i,m,p,a,c,t){c.ire_o=p;c[p]=c[p]||function(){(c[p].a=c[p].a||[]).push(arguments)};t=a.createElement(m);var z=a.getElementsByTagName(m)[0];t.async=1;t.src=i;z.parentNode.insertBefore(t,z)})('https://utt.impactcdn.com/P-A7822724-1d97-417f-8714-920efb4f56a01.js','script','impactStat',document,window);impactStat('transformLinks');impactStat('trackImpression');`}
       </Script>
 
-      {/* バリューコマース LinkSwitchタグ[cite: 13] */}
+      {/* バリューコマース LinkSwitchタグ */}
       <Script id="valuecommerce-linkswitch" strategy="afterInteractive">
         {`var vc_pid = "89270986";`}
       </Script>
