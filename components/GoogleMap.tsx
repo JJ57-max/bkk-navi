@@ -195,7 +195,7 @@ function CustomPolylineRouteComponent({ destination, travelMode }: { destination
 }
 
 export default function GoogleMapComponent({ destinationCoordinate, destinationTitle, travelMode = 'transit', onSelectArbitraryPoint }: GoogleMapProps) {
-    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "AIzaSyCywzT_-wuzKVhv0PcgvxK06XFK5On3yh0";
+    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
     const [activeStation, setActiveStation] = useState<Station | null>(null);
     const [isDestinationOpen, setIsDestinationOpen] = useState<boolean>(false);
 
@@ -214,7 +214,7 @@ export default function GoogleMapComponent({ destinationCoordinate, destinationT
     };
 
     return (
-        <APIProvider apiKey={apiKey}>
+        <APIProvider apiKey={apiKey || ''}>
             <div className="w-full h-full relative">
                 <Map
                     defaultCenter={{ lat: destinationCoordinate.lat, lng: destinationCoordinate.lng }}
