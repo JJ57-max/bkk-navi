@@ -29,6 +29,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ja">
+      <head>
+        <meta name="impact-site-verification" value="c54d0af30-efb7-4f61-af19-faf5c9e12c57" />
+      </head>
       <body className="antialiased overflow-hidden">
         {children}
       </body>
