@@ -5,7 +5,7 @@ import React from 'react';
 import { bangkokExchangeShops, ExchangeShop } from '@/data/guides';
 
 interface GuideModalProps {
-    type: 'exchange' | 'squall' | 'manner' | null;
+    type: 'exchange' | 'squall' | 'prep' | 'manner' | null;
     onClose: () => void;
     onSelectExchangeShop: (shop: ExchangeShop) => void;
 }
@@ -24,10 +24,10 @@ export default function GuideModal({
                 <div className="flex justify-between items-center border-b pb-3 mb-4">
                     <div className="flex items-center gap-2">
                         <span className="text-2xl">
-                            {type === 'exchange' ? '💴' : type === 'squall' ? '🌧️' : '📖'}
+                            {type === 'exchange' ? '💴' : type === 'squall' ? '🌧️' : type === 'prep' ? '✈️' : '📖'}
                         </span>
                         <h2 className="font-bold text-gray-900 text-base">
-                            {type === 'exchange' ? '高レート両替所ガイド (PR)' : type === 'squall' ? 'スコール避難スポット' : 'タイ渡航の準備とマナー'}
+                            {type === 'exchange' ? '高レート両替所ガイド (PR)' : type === 'squall' ? 'スコール避難スポット' : type === 'prep' ? 'タイ渡航の準備 (TDAC)' : 'タイマナー ＆ チップ'}
                         </h2>
                     </div>
                     <button 
@@ -112,7 +112,6 @@ export default function GuideModal({
                                     </a>
                                 </div>
 
-                                {/* 両替・資金調達の文脈に絞ったGrab/配車アプリのPRカード */}
                                 <a 
                                     href="https://www.klook.com" 
                                     target="_blank" 
@@ -143,9 +142,8 @@ export default function GuideModal({
                         </div>
                     )}
 
-                    {type === 'manner' && (
+                    {type === 'prep' && (
                         <div className="flex flex-col gap-3 leading-relaxed">
-                            {/* TDAC（デジタル入国カード）の事前準備案内ボックス */}
                             <div className="bg-amber-50 border border-amber-200 p-3 rounded-2xl text-amber-900 text-[11px]">
                                 <span className="font-bold block mb-1">✈️ 入国前の事前準備：TDAC（入国カード）</span>
                                 タイ入国に際して、デジタル入国カード（TDAC）の事前登録が求められます。スムーズな渡航のために出発前にお済ませください。
@@ -160,7 +158,15 @@ export default function GuideModal({
                                     </a>
                                 </div>
                             </div>
+                            <div className="bg-gray-50 p-3 rounded-2xl border text-[11px] text-gray-600 space-y-1">
+                                <p><b>パスポート残存期間</b>: タイ入国時に6ヶ月以上残っている必要があります。</p>
+                                <p><b>航空券の準備</b>: 出国用の航空券（Eチケット等）の提示が求められる場合があります。</p>
+                            </div>
+                        </div>
+                    )}
 
+                    {type === 'manner' && (
+                        <div className="flex flex-col gap-3 leading-relaxed">
                             <div className="bg-orange-50 border border-orange-200 p-3 rounded-2xl text-orange-900 text-[11px]">
                                 <span className="font-bold block mb-1">📖 知っておくべきタイの文化とマナー</span>
                                 王室への敬意、寺院での服装、チップの習慣など、最低限のマナーを知っておくとトラブルを防げます。
@@ -171,7 +177,6 @@ export default function GuideModal({
                                 <p><b>3. タクシーの乗車</b>: 乗る前に必ず「メーター（By Meter?）」と確認するか、配車アプリ（Grab / Bolt）の利用が安心です。</p>
                             </div>
 
-                            {/* 配車アプリを安全に使うための自衛策ボックス */}
                             <div className="bg-blue-50 border border-blue-200 p-3 rounded-2xl text-blue-900 text-[11px] mt-1">
                                 <span className="font-bold block mb-1">🚗 Grab / Boltを安全に使いこなすコツ</span>
                                 <ul className="list-disc pl-4 space-y-1 text-blue-800">

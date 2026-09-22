@@ -25,7 +25,7 @@ function MainContent() {
     const [showTravelPlanDrawer, setShowTravelPlanDrawer] = useState<boolean>(false);
     const [showDetailSheet, setShowDetailSheet] = useState<boolean>(false);
     const [showThaiCard, setShowThaiCard] = useState<boolean>(false);
-    const [activeGuide, setActiveGuide] = useState<'exchange' | 'squall' | 'manner' | null>(null);
+    const [activeGuide, setActiveGuide] = useState<'exchange' | 'squall' | 'prep' | 'manner' | null>(null);
 
     const [agodaHotels, setAgodaHotels] = useState<any[]>([]);
     const [agodaLoading, setAgodaLoading] = useState<boolean>(true);
@@ -283,7 +283,6 @@ function MainContent() {
                                 const data = await res.json();
                                 let resolvedAddress = data.address || tempTitle;
                                 
-                                // 末尾や文言に含まれる「タイ」や「Thailand」を完全に除去する
                                 resolvedAddress = resolvedAddress
                                     .replace(/タイ王国|タイ$|タイ、|Thailand|, Thailand/g, '')
                                     .replace(/,\s*$/, '')
@@ -360,6 +359,7 @@ function MainContent() {
                     <div className="h-4 w-[1px] bg-gray-300 mx-0.5 shrink-0"></div>
                     <button onClick={() => setActiveGuide('exchange')} className="whitespace-nowrap px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold shadow-sm shrink-0">💴 両替</button>
                     <button onClick={() => setActiveGuide('squall')} className="whitespace-nowrap px-3 py-1.5 rounded-xl bg-cyan-50 text-cyan-700 border border-cyan-200 text-xs font-bold shadow-sm shrink-0">🌧️ 避難</button>
+                    <button onClick={() => setActiveGuide('prep')} className="whitespace-nowrap px-3 py-1.5 rounded-xl bg-amber-50 text-amber-800 border border-amber-200 text-xs font-bold shadow-sm shrink-0">✈️ 準備</button>
                     <button onClick={() => setActiveGuide('manner')} className="whitespace-nowrap px-3 py-1.5 rounded-xl bg-orange-50 text-orange-700 border border-orange-200 text-xs font-bold shadow-sm shrink-0">📖 マナー</button>
                 </div>
 
