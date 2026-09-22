@@ -85,18 +85,18 @@ export default function GuideModal({
                                 </div>
                             ))}
 
-                            {/* 両替所ガイド専用のお得なPRセクション（Wise ＆ eSIM ＆ 移動のGrab訴求） */}
+                            {/* 両替所ガイド専用のお得なPRセクション（Wise紹介リンク反映済み） */}
                             <div className="mt-2 pt-3 border-t border-gray-100 flex flex-col gap-2">
                                 <p className="text-[10px] text-gray-400 font-bold px-1">現金と合わせてお得な準備サービス (PR)</p>
                                 <div className="grid grid-cols-2 gap-2">
                                     <a 
-                                        href="https://wise.com/" 
+                                        href="https://wise.com/invite/dic/junichim52" 
                                         target="_blank" 
                                         rel="noopener noreferrer" 
                                         className="bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 p-2.5 rounded-2xl flex flex-col items-center gap-1 transition-all text-center"
                                     >
                                         <span className="text-base">💳</span>
-                                        <span className="text-[11px] font-bold text-emerald-900 leading-tight">Wiseデビットカード</span>
+                                        <span className="text-[11px] font-bold text-emerald-900 leading-tight">Wiseデビットカード (PR)</span>
                                         <span className="text-[9px] text-emerald-600 font-medium">手数料最安クラスで両替</span>
                                     </a>
 
