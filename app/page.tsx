@@ -10,6 +10,7 @@ import EmergencyModal from '@/components/EmergencyModal';
 import TravelPlanDrawer, { ItineraryItem } from '@/components/TravelPlanDrawer';
 import { bangkokLandmarks } from '@/data/landmarks';
 import { ExchangeShop } from '@/data/guides';
+import { RecommendedSpot } from '@/data/recommendations';
 import { allBangkokStations, Station } from '@/data/stations';
 
 function MainContent() {
@@ -26,8 +27,8 @@ function MainContent() {
     const [showTravelPlanDrawer, setShowTravelPlanDrawer] = useState<boolean>(false);
     const [showDetailSheet, setShowDetailSheet] = useState<boolean>(false);
     const [showThaiCard, setShowThaiCard] = useState<boolean>(false);
-    const [activeGuide, setActiveGuide] = useState<'exchange' | 'squall' | 'prep' | 'manner' | null>(null);
-    const [showEmergencyModal, setShowEmergencyModal] = useState<boolean>(false); // 緊急モーダルの開閉状態
+    const [activeGuide, setActiveGuide] = useState<'exchange' | 'squall' | 'prep' | 'manner' | 'recommend' | null>(null);
+    const [showEmergencyModal, setShowEmergencyModal] = useState<boolean>(false);
 
     const [agodaHotels, setAgodaHotels] = useState<any[]>([]);
     const [agodaLoading, setAgodaLoading] = useState<boolean>(true);
@@ -230,6 +231,17 @@ function MainContent() {
         showToast(`📍 「${shop.name}」を目的地に設定しました`);
     };
 
+    const handleSelectRecommendedSpot = (spot: RecommendedSpot) => {
+        const { lat, lng } = extractCoordinates(spot);
+        setDestinationCoordinate({ lat, lng });
+        setDestinationTitle(spot.name);
+        setSearchText('');
+        setShowDetailSheet(false);
+        setIsDemoMode(false);
+        updateUrlParams(spot.name, lat, lng);
+        showToast(`📍 「${spot.name}」を目的地に設定しました`);
+    };
+
     const handleSelectHotel = (hotel: any) => {
         const { lat, lng } = extractCoordinates(hotel);
         const name = hotel.hotelName || hotel.name || 'バンコクのホテル';
@@ -359,8 +371,8 @@ function MainContent() {
                         <span>📋</span> マイプラン ({itineraryItems.length})
                     </button>
                     <div className="h-4 w-[1px] bg-gray-300 mx-0.5 shrink-0"></div>
-                    {/* 緊急・医療サポートボタン */}
                     <button onClick={() => setShowEmergencyModal(true)} className="whitespace-nowrap px-3 py-1.5 rounded-xl bg-rose-50 text-rose-700 border border-rose-200 text-xs font-bold shadow-sm shrink-0">🚨 緊急</button>
+                    <button onClick={() => setActiveGuide('recommend')} className="whitespace-nowrap px-3 py-1.5 rounded-xl bg-blue-50 text-blue-700 border border-blue-200 text-xs font-bold shadow-sm shrink-0">✨ おすすめ</button>
                     <button onClick={() => setActiveGuide('exchange')} className="whitespace-nowrap px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold shadow-sm shrink-0">💴 両替</button>
                     <button onClick={() => setActiveGuide('squall')} className="whitespace-nowrap px-3 py-1.5 rounded-xl bg-cyan-50 text-cyan-700 border border-cyan-200 text-xs font-bold shadow-sm shrink-0">🌧️ 避難</button>
                     <button onClick={() => setActiveGuide('prep')} className="whitespace-nowrap px-3 py-1.5 rounded-xl bg-amber-50 text-amber-800 border border-amber-200 text-xs font-bold shadow-sm shrink-0">✈️ 準備</button>
@@ -569,7 +581,6 @@ function MainContent() {
                 }}
             />
 
-            {/* 緊急・医療サポートモーダル */}
             <EmergencyModal 
                 isOpen={showEmergencyModal}
                 onClose={() => setShowEmergencyModal(false)}
@@ -612,7 +623,12 @@ function MainContent() {
                 <ThaiDriverCardModal destinationTitle={destinationTitle} onClose={() => setShowThaiCard(false)} />
             )}
 
-            <GuideModal type={activeGuide} onClose={() => setActiveGuide(null)} onSelectExchangeShop={handleSelectExchangeShop} />
+            <GuideModal 
+                type={activeGuide} 
+                onClose={() => setActiveGuide(null)} 
+                onSelectExchangeShop={handleSelectExchangeShop}
+                onSelectRecommendedSpot={handleSelectRecommendedSpot}
+            />
         </main>
     );
 }

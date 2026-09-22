@@ -1,21 +1,30 @@
 // components/GuideModal.tsx
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { bangkokExchangeShops, ExchangeShop } from '@/data/guides';
+import { bangkokRecommendations, RecommendedSpot } from '@/data/recommendations';
 
 interface GuideModalProps {
-    type: 'exchange' | 'squall' | 'prep' | 'manner' | null;
+    type: 'exchange' | 'squall' | 'prep' | 'manner' | 'recommend' | null;
     onClose: () => void;
     onSelectExchangeShop: (shop: ExchangeShop) => void;
+    onSelectRecommendedSpot?: (spot: RecommendedSpot) => void;
 }
 
 export default function GuideModal({
     type,
     onClose,
     onSelectExchangeShop,
+    onSelectRecommendedSpot,
 }: GuideModalProps) {
+    const [recCategory, setRecCategory] = useState<'all' | 'massage' | 'cafe' | 'food'>('all');
+
     if (!type) return null;
+
+    const filteredSpots = recCategory === 'all' 
+        ? bangkokRecommendations 
+        : bangkokRecommendations.filter(s => s.category === recCategory);
 
     return (
         <div className="absolute inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 pointer-events-auto">
@@ -24,10 +33,10 @@ export default function GuideModal({
                 <div className="flex justify-between items-center border-b pb-3 mb-4">
                     <div className="flex items-center gap-2">
                         <span className="text-2xl">
-                            {type === 'exchange' ? '💴' : type === 'squall' ? '🌧️' : type === 'prep' ? '✈️' : '📖'}
+                            {type === 'exchange' ? '💴' : type === 'squall' ? '🌧️' : type === 'prep' ? '✈️' : type === 'recommend' ? '✨' : '📖'}
                         </span>
                         <h2 className="font-bold text-gray-900 text-base">
-                            {type === 'exchange' ? '高レート両替所ガイド (PR)' : type === 'squall' ? 'スコール避難スポット' : type === 'prep' ? 'タイ渡航の準備 (TDAC)' : 'タイマナー ＆ チップ'}
+                            {type === 'exchange' ? '高レート両替所ガイド (PR)' : type === 'squall' ? 'スコール避難スポット' : type === 'prep' ? 'タイ渡航の準備 (TDAC)' : type === 'recommend' ? '周辺おすすめリフレッシュ' : 'タイマナー ＆ チップ'}
                         </h2>
                     </div>
                     <button 
@@ -40,6 +49,67 @@ export default function GuideModal({
 
                 {/* コンテンツ本文 */}
                 <div className="flex-1 overflow-y-auto flex flex-col gap-3 pr-1 text-xs text-gray-700">
+                    {/* 4. 周辺おすすめスポット（新設タブ） */}
+                    {type === 'recommend' && (
+                        <div className="flex flex-col gap-3">
+                            <div className="bg-blue-50 border border-blue-200 p-3 rounded-2xl text-blue-900 text-[11px] leading-relaxed">
+                                <span className="font-bold block mb-1">✨ 街歩きの合間のリフレッシュ</span>
+                                バンコク市内の人気スパ・マッサージ店、おしゃれカフェ、活気あるナイトマーケットやローカルグルメを厳選しました。ワンタップで目的地に設定できます！
+                            </div>
+
+                            {/* カテゴリ切り替えボタン */}
+                            <div className="flex gap-1.5 bg-gray-100 p-1 rounded-2xl">
+                                {[
+                                    { key: 'all', label: 'すべて' },
+                                    { key: 'massage', label: '💆 マッサージ' },
+                                    { key: 'cafe', label: '☕ カフェ' },
+                                    { key: 'food', label: '🍜 グルメ' },
+                                ].map((cat) => (
+                                    <button
+                                        key={cat.key}
+                                        onClick={() => setRecCategory(cat.key as any)}
+                                        className={`flex-1 py-1.5 text-[10px] font-bold rounded-xl transition-all ${
+                                            recCategory === cat.key ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-600 hover:bg-white'
+                                        }`}
+                                    >
+                                        {cat.label}
+                                    </button>
+                                ))}
+                            </div>
+
+                            {/* スポット一覧 */}
+                            {filteredSpots.map((spot) => (
+                                <div key={spot.id} className="bg-gray-50 border border-gray-200 rounded-2xl p-3 flex flex-col gap-2">
+                                    <div className="flex justify-between items-start">
+                                        <div>
+                                            <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full text-white ${
+                                                spot.category === 'massage' ? 'bg-purple-600' :
+                                                spot.category === 'cafe' ? 'bg-amber-600' : 'bg-rose-600'
+                                            }`}>
+                                                {spot.category === 'massage' ? 'マッサージ・スパ' : spot.category === 'cafe' ? 'カフェ・スイーツ' : 'グルメ・屋台'}
+                                            </span>
+                                            <h3 className="font-bold text-gray-900 text-xs mt-1.5">{spot.name}</h3>
+                                            <span className="text-[10px] text-gray-500 font-medium">📍 エリア: {spot.area}</span>
+                                        </div>
+                                    </div>
+                                    <p className="text-[11px] text-gray-600 leading-relaxed">{spot.description}</p>
+                                    
+                                    <button
+                                        onClick={() => {
+                                            if (onSelectRecommendedSpot) {
+                                                onSelectRecommendedSpot(spot);
+                                            }
+                                            onClose();
+                                        }}
+                                        className="w-full bg-blue-600 text-white font-bold py-2 rounded-xl text-center hover:bg-blue-700 transition-colors shadow-sm flex items-center justify-center gap-1 mt-1"
+                                    >
+                                        <span>📍</span> マップで場所を見る（目的地に設定）
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+
                     {type === 'exchange' && (
                         <div className="flex flex-col gap-3">
                             <div className="bg-emerald-50 border border-emerald-200 p-3 rounded-2xl text-emerald-800 text-[11px] leading-relaxed">
