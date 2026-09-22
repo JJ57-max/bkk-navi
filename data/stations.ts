@@ -52,6 +52,9 @@ export const allBangkokStations: Station[] = [
     // 2. バンコク都市圏 (BTS スクンビット線)
     // ==========================================
     { name: "クーコット", line: "BTS", coordinate: { latitude: 13.9525, longitude: 100.6386 } },
+    { name: "タイ王国空軍博物館", line: "BTS", coordinate: { latitude: 13.9272, longitude: 100.6236 } },
+    { name: "インチャルーン市場", line: "BTS", coordinate: { latitude: 13.8964, longitude: 100.6056 } },
+    { name: "ワット・プラ・シー・マハータート", line: "BTS", coordinate: { latitude: 13.8733, longitude: 100.5950 } },
     { name: "モーチット", line: "BTS", coordinate: { latitude: 13.8016, longitude: 100.5539 } },
     { name: "サイアム", line: "BTS", coordinate: { latitude: 13.7460, longitude: 100.5347 } },
     { name: "アソーク", line: "BTS", coordinate: { latitude: 13.7377, longitude: 100.5604 } },
@@ -95,6 +98,8 @@ export const allBangkokStations: Station[] = [
     { name: "マッカサン", line: "ARL", coordinate: { latitude: 13.7497, longitude: 100.5650 } },
     { name: "ラムカムヘン", line: "ARL", coordinate: { latitude: 13.7431, longitude: 100.6033 } },
     { name: "フアマーク", line: "ARL", coordinate: { latitude: 13.7381, longitude: 100.6406 } },
+    { name: "バーン・タップチャーン", line: "ARL", coordinate: { latitude: 13.7303, longitude: 100.6822 } },
+    { name: "ラートクラバン", line: "ARL", coordinate: { latitude: 13.7236, longitude: 100.7208 } },
     { name: "スワンナプーム空港", line: "ARL", coordinate: { latitude: 13.6900, longitude: 100.7501 } },
 
     // ==========================================
