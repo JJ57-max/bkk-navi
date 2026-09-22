@@ -85,7 +85,7 @@ export default function GuideModal({
                                 </div>
                             ))}
 
-                            {/* 両替所ガイド専用のお得なPRセクション（Wise紹介リンク反映済み） */}
+                            {/* 両替所ガイド専用のお得なPRセクション（Wise・Airalo） */}
                             <div className="mt-2 pt-3 border-t border-gray-100 flex flex-col gap-2">
                                 <p className="text-[10px] text-gray-400 font-bold px-1">現金と合わせてお得な準備サービス (PR)</p>
                                 <div className="grid grid-cols-2 gap-2">
@@ -111,16 +111,6 @@ export default function GuideModal({
                                         <span className="text-[9px] text-indigo-600 font-medium">街歩き中のネット確保</span>
                                     </a>
                                 </div>
-
-                                <a 
-                                    href="https://www.klook.com" 
-                                    target="_blank" 
-                                    rel="noopener noreferrer"
-                                    className="block bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-2.5 rounded-2xl text-center shadow-md hover:opacity-95 transition-opacity mt-1"
-                                >
-                                    <p className="font-bold text-xs">🚗 両替後の移動に：Grab / Bolt 配車アプリ (PR)</p>
-                                    <p className="text-[9px] text-blue-100 mt-0.5">高レート両替所からの安全なキャッシュレス移動を事前準備</p>
-                                </a>
                             </div>
                         </div>
                     )}
