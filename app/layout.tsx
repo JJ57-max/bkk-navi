@@ -1,6 +1,6 @@
 // app/layout.tsx
 import type { Metadata, Viewport } from "next";
-import { GoogleAnalytics } from '@next/third-parties/google'; // インポートを追加
+import { GoogleAnalytics } from '@next/third-parties/google';
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -11,6 +11,10 @@ export const metadata: Metadata = {
     capable: true,
     statusBarStyle: "default",
     title: "BKKナビ",
+  },
+  // 下記の other にメタタグを追加します
+  other: {
+    "impact-site-verification": "c54d0af30-efb7-4f61-af19-faf5c9e12c57",
   },
 };
 
@@ -29,9 +33,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ja">
-      <head>
-        <meta name="impact-site-verification" value="c54d0af30-efb7-4f61-af19-faf5c9e12c57" />
-      </head>
       <body className="antialiased overflow-hidden">
         {children}
       </body>
