@@ -27,7 +27,7 @@ export default function GuideModal({
                             {type === 'exchange' ? '💴' : type === 'squall' ? '🌧️' : '📖'}
                         </span>
                         <h2 className="font-bold text-gray-900 text-base">
-                            {type === 'exchange' ? '高レート両替所ガイド (PR)' : type === 'squall' ? 'スコール避難スポット' : 'タイマナー ＆ チップ'}
+                            {type === 'exchange' ? '高レート両替所ガイド (PR)' : type === 'squall' ? 'スコール避難スポット' : 'タイ渡航の準備とマナー'}
                         </h2>
                     </div>
                     <button 
@@ -145,6 +145,22 @@ export default function GuideModal({
 
                     {type === 'manner' && (
                         <div className="flex flex-col gap-3 leading-relaxed">
+                            {/* TDAC（デジタル入国カード）の事前準備案内ボックス */}
+                            <div className="bg-amber-50 border border-amber-200 p-3 rounded-2xl text-amber-900 text-[11px]">
+                                <span className="font-bold block mb-1">✈️ 入国前の事前準備：TDAC（入国カード）</span>
+                                タイ入国に際して、デジタル入国カード（TDAC）の事前登録が求められます。スムーズな渡航のために出発前にお済ませください。
+                                <div className="mt-2">
+                                    <a 
+                                        href="https://tdac.immigration.go.th" 
+                                        target="_blank" 
+                                        rel="noopener noreferrer" 
+                                        className="inline-flex items-center gap-1 bg-amber-600 hover:bg-amber-700 text-white font-bold py-1.5 px-3 rounded-xl text-[10px] transition-colors"
+                                    >
+                                        🌐 TDAC公式申請サイトを開く
+                                    </a>
+                                </div>
+                            </div>
+
                             <div className="bg-orange-50 border border-orange-200 p-3 rounded-2xl text-orange-900 text-[11px]">
                                 <span className="font-bold block mb-1">📖 知っておくべきタイの文化とマナー</span>
                                 王室への敬意、寺院での服装、チップの習慣など、最低限のマナーを知っておくとトラブルを防げます。
@@ -155,7 +171,7 @@ export default function GuideModal({
                                 <p><b>3. タクシーの乗車</b>: 乗る前に必ず「メーター（By Meter?）」と確認するか、配車アプリ（Grab / Bolt）の利用が安心です。</p>
                             </div>
 
-                            {/* 配車アプリを安全に使うための自衛策ボックス（マナーガイド内には自衛策のみをすっきり掲載） */}
+                            {/* 配車アプリを安全に使うための自衛策ボックス */}
                             <div className="bg-blue-50 border border-blue-200 p-3 rounded-2xl text-blue-900 text-[11px] mt-1">
                                 <span className="font-bold block mb-1">🚗 Grab / Boltを安全に使いこなすコツ</span>
                                 <ul className="list-disc pl-4 space-y-1 text-blue-800">
