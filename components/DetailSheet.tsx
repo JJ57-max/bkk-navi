@@ -83,30 +83,23 @@ export default function DetailSheet({ title, distanceKm, onClose, onOpenThaiCard
                 <span>タイ語ドライバーカードを表示（ぼったくり防止）</span>
             </button>
 
+            {/* 現地で役立つおすすめサービス (PR) */}
             <div className="flex flex-col gap-1.5 pt-1">
-                <p className="text-[10px] text-gray-400 font-bold px-1">現地で役立つおすすめサービス (PR)</p>
-                <div className="grid grid-cols-3 gap-2">
-                    <button 
-                        onClick={() => setShowHotelModal(true)}
-                        className="bg-blue-50 hover:bg-blue-100 border border-blue-200 p-2.5 rounded-2xl flex flex-col items-center gap-1 transition-all text-center group"
-                    >
-                        <span className="text-base">🏨</span>
-                        <span className="text-[11px] font-bold text-blue-900 leading-tight">ホテルを検索</span>
-                        <span className="text-[9px] text-blue-600 font-medium">Agoda (PR)</span>
-                    </button>
-                    
-                    {/* 現地ツアー (Klook) アフィリエイトリンク */}
+                <p className="text-[10px] text-gray-400 font-bold px-1">現金と合わせてお得な準備サービス (PR)</p>
+                <div className="grid grid-cols-2 gap-2">
+                    {/* Wise デビットカード */}
                     <a 
-                        href="https://www.klook.com/" 
+                        href="https://wise.com/" 
                         target="_blank" 
                         rel="noopener noreferrer" 
-                        className="bg-amber-50 hover:bg-amber-100 border border-amber-200 p-2.5 rounded-2xl flex flex-col items-center gap-1 transition-all text-center group"
+                        className="bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 p-2.5 rounded-2xl flex flex-col items-center gap-1 transition-all text-center group"
                     >
-                        <span className="text-base">🎫</span>
-                        <span className="text-[11px] font-bold text-amber-900 leading-tight">現地ツアー</span>
-                        <span className="text-[9px] text-amber-600 font-medium">Klook (PR)</span>
+                        <span className="text-base">💳</span>
+                        <span className="text-[11px] font-bold text-emerald-900 leading-tight">Wiseデビットカード (PR)</span>
+                        <span className="text-[9px] text-emerald-600 font-medium">手数料最安クラスで両替</span>
                     </a>
 
+                    {/* タイ用eSIM (Airalo) */}
                     <a 
                         href="https://www.airalo.com/" 
                         target="_blank" 
@@ -114,8 +107,8 @@ export default function DetailSheet({ title, distanceKm, onClose, onOpenThaiCard
                         className="bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 p-2.5 rounded-2xl flex flex-col items-center gap-1 transition-all text-center group"
                     >
                         <span className="text-base">📶</span>
-                        <span className="text-[11px] font-bold text-indigo-900 leading-tight">タイ用eSIM</span>
-                        <span className="text-[9px] text-indigo-600 font-medium">Airalo (PR)</span>
+                        <span className="text-[11px] font-bold text-indigo-900 leading-tight">タイ用eSIM (Airalo)</span>
+                        <span className="text-[9px] text-indigo-600 font-medium">街歩き中のネット確保</span>
                     </a>
                 </div>
             </div>
