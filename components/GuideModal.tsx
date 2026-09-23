@@ -291,6 +291,76 @@ export default function GuideModal({
                                     窓口や券売機に並ばず、改札のタッチ部分に<b>タッチ決済対応のクレジットカード（Visa/Mastercard）やデビットカード（Wiseなど）を直接タッチ</b>するだけで、そのまま乗車・決済できます（※トークンを買う手間が省けて一番ラクです）。
                                 </p>
                             </div>
+
+                            {/* バスの乗り方ガイド */}
+                            <div className="bg-amber-50 border border-amber-200 p-3 rounded-2xl text-amber-900 text-[11px] mt-1">
+                                <span className="font-bold block mb-1">🚌 バンコク路線バスの乗り方・攻略法</span>
+                                ローカルな移動を楽しめますが、言葉の壁や難易度が高いため事前のコツが大切です！
+                            </div>
+
+                            <div className="bg-gray-50 border border-gray-200 p-3 rounded-2xl flex flex-col gap-2">
+                                <h3 className="font-bold text-gray-800 text-xs">1. 乗る（手を挙げてアピール）</h3>
+                                <p className="text-[11px] text-gray-600 leading-relaxed">
+                                    バス停で目的のバスが見えたら、<b>運転手に向けて手を水平に高く差し出し「乗ります」のサイン</b>を必ず出します（出さないと通過してしまいます）。
+                                </p>
+                            </div>
+
+                            <div className="bg-gray-50 border border-gray-200 p-3 rounded-2xl flex flex-col gap-2">
+                                <h3 className="font-bold text-gray-800 text-xs">2. 料金を払う（車掌さんへ現金）</h3>
+                                <p className="text-[11px] text-gray-600 leading-relaxed">
+                                    乗車後、集金バッグを持った車掌さんが席まで来るので、<b>現金（小銭か20バーツ札）</b>を渡して切符を受け取ります。
+                                </p>
+                            </div>
+
+                            <div className="bg-gray-50 border border-gray-200 p-3 rounded-2xl flex flex-col gap-2">
+                                <h3 className="font-bold text-gray-800 text-xs">💡 言葉が不安なときの対策＆アドバイス</h3>
+                                <p className="text-[11px] text-gray-600 leading-relaxed">
+                                    行き先がタイ文字で読めない・タイ語で伝えられない場合は、無理せず<b>「MTR」「BTS」「配車アプリ（Grab/Bolt）」</b>を使うのが圧倒的に安心です。どうしてもバスに乗る場合は、<b>行きたい場所のタイ語表記（Googleマップ画面など）を車掌さんに無言で見せる</b>と、降りるべき場所で教えてもらいやすくなります！
+                                </p>
+                            </div>
+
+                            {/* バイタク＆トゥクトゥクの攻略ガイド */}
+                            <div className="bg-purple-50 border border-purple-200 p-3 rounded-2xl text-purple-900 text-[11px] mt-1">
+                                <span className="font-bold block mb-1">🏍️ バイタク ＆ 🛺 トゥクトゥクの乗り方</span>
+                                バンコクならではのスリル満点な移動手段ですが、安全に乗るためのコツがあります！
+                            </div>
+
+                            <div className="bg-gray-50 border border-gray-200 p-3 rounded-2xl flex flex-col gap-2">
+                                <h3 className="font-bold text-gray-800 text-xs">1. バイタク（バイクタクシー / Win）</h3>
+                                <p className="text-[11px] text-gray-600 leading-relaxed">
+                                    <b>大渋滞をすり抜ける最強の時短ツール</b>です。街なかの専用ベストを着た運転手がたむろする「ウィン（Win）」と呼ばれる乗り場から乗ります。
+                                </p>
+                                <ul className="list-disc pl-4 space-y-1 text-[10px] text-gray-600">
+                                    <li><b>料金交渉が基本</b>: 乗る前に必ず行き先を告げて値段を確認（または配車アプリ「Grab / Bolt」経由で呼ぶとぼったくりが防げて安心）。</li>
+                                    <li><b>安全第一</b>: ヘルメットの着用が義務づけられています。スピードが出るため、しっかり捕まりましょう。</li>
+                                </ul>
+                            </div>
+
+                            <div className="bg-gray-50 border border-gray-200 p-3 rounded-2xl flex flex-col gap-2">
+                                <h3 className="font-bold text-gray-800 text-xs">2. トゥクトゥク（三輪タクシー）</h3>
+                                <p className="text-[11px] text-gray-600 leading-relaxed">
+                                    風を切りながら走る観光の目玉ですが、<b>実用的な移動というよりは「エンタメ・観光体験」</b>として割り切るのがおすすめです。
+                                </p>
+                                <ul className="list-disc pl-4 space-y-1 text-[10px] text-gray-600">
+                                    <li><b>乗車前の価格交渉が必須</b>: メーターがないため、乗る前に必ず「いくらか」を確認し、合意してから乗りましょう。</li>
+                                    <li><b>排気ガスに注意</b>: 窓がないため大気汚染や排気ガスをダイレクトに浴びます。夜間の短距離や雰囲気を楽しむ用として使うのがスマートです。</li>
+                                </ul>
+                            </div>
+
+                            {/* LINE MAN について */}
+                            <div className="bg-emerald-50 border border-emerald-200 p-3 rounded-2xl text-emerald-900 text-[11px] mt-1">
+                                <span className="font-bold block mb-1">🛵 タイの超定番ライフライン「LINE MAN」</span>
+                                フードデリバリーから移動まで何でも揃う国民的アプリです。
+                            </div>
+
+                            <div className="bg-gray-50 border border-gray-200 p-3 rounded-2xl flex flex-col gap-2">
+                                <p className="text-[11px] text-gray-600 leading-relaxed">
+                                    日本のLINEアプリとは別ですが、<b>タイに到着してから現地でアプリをダウンロードし、ご自身のLINEアカウントや電話番号でログインして利用可能</b>です。
+                                </p>
+                                <p className="text-[11px] text-gray-600 leading-relaxed">
+                                    ホテルの部屋から一歩も出ずにローカルフードを頼みたいときや、GrabやBoltのサブの配車手段として非常に強力な味方になります！
+                                </p>
+                            </div>
                         </div>
                     )}
 
@@ -300,7 +370,7 @@ export default function GuideModal({
                                 <span className="font-bold block mb-1">📖 知っておくべきタイの文化とマナー</span>
                                 王室への敬意、寺院での服装、チップの習慣など、最低限のマナーを知っておくとトラブルを防げます。
                             </div>
-                            <div className="bg-gray-50 p-3 rounded-2xl border space-y-2">
+                            <div className="bg-gray-50 border border-gray-200 p-3 rounded-2xl border space-y-2">
                                 <p><b>1. 寺院の服装</b>: 露出の多い服装（タンクトップや短パン）はNG。肩や膝が隠れる服装で行きましょう。</p>
                                 <p><b>2. チップの習慣</b>: 高級レストランやマッサージではお気持ち程度（20〜100バーツ紙幣）を渡すとスマートです。</p>
                                 <p><b>3. タクシーの乗車</b>: 乗る前に必ず「メーター（By Meter?）」と確認するか、配車アプリ（Grab / Bolt）の利用が安心です。</p>
