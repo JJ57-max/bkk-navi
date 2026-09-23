@@ -35,6 +35,8 @@ function MainContent() {
 
     const [googlePlaces, setGooglePlaces] = useState<any[]>([]);
     const [placesLoading, setPlacesLoading] = useState<boolean>(false);
+    
+    const [placesService, setPlacesService] = useState<google.maps.places.PlacesService | null>(null);
 
     useEffect(() => {
         const fetchAgodaHotelsDirectly = async () => {
@@ -55,31 +57,21 @@ function MainContent() {
         fetchAgodaHotelsDirectly();
     }, []);
 
-    // 【修正】window.google.maps が読み込まれたら直接 PlacesService を生成して検索を実行
     useEffect(() => {
-        if (!searchText || searchText.trim().length < 2) {
+        if (!searchText || searchText.trim().length < 2 || !placesService) {
             setGooglePlaces([]);
             return;
         }
 
         const timer = setTimeout(() => {
-            if (typeof window === 'undefined' || !window.google?.maps?.places) {
-                console.log('Google Maps Places API is not loaded yet');
-                setGooglePlaces([]);
-                return;
-            }
-
             setPlacesLoading(true);
-            const dummyDiv = document.createElement('div');
-            const service = new google.maps.places.PlacesService(dummyDiv);
-
             const request = {
                 query: searchText + ' バンコク',
                 location: new google.maps.LatLng(13.7460, 100.5347),
                 radius: 30000,
             };
 
-            service.textSearch(request, (results, status) => {
+            placesService.textSearch(request, (results, status) => {
                 setPlacesLoading(false);
                 console.log('Places API Status:', status);
                 console.log('Places API Results:', results);
@@ -103,7 +95,7 @@ function MainContent() {
         }, 400);
 
         return () => clearTimeout(timer);
-    }, [searchText]);
+    }, [searchText, placesService]);
 
     const categories = ["すべて", "観光・ナイトスポット", "寺院", "ショッピング", "ホテル", "空港"];
 
@@ -318,6 +310,7 @@ function MainContent() {
                     destinationCoordinate={destinationCoordinate}
                     destinationTitle={destinationTitle}
                     travelMode={selectedMode}
+                    onPlacesServiceReady={(service) => setPlacesService(service)}
                     onSelectArbitraryPoint={async (title, lat, lng) => {
                         const tempTitle = `指定エリア (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
                         setDestinationCoordinate({ lat, lng });
@@ -350,7 +343,7 @@ function MainContent() {
             </div>
 
             {toastMessage && (
-                <div className="absolute bottom-24 left-1/2 -translate-x-1/2 z-50 bg-gray-900/90 text-white text-xs font-bold px-4 py-2.5 rounded-2xl shadow-2xl backdrop-blur-md animate-bounce pointer-events-none border border-white/10 flex items-center gap-2">
+                <div className="absolute bottom-24 left-1/2 -translate-x-1/2 z-50 bg-gray-900/90 text-white text-xs font-bold px-4 py-2.5 rounded-2xl shadow-xl backdrop-blur-md animate-bounce pointer-events-none border border-white/10 flex items-center gap-2">
                     <span className="text-emerald-400">✨</span>
                     <span>{toastMessage}</span>
                 </div>

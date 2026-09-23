@@ -13,7 +13,6 @@ interface GoogleMapProps {
     onPlacesServiceReady?: (service: google.maps.places.PlacesService) => void;
 }
 
-// バンコク都市圏内の路線網（路線図）描画コンポーネント
 function TransitLinesComponent() {
     const map = useMap();
 
@@ -95,7 +94,6 @@ function TransitLinesComponent() {
     return null;
 }
 
-// 選択された移動手段に応じて動的にルートを描画
 function CustomPolylineRouteComponent({ destination, travelMode }: { destination: { lat: number; lng: number }, travelMode: string }) {
     const map = useMap();
     const [origin, setOrigin] = useState<{ lat: number; lng: number } | null>(null);
@@ -194,14 +192,11 @@ function CustomPolylineRouteComponent({ destination, travelMode }: { destination
     return null;
 }
 
-// マップインスタンスに紐づくPlacesService初期化コンポーネント
 function PlacesServiceInitializer({ onReady }: { onReady: (service: google.maps.places.PlacesService) => void }) {
     const map = useMap();
 
     useEffect(() => {
         if (!map) return;
-        // 公式 PlacesService のインスタンスを生成して親に渡す
-        const dummyDiv = document.createElement('div');
         const service = new google.maps.places.PlacesService(map);
         onReady(service);
     }, [map, onReady]);
