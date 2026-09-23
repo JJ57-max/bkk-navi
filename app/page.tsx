@@ -257,7 +257,8 @@ function MainContent() {
 
     const query = searchText ? searchText.toLowerCase().trim() : '';
 
-    const isLandmarkAllowed = !selectedCategory || (selectedCategory !== 'ホテル' && selectedCategory !== '空港' && (selectedCategory === 'すべて' || selectedCategory));
+    // 【修正】ホテルと空港以外のカテゴリ、または「すべて」選択時、あるいはフリー検索時はランドマーク対象に含める
+    const isLandmarkAllowed = !selectedCategory || (selectedCategory !== 'ホテル' && (selectedCategory === 'すべて' || selectedCategory));
     const filteredLandmarks = isLandmarkAllowed ? (bangkokLandmarks || []).filter(l => {
         const matchCategory = selectedCategory && selectedCategory !== 'すべて' && selectedCategory !== 'ホテル' ? (l.category || '').includes(selectedCategory) : true;
         const matchSearch = query ? (l.name || '').toLowerCase().includes(query) || (l.category || '').toLowerCase().includes(query) : true;
