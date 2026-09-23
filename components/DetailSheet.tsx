@@ -116,7 +116,7 @@ export default function DetailSheet({ title, distanceKm, onClose, onOpenThaiCard
                     >
                         <span className="text-base">📶</span>
                         <span className="text-[11px] font-bold text-indigo-900 leading-tight">タイ用eSIM</span>
-                        <span className="text-[9px] text-indigo-600 font-medium">Airalo (PR)[cite: 3]</span>
+                        <span className="text-[9px] text-indigo-600 font-medium">Airalo (PR)</span>
                     </a>
                 </div>
             </div>
