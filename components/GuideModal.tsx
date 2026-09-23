@@ -6,7 +6,7 @@ import { bangkokExchangeShops, ExchangeShop } from '@/data/guides';
 import { bangkokRecommendations, RecommendedSpot } from '@/data/recommendations';
 
 interface GuideModalProps {
-    type: 'exchange' | 'squall' | 'prep' | 'manner' | 'recommend' | 'transport' | null;
+    type: 'exchange' | 'squall' | 'prep' | 'manner' | 'recommend' | 'transport' | 'safety' | 'thai_phrases' | null;
     onClose: () => void;
     onSelectExchangeShop: (shop: ExchangeShop) => void;
     onSelectRecommendedSpot?: (spot: RecommendedSpot) => void;
@@ -31,7 +31,7 @@ export default function GuideModal({
     onClose,
     onSelectExchangeShop,
     onSelectRecommendedSpot,
-    currentLocation = { lat: 13.7462, longitude: 100.5350, lng: 100.5350 }, // デフォルト: サイアム付近
+    currentLocation = { lat: 13.7462, lng: 100.5350 },
 }: GuideModalProps) {
     const [recCategory, setRecCategory] = useState<'all' | 'massage' | 'cafe' | 'food'>('all');
 
@@ -47,7 +47,7 @@ export default function GuideModal({
                 spot.coordinate.latitude,
                 spot.coordinate.longitude
             );
-            return { ...spot, distance: Math.round(distance * 10) / 10 }; // 小数点第1位まで
+            return { ...spot, distance: Math.round(distance * 10) / 10 };
         })
         .sort((a, b) => a.distance - b.distance);
 
@@ -62,14 +62,18 @@ export default function GuideModal({
                              type === 'squall' ? '🌧️' : 
                              type === 'prep' ? '✈️' : 
                              type === 'recommend' ? '✨' : 
-                             type === 'transport' ? '🚆' : '📖'}
+                             type === 'transport' ? '🚆' : 
+                             type === 'safety' ? '🛡️' : 
+                             type === 'thai_phrases' ? '🗣️' : '📖'}
                         </span>
                         <h2 className="font-bold text-gray-900 text-base">
                             {type === 'exchange' ? '高レート両替所ガイド (PR)' : 
                              type === 'squall' ? 'スコール避難スポット' : 
                              type === 'prep' ? 'タイ渡航の準備 (TDAC)' : 
                              type === 'recommend' ? '周辺おすすめリフレッシュ' : 
-                             type === 'transport' ? 'タイ国鉄・鉄道移動ガイド' : 'タイマナー ＆ チップ'}
+                             type === 'transport' ? 'タイ国鉄・鉄道移動ガイド' : 
+                             type === 'safety' ? '安全・治安＆注意エリアガイド' : 
+                             type === 'thai_phrases' ? 'サバイバルタイ語会話' : 'タイマナー ＆ チップ'}
                         </h2>
                     </div>
                     <button 
@@ -82,7 +86,7 @@ export default function GuideModal({
 
                 {/* コンテンツ本文 */}
                 <div className="flex-1 overflow-y-auto flex flex-col gap-3 pr-1 text-xs text-gray-700">
-                    {/* 4. 周辺おすすめスポット（タブ） */}
+                    {/* 周辺おすすめスポット */}
                     {type === 'recommend' && (
                         <div className="flex flex-col gap-3">
                             <div className="bg-blue-50 border border-blue-200 p-3 rounded-2xl text-blue-900 text-[11px] leading-relaxed">
@@ -145,6 +149,96 @@ export default function GuideModal({
                                     </button>
                                 </div>
                             ))}
+                        </div>
+                    )}
+
+                    {/* 安全・治安＆注意エリアガイド */}
+                    {type === 'safety' && (
+                        <div className="flex flex-col gap-3 leading-relaxed">
+                            <div className="bg-rose-50 border border-rose-200 p-3 rounded-2xl text-rose-900 text-[11px]">
+                                <span className="font-bold block mb-1">🛡️ バンコクの治安と注意すべきエリア</span>
+                                バンコクは比較的治安の良い都市ですが、スリ、置き引き、悪質な声かけに対する心構えを持っておくと安心です。
+                            </div>
+
+                            <div className="bg-gray-50 p-3 rounded-2xl border space-y-2">
+                                <h4 className="font-bold text-gray-800 text-xs">⚠️ 「日本円を見せて」などの不審な声かけ</h4>
+                                <p className="text-[11px] text-gray-600">
+                                    観光地などで「記念に日本円を見せて」「お札のデザインを見せて」と声をかけられても、<b>絶対に財布や現金を取り出さない</b>でください。巧みなスリや詐欺の手口であるため、完全無視してその場を離れましょう。
+                                </p>
+                            </div>
+
+                            <div className="bg-gray-50 p-3 rounded-2xl border space-y-2">
+                                <h4 className="font-bold text-gray-800 text-xs">⚠️ 夜間の単独行動・注意が必要なエリア</h4>
+                                <p className="text-[11px] text-gray-600">
+                                    <b>ナナプラザやソイ・カウボーイ周辺の裏通り、深夜の暗い路地：</b>
+                                    華やかな歓楽街のメインから一本外れた路地や深夜の単独行動は、トラブルに巻き込まれやすくなります。夜間はなるべく大通りを歩き、配車アプリ（Grab/Bolt）を賢く利用しましょう。
+                                </p>
+                            </div>
+
+                            <div className="bg-gray-50 p-3 rounded-2xl border space-y-2">
+                                <h4 className="font-bold text-gray-800 text-xs">🛵 バイクによるひったくりへの警戒</h4>
+                                <p className="text-[11px] text-gray-600">
+                                    歩道でスマホを操作しながら歩くのは危険です。後ろから走ってきたバイクにひったくられる事例があるため、操作する際は建物側に寄って立ち止まりましょう。
+                                </p>
+                            </div>
+
+                            <div className="bg-amber-50 border border-amber-200 p-3 rounded-2xl text-amber-900 text-[11px]">
+                                <span className="font-bold block mb-1">📞 緊急時の連絡先（お守りメモ）</span>
+                                <ul className="list-disc pl-4 space-y-1 text-[10px] text-amber-900">
+                                    <li><b>観光警察（英語対応可）</b>: 1155</li>
+                                    <li><b>警察（一般）</b>: 191</li>
+                                    <li><b>在タイ日本国大使館</b>: +66-2-207-8500</li>
+                                </ul>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* サバイバルタイ語会話パネル */}
+                    {type === 'thai_phrases' && (
+                        <div className="flex flex-col gap-3 leading-relaxed">
+                            <div className="bg-indigo-50 border border-indigo-200 p-3 rounded-2xl text-indigo-900 text-[11px]">
+                                <span className="font-bold block mb-1">🗣️ 旅で役立つサバイバルタイ語</span>
+                                タイでは語尾に自分の性別をつけて敬意を表します。<br/>
+                                <b>男性：〜カップ / 女性：〜カー</b> をつけて話すと非常に好印象です！
+                            </div>
+
+                            <div className="bg-gray-50 p-3 rounded-2xl border space-y-2.5">
+                                <div className="border-b pb-2">
+                                    <div className="font-bold text-gray-900 text-xs">こんにちは / お疲れ様です</div>
+                                    <div className="text-blue-600 font-extrabold text-xs mt-0.5">サワディー・カップ / カー</div>
+                                    <div className="text-[10px] text-gray-500">基本の挨拶。お店に入る時や会った時にいつでも使えます。</div>
+                                </div>
+
+                                <div className="border-b pb-2">
+                                    <div className="font-bold text-gray-900 text-xs">ありがとうございます</div>
+                                    <div className="text-blue-600 font-extrabold text-xs mt-0.5">コプ・クン・カップ / カー</div>
+                                    <div className="text-[10px] text-gray-500">お礼を伝えるときは笑顔でこれ一言。</div>
+                                </div>
+
+                                <div className="border-b pb-2">
+                                    <div className="font-bold text-gray-900 text-xs">いくらですか？</div>
+                                    <div className="text-blue-600 font-extrabold text-xs mt-0.5">タorラーカ・タオライ・カップ / カー</div>
+                                    <div className="text-[10px] text-gray-500">屋台やマーケットでの買い物必須フレーズ。</div>
+                                </div>
+
+                                <div className="border-b pb-2">
+                                    <div className="font-bold text-gray-900 text-xs">辛くしないでください</div>
+                                    <div className="text-blue-600 font-extrabold text-xs mt-0.5">マイ・ペット・カップ / カー</div>
+                                    <div className="text-[10px] text-gray-500">タイ料理が苦手・辛さを控えたいときに命を救う言葉です。</div>
+                                </div>
+
+                                <div className="border-b pb-2">
+                                    <div className="font-bold text-gray-900 text-xs">美味しいです！</div>
+                                    <div className="text-blue-600 font-extrabold text-xs mt-0.5">アロイ・カップ / カー</div>
+                                    <div className="text-[10px] text-gray-500">料理を作ってくれた店員さんに伝えるととても喜ばれます。</div>
+                                </div>
+
+                                <div>
+                                    <div className="font-bold text-gray-900 text-xs">大丈夫です / 要りません (お断り)</div>
+                                    <div className="text-blue-600 font-extrabold text-xs mt-0.5">マイ・ペン・ライ / プリッ・ノー</div>
+                                    <div className="text-[10px] text-gray-500">キャッチや不要な勧誘をスマートに断る時の一言。</div>
+                                </div>
+                            </div>
                         </div>
                     )}
 

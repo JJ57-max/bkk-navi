@@ -27,8 +27,10 @@ function MainContent() {
     const [showTravelPlanDrawer, setShowTravelPlanDrawer] = useState<boolean>(false);
     const [showDetailSheet, setShowDetailSheet] = useState<boolean>(false);
     const [showThaiCard, setShowThaiCard] = useState<boolean>(false);
-    // 【修正】activeGuide の型に 'transport' を追加
-    const [activeGuide, setActiveGuide] = useState<'exchange' | 'squall' | 'prep' | 'manner' | 'recommend' | 'transport' | null>(null);
+    
+    // 【修正】activeGuide の型に 'transport', 'safety', 'thai_phrases' を追加
+    const [activeGuide, setActiveGuide] = useState<'exchange' | 'squall' | 'prep' | 'manner' | 'recommend' | 'transport' | 'safety' | 'thai_phrases' | null>(null);
+    
     const [showEmergencyModal, setShowEmergencyModal] = useState<boolean>(false);
 
     const [agodaHotels, setAgodaHotels] = useState<any[]>([]);
@@ -79,9 +81,6 @@ function MainContent() {
 
             service.textSearch(request, (results, status) => {
                 setPlacesLoading(false);
-                console.log('Places API Status:', status);
-                console.log('Places API Results:', results);
-
                 if (status === google.maps.places.PlacesServiceStatus.OK && results) {
                     const mapped = results.map((place) => ({
                         id: place.place_id || Math.random().toString(),
@@ -407,8 +406,10 @@ function MainContent() {
                     <button onClick={() => setActiveGuide('exchange')} className="whitespace-nowrap px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold shadow-sm shrink-0">💴 両替</button>
                     <button onClick={() => setActiveGuide('squall')} className="whitespace-nowrap px-3 py-1.5 rounded-xl bg-cyan-50 text-cyan-700 border border-cyan-200 text-xs font-bold shadow-sm shrink-0">🌧️ 避難</button>
                     <button onClick={() => setActiveGuide('prep')} className="whitespace-nowrap px-3 py-1.5 rounded-xl bg-amber-50 text-amber-800 border border-amber-200 text-xs font-bold shadow-sm shrink-0">✈️ 準備</button>
-                    {/* 【追加】「タイ国鉄・長距離移動ガイド」を開くボタン */}
                     <button onClick={() => setActiveGuide('transport')} className="whitespace-nowrap px-3 py-1.5 rounded-xl bg-indigo-50 text-indigo-700 border border-indigo-200 text-xs font-bold shadow-sm shrink-0">🚆 移動</button>
+                    {/* 【追加】安全ガイド・タイ語会話を開くボタン */}
+                    <button onClick={() => setActiveGuide('safety')} className="whitespace-nowrap px-3 py-1.5 rounded-xl bg-rose-50 text-rose-800 border border-rose-200 text-xs font-bold shadow-sm shrink-0">🛡️ 安全</button>
+                    <button onClick={() => setActiveGuide('thai_phrases')} className="whitespace-nowrap px-3 py-1.5 rounded-xl bg-purple-50 text-purple-700 border border-purple-200 text-xs font-bold shadow-sm shrink-0">🗣️ タイ語</button>
                     <button onClick={() => setActiveGuide('manner')} className="whitespace-nowrap px-3 py-1.5 rounded-xl bg-orange-50 text-orange-700 border border-orange-200 text-xs font-bold shadow-sm shrink-0">📖 マナー</button>
                 </div>
 
@@ -661,6 +662,7 @@ function MainContent() {
                 onClose={() => setActiveGuide(null)} 
                 onSelectExchangeShop={handleSelectExchangeShop}
                 onSelectRecommendedSpot={handleSelectRecommendedSpot}
+                currentLocation={destinationCoordinate} // 【追加】現在地座標を渡して距離ソートを連動
             />
         </main>
     );
