@@ -35,9 +35,6 @@ function MainContent() {
 
     const [googlePlaces, setGooglePlaces] = useState<any[]>([]);
     const [placesLoading, setPlacesLoading] = useState<boolean>(false);
-    
-    // Google Maps SDK の PlacesService インスタンスを保持
-    const [placesService, setPlacesService] = useState<google.maps.places.PlacesService | null>(null);
 
     useEffect(() => {
         const fetchAgodaHotelsDirectly = async () => {
@@ -58,23 +55,35 @@ function MainContent() {
         fetchAgodaHotelsDirectly();
     }, []);
 
-    // 【ベストプラクティス修正】公式 PlacesService を使ったクライアントサイド検索
+    // 【修正】window.google.maps が読み込まれたら直接 PlacesService を生成して検索を実行
     useEffect(() => {
-        if (!searchText || searchText.trim().length < 2 || !placesService) {
+        if (!searchText || searchText.trim().length < 2) {
             setGooglePlaces([]);
             return;
         }
 
         const timer = setTimeout(() => {
+            if (typeof window === 'undefined' || !window.google?.maps?.places) {
+                console.log('Google Maps Places API is not loaded yet');
+                setGooglePlaces([]);
+                return;
+            }
+
             setPlacesLoading(true);
+            const dummyDiv = document.createElement('div');
+            const service = new google.maps.places.PlacesService(dummyDiv);
+
             const request = {
                 query: searchText + ' バンコク',
                 location: new google.maps.LatLng(13.7460, 100.5347),
                 radius: 30000,
             };
 
-            placesService.textSearch(request, (results, status) => {
+            service.textSearch(request, (results, status) => {
                 setPlacesLoading(false);
+                console.log('Places API Status:', status);
+                console.log('Places API Results:', results);
+
                 if (status === google.maps.places.PlacesServiceStatus.OK && results) {
                     const mapped = results.map((place) => ({
                         id: place.place_id || Math.random().toString(),
@@ -94,7 +103,7 @@ function MainContent() {
         }, 400);
 
         return () => clearTimeout(timer);
-    }, [searchText, placesService]);
+    }, [searchText]);
 
     const categories = ["すべて", "観光・ナイトスポット", "寺院", "ショッピング", "ホテル", "空港"];
 
@@ -309,7 +318,6 @@ function MainContent() {
                     destinationCoordinate={destinationCoordinate}
                     destinationTitle={destinationTitle}
                     travelMode={selectedMode}
-                    onPlacesServiceReady={(service) => setPlacesService(service)}
                     onSelectArbitraryPoint={async (title, lat, lng) => {
                         const tempTitle = `指定エリア (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
                         setDestinationCoordinate({ lat, lng });
