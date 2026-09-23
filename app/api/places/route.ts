@@ -9,7 +9,13 @@ export async function GET(request: Request) {
     return NextResponse.json([]);
   }
 
-  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "AIzaSyCywzT_-wuzKVhv0PcgvxK06XFK5On3yh0";
+  // APIキーは必ず環境変数から取得する（直書きしない）
+  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || process.env.GOOGLE_MAPS_API_KEY;
+
+  if (!apiKey) {
+      console.error("Google Maps API Key is missing.");
+      return NextResponse.json([]);
+  }
   
   try {
     // バンコク中心部を基準に、フリーワードでGoogle Placesからスポットを検索
