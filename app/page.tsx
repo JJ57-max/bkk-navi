@@ -57,6 +57,7 @@ function MainContent() {
         fetchAgodaHotelsDirectly();
     }, []);
 
+    // 【修正】検索クエリをシンプルにし、PlacesServiceの動作ログを確実にコンソールに出力
     useEffect(() => {
         if (!searchText || searchText.trim().length < 2 || !placesService) {
             setGooglePlaces([]);
@@ -66,15 +67,14 @@ function MainContent() {
         const timer = setTimeout(() => {
             setPlacesLoading(true);
             const request = {
-                query: searchText + ' バンコク',
-                location: new google.maps.LatLng(13.7460, 100.5347),
-                radius: 30000,
+                query: `${searchText} バンコク`,
             };
 
             placesService.textSearch(request, (results, status) => {
                 setPlacesLoading(false);
-                console.log('Places API Status:', status);
-                console.log('Places API Results:', results);
+                console.log('--- Places API Search Executed ---');
+                console.log('Status:', status);
+                console.log('Results:', results);
 
                 if (status === google.maps.places.PlacesServiceStatus.OK && results) {
                     const mapped = results.map((place) => ({
@@ -620,7 +620,7 @@ function MainContent() {
             />
 
             {showDetailSheet && (
-                <DetailSheet 
+                /DetailSheet 
                     title={destinationTitle} 
                     distanceKm={(() => {
                         const startLat = 13.7460;
