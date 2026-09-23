@@ -10,21 +10,46 @@ interface GuideModalProps {
     onClose: () => void;
     onSelectExchangeShop: (shop: ExchangeShop) => void;
     onSelectRecommendedSpot?: (spot: RecommendedSpot) => void;
+    currentLocation?: { lat: number; lng: number };
 }
+
+// 2地点の緯度経度から直線距離(km)を算出するヘルパー関数
+const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+    const R = 6371; // 地球の半径 (km)
+    const dLat = (lat2 - lat1) * (Math.PI / 180);
+    const dLon = (lon2 - lon1) * (Math.PI / 180);
+    const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+};
 
 export default function GuideModal({
     type,
     onClose,
     onSelectExchangeShop,
     onSelectRecommendedSpot,
+    currentLocation = { lat: 13.7462, longitude: 100.5350, lng: 100.5350 }, // デフォルト: サイアム付近
 }: GuideModalProps) {
     const [recCategory, setRecCategory] = useState<'all' | 'massage' | 'cafe' | 'food'>('all');
 
     if (!type) return null;
 
-    const filteredSpots = recCategory === 'all' 
-        ? bangkokRecommendations 
-        : bangkokRecommendations.filter(s => s.category === recCategory);
+    // カテゴリでフィルタリングしつつ、現在地からの距離を計算して「近い順」にソート
+    const filteredSpots = bangkokRecommendations
+        .filter(s => recCategory === 'all' || s.category === recCategory)
+        .map(spot => {
+            const distance = calculateDistance(
+                currentLocation.lat,
+                currentLocation.lng,
+                spot.coordinate.latitude,
+                spot.coordinate.longitude
+            );
+            return { ...spot, distance: Math.round(distance * 10) / 10 }; // 小数点第1位まで
+        })
+        .sort((a, b) => a.distance - b.distance);
 
     return (
         <div className="absolute inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 pointer-events-auto">
@@ -61,8 +86,8 @@ export default function GuideModal({
                     {type === 'recommend' && (
                         <div className="flex flex-col gap-3">
                             <div className="bg-blue-50 border border-blue-200 p-3 rounded-2xl text-blue-900 text-[11px] leading-relaxed">
-                                <span className="font-bold block mb-1">✨ 街歩きの合間のリフレッシュ</span>
-                                バンコク市内の人気スパ・マッサージ店、おしゃれカフェ、活気あるナイトマーケットやローカルグルメを厳選しました。ワンタップで目的地に設定できます！
+                                <span className="font-bold block mb-1">✨ 現在地周辺のおすすめリフレッシュ</span>
+                                バンコク市内の人気スパ・カフェ・屋台などを、あなたの現在地から近い順に表示しています。ワンタップで目的地に設定できます！
                             </div>
 
                             {/* カテゴリ切り替えボタン */}
@@ -85,18 +110,23 @@ export default function GuideModal({
                                 ))}
                             </div>
 
-                            {/* スポット一覧 */}
+                            {/* スポット一覧（近い順に動的ソート） */}
                             {filteredSpots.map((spot) => (
                                 <div key={spot.id} className="bg-gray-50 border border-gray-200 rounded-2xl p-3 flex flex-col gap-2">
                                     <div className="flex justify-between items-start">
                                         <div>
-                                            <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full text-white ${
-                                                spot.category === 'massage' ? 'bg-purple-600' :
-                                                spot.category === 'cafe' ? 'bg-amber-600' : 'bg-rose-600'
-                                            }`}>
-                                                {spot.category === 'massage' ? 'マッサージ・スパ' : spot.category === 'cafe' ? 'カフェ・スイーツ' : 'グルメ・屋台'}
-                                            </span>
-                                            <h3 className="font-bold text-gray-900 text-xs mt-1.5">{spot.name}</h3>
+                                            <div className="flex items-center gap-1.5 mb-1">
+                                                <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full text-white ${
+                                                    spot.category === 'massage' ? 'bg-purple-600' :
+                                                    spot.category === 'cafe' ? 'bg-amber-600' : 'bg-rose-600'
+                                                }`}>
+                                                    {spot.category === 'massage' ? 'マッサージ・スパ' : spot.category === 'cafe' ? 'カフェ・スイーツ' : 'グルメ・屋台'}
+                                                </span>
+                                                <span className="text-[10px] bg-blue-100 text-blue-800 font-extrabold px-2 py-0.5 rounded-full">
+                                                    現在地から約 {spot.distance} km
+                                                </span>
+                                            </div>
+                                            <h3 className="font-bold text-gray-900 text-xs mt-1">{spot.name}</h3>
                                             <span className="text-[10px] text-gray-500 font-medium">📍 エリア: {spot.area}</span>
                                         </div>
                                     </div>

@@ -56,6 +56,30 @@ export const bangkokRecommendations: RecommendedSpot[] = [
         description: '緑豊かな一軒家で極上のアロママッサージやハーバルスパが体験できるラグジュアリー店。',
         coordinate: { latitude: 13.7320, longitude: 100.5810 }
     },
+    {
+        id: 'health_land_sathorn',
+        name: 'Health Land Sathorn (サトーン店)',
+        category: 'massage',
+        area: 'サトーン',
+        description: 'コロニアル様式の美しい建築が特徴の大型店舗。落ち着いた環境で本格的な施術が受けられます。',
+        coordinate: { latitude: 13.7230, longitude: 100.5315 }
+    },
+    {
+        id: 'rarin_jinda_gaysorn',
+        name: 'Rarin Jinda Wellness Spa (ゲソーンタワー)',
+        category: 'massage',
+        area: 'チットロム',
+        description: '高級デパート内にあり、最新のウェルネス技術と伝統的なタイマッサージを融合させた極上スパ。',
+        coordinate: { latitude: 13.7440, longitude: 100.5420 }
+    },
+    {
+        id: 'urban_retreat_asoke',
+        name: 'Urban Retreat Spa (アソーク店)',
+        category: 'massage',
+        area: 'アソーク',
+        description: '駅近でリーズナブルながら清潔感があり、アロママッサージやスクラブが評判の隠れ家的サロン。',
+        coordinate: { latitude: 13.7378, longitude: 100.5605 }
+    },
 
     // ==========================================
     // カフェ・スイーツ
@@ -92,9 +116,41 @@ export const bangkokRecommendations: RecommendedSpot[] = [
         description: '数々の世界バリスタチャンピオンシップで受賞した、バンコク最高峰の本格エスプレッソバー。',
         coordinate: { latitude: 13.7562, longitude: 100.5358 }
     },
+    {
+        id: 'hands_and_heart_ari',
+        name: 'Hands and Heart (アーリー)',
+        category: 'cafe',
+        area: 'アーリー',
+        description: '白を基調としたミニマルな空間で、こだわりのドリップコーヒーをしっとりと味わえる人気カフェ。',
+        coordinate: { latitude: 13.7820, longitude: 100.5440 }
+    },
+    {
+        id: 'intr_cnx_sathorn',
+        name: 'ORGANIC SUPPLY (サトーン・ソイ)',
+        category: 'cafe',
+        area: 'サトーン',
+        description: 'オーガニック食材にこだわったスムージーやヘルシーなスイーツが楽しめる、緑に囲まれたカフェ。',
+        coordinate: { latitude: 13.7190, longitude: 100.5370 }
+    },
+    {
+        id: 'li_life_cafe_ekamai',
+        name: 'Heals Cafe & Workspace (エカマイ)',
+        category: 'cafe',
+        area: 'エカマイ',
+        description: '静かな住宅街に佇む、木の温もりを感じる落ち着いた雰囲気の隠れ家カフェ。',
+        coordinate: { latitude: 13.7280, longitude: 100.5875 }
+    },
+    {
+        id: 'ici_bkk_sathorn',
+        name: 'ici.bkk (サトーン)',
+        category: 'cafe',
+        area: 'サトーン',
+        description: 'まるで芸術作品のような美しすぎるフレンチデザートと写真映えする空間が人気のパティスリーカフェ。',
+        coordinate: { latitude: 13.7198, longitude: 100.5285 }
+    },
 
     // ==========================================
-    // グルメ・ナイトマーケット
+    // グルメ・ナイトマーケット・ショッピング
     // ==========================================
     {
         id: 'jodd_fairs',
@@ -127,5 +183,37 @@ export const bangkokRecommendations: RecommendedSpot[] = [
         area: '旧市街・民主記念塔',
         description: '「タイで一番美味しいパッタイ」と称される老舗行列店。卵で包まれた元祖エビパッタイは必食。',
         coordinate: { latitude: 13.7538, longitude: 100.5042 }
+    },
+    {
+        id: 'iconsiam_sook_siam',
+        name: 'アイコンサイアム (SOOKSIAM)',
+        category: 'food',
+        area: 'トンブリー（チャオプラヤー川沿い）',
+        description: '超巨大ショッピングモール内の、屋内型水上マーケットを模した一大フードテーマパーク。',
+        coordinate: { latitude: 13.7265, longitude: 100.5108 }
+    },
+    {
+        id: 'wattana_panich_beef_noodle',
+        name: 'ワッタナー・パーニット (エカマイ)',
+        category: 'food',
+        area: 'エカマイ',
+        description: '何十年も継ぎ足されてきた伝説のスープが絶品の、牛肉ビーフヌードル（クッティオ・ヌア）の名店。',
+        coordinate: { latitude: 13.7262, longitude: 100.5850 }
+    },
+    {
+        id: 'asiatique_the_riverfront',
+        name: 'アジアティーク・ザ・リバーフロント',
+        category: 'food',
+        area: 'チャルンクルン通り',
+        description: 'チャオプラヤー川沿いの倉庫街を改装した、夜景と観覧車、グルメが楽しめるおしゃれなナイトスポット。',
+        coordinate: { latitude: 13.7025, longitude: 100.5038 }
+    },
+    {
+        id: 'baan_ice_thonglor',
+        name: 'Baan Ice (トンロー店)',
+        category: 'food',
+        area: 'トンロー',
+        description: '南タイの本格的でスパイシーな家庭料理を落ち着いたモダンな空間で味わえる大人気レストラン。',
+        coordinate: { latitude: 13.7350, longitude: 100.5795 }
     }
 ];
