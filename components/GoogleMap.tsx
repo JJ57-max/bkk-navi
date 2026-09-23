@@ -10,16 +10,16 @@ interface GoogleMapProps {
     destinationTitle: string;
     travelMode?: string;
     onSelectArbitraryPoint?: (title: string, lat: number, lng: number) => void;
+    onPlacesServiceReady?: (service: google.maps.places.PlacesService) => void;
 }
 
-// バンコク都市圏内の路線網（路線図）描画コンポーネント（遠隔地向けは除外）
+// バンコク都市圏内の路線網（路線図）描画コンポーネント
 function TransitLinesComponent() {
     const map = useMap();
 
     useEffect(() => {
         if (!map) return;
 
-        // バンコク都市圏の交通網のみに限定
         const linesData = [
             {
                 name: 'BTS Sukhumvit Line',
@@ -108,7 +108,7 @@ function CustomPolylineRouteComponent({ destination, travelMode }: { destination
                     const lat = position.coords.latitude;
                     const lng = position.coords.longitude;
                     if (lat > 20) {
-                        setOrigin({ lat: 13.7367, lng: 100.5606 }); // アソーク周辺
+                        setOrigin({ lat: 13.7367, lng: 100.5606 });
                     } else {
                         setOrigin({ lat, lng });
                     }
@@ -194,7 +194,22 @@ function CustomPolylineRouteComponent({ destination, travelMode }: { destination
     return null;
 }
 
-export default function GoogleMapComponent({ destinationCoordinate, destinationTitle, travelMode = 'transit', onSelectArbitraryPoint }: GoogleMapProps) {
+// マップインスタンスに紐づくPlacesService初期化コンポーネント
+function PlacesServiceInitializer({ onReady }: { onReady: (service: google.maps.places.PlacesService) => void }) {
+    const map = useMap();
+
+    useEffect(() => {
+        if (!map) return;
+        // 公式 PlacesService のインスタンスを生成して親に渡す
+        const dummyDiv = document.createElement('div');
+        const service = new google.maps.places.PlacesService(map);
+        onReady(service);
+    }, [map, onReady]);
+
+    return null;
+}
+
+export default function GoogleMapComponent({ destinationCoordinate, destinationTitle, travelMode = 'transit', onSelectArbitraryPoint, onPlacesServiceReady }: GoogleMapProps) {
     const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
     const [activeStation, setActiveStation] = useState<Station | null>(null);
     const [isDestinationOpen, setIsDestinationOpen] = useState<boolean>(false);
@@ -214,7 +229,7 @@ export default function GoogleMapComponent({ destinationCoordinate, destinationT
     };
 
     return (
-        <APIProvider apiKey={apiKey || ''}>
+        <APIProvider apiKey={apiKey || ''} libraries={['places']}>
             <div className="w-full h-full relative">
                 <Map
                     defaultCenter={{ lat: destinationCoordinate.lat, lng: destinationCoordinate.lng }}
@@ -227,13 +242,11 @@ export default function GoogleMapComponent({ destinationCoordinate, destinationT
                     scaleControl={true}
                     onClick={handleMapClick}
                 >
-                    {/* バンコク都市圏の路線網ラインのみ描画 */}
-                    <TransitLinesComponent />
+                    {onPlacesServiceReady && <PlacesServiceInitializer onReady={onPlacesServiceReady} />}
 
-                    {/* 目的地へのルート（白抜き縁取り付き・移動モード連動） */}
+                    <TransitLinesComponent />
                     <CustomPolylineRouteComponent destination={destinationCoordinate} travelMode={travelMode} />
 
-                    {/* 目的地ピン */}
                     <AdvancedMarker 
                         position={{ lat: destinationCoordinate.lat, lng: destinationCoordinate.lng }}
                         onClick={() => setIsDestinationOpen(!isDestinationOpen)}
@@ -250,10 +263,8 @@ export default function GoogleMapComponent({ destinationCoordinate, destinationT
                         </div>
                     </AdvancedMarker>
 
-                    {/* バンコク都市圏および主要な駅・船・バスピン（遠隔地の地方駅を除外） */}
                     {allBangkokStations
                         .filter(station => {
-                            // SRT（国鉄長距離）および地方都市の駅を完全に除外
                             if (station.line === 'SRT') return false;
                             const name = station.name;
                             const remoteKeywords = [

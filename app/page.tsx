@@ -35,6 +35,9 @@ function MainContent() {
 
     const [googlePlaces, setGooglePlaces] = useState<any[]>([]);
     const [placesLoading, setPlacesLoading] = useState<boolean>(false);
+    
+    // Google Maps SDK の PlacesService インスタンスを保持
+    const [placesService, setPlacesService] = useState<google.maps.places.PlacesService | null>(null);
 
     useEffect(() => {
         const fetchAgodaHotelsDirectly = async () => {
@@ -55,52 +58,43 @@ function MainContent() {
         fetchAgodaHotelsDirectly();
     }, []);
 
-    // 【修正】サーバー経由ではなく、ブラウザから直接Google Places API（Text Search）を呼び出す
+    // 【ベストプラクティス修正】公式 PlacesService を使ったクライアントサイド検索
     useEffect(() => {
-        if (!searchText || searchText.trim().length < 2) {
+        if (!searchText || searchText.trim().length < 2 || !placesService) {
             setGooglePlaces([]);
             return;
         }
 
-        const timer = setTimeout(async () => {
-            try {
-                setPlacesLoading(true);
-                const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
-                if (!apiKey) {
-                    setGooglePlaces([]);
-                    return;
-                }
+        const timer = setTimeout(() => {
+            setPlacesLoading(true);
+            const request = {
+                query: searchText + ' バンコク',
+                location: new google.maps.LatLng(13.7460, 100.5347),
+                radius: 30000,
+            };
 
-                const url = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(searchText + ' バンコク')}&location=13.7460,100.5347&radius=30000&language=ja&key=${apiKey}`;
-                
-                const res = await fetch(url);
-                const data = await res.json();
-
-                if (data.status === 'OK' && data.results) {
-                    const places = data.results.map((place: any) => ({
-                        id: place.place_id,
-                        name: place.name,
-                        address: place.formatted_address,
+            placesService.textSearch(request, (results, status) => {
+                setPlacesLoading(false);
+                if (status === google.maps.places.PlacesServiceStatus.OK && results) {
+                    const mapped = results.map((place) => ({
+                        id: place.place_id || Math.random().toString(),
+                        name: place.name || 'スポット',
+                        address: place.formatted_address || '',
                         category: 'Googleスポット',
-                        latitude: place.geometry.location.lat,
-                        longitude: place.geometry.location.lng,
+                        latitude: place.geometry?.location?.lat() ?? 13.7460,
+                        longitude: place.geometry?.location?.lng() ?? 100.5347,
                         rating: place.rating || 4.0,
                         userRatingsTotal: place.user_ratings_total || 0,
                     }));
-                    setGooglePlaces(places);
+                    setGooglePlaces(mapped);
                 } else {
                     setGooglePlaces([]);
                 }
-            } catch (err) {
-                console.error('Google Places Search Error:', err);
-                setGooglePlaces([]);
-            } finally {
-                setPlacesLoading(false);
-            }
+            });
         }, 400);
 
         return () => clearTimeout(timer);
-    }, [searchText]);
+    }, [searchText, placesService]);
 
     const categories = ["すべて", "観光・ナイトスポット", "寺院", "ショッピング", "ホテル", "空港"];
 
@@ -315,6 +309,7 @@ function MainContent() {
                     destinationCoordinate={destinationCoordinate}
                     destinationTitle={destinationTitle}
                     travelMode={selectedMode}
+                    onPlacesServiceReady={(service) => setPlacesService(service)}
                     onSelectArbitraryPoint={async (title, lat, lng) => {
                         const tempTitle = `指定エリア (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
                         setDestinationCoordinate({ lat, lng });
