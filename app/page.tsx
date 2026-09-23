@@ -55,6 +55,7 @@ function MainContent() {
         fetchAgodaHotelsDirectly();
     }, []);
 
+    // 【修正】サーバー経由ではなく、ブラウザから直接Google Places API（Text Search）を呼び出す
     useEffect(() => {
         if (!searchText || searchText.trim().length < 2) {
             setGooglePlaces([]);
@@ -64,10 +65,31 @@ function MainContent() {
         const timer = setTimeout(async () => {
             try {
                 setPlacesLoading(true);
-                const res = await fetch(`/api/places?query=${encodeURIComponent(searchText)}`);
-                if (res.ok) {
-                    const data = await res.json();
-                    setGooglePlaces(Array.isArray(data) ? data : []);
+                const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+                if (!apiKey) {
+                    setGooglePlaces([]);
+                    return;
+                }
+
+                const url = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(searchText + ' バンコク')}&location=13.7460,100.5347&radius=30000&language=ja&key=${apiKey}`;
+                
+                const res = await fetch(url);
+                const data = await res.json();
+
+                if (data.status === 'OK' && data.results) {
+                    const places = data.results.map((place: any) => ({
+                        id: place.place_id,
+                        name: place.name,
+                        address: place.formatted_address,
+                        category: 'Googleスポット',
+                        latitude: place.geometry.location.lat,
+                        longitude: place.geometry.location.lng,
+                        rating: place.rating || 4.0,
+                        userRatingsTotal: place.user_ratings_total || 0,
+                    }));
+                    setGooglePlaces(places);
+                } else {
+                    setGooglePlaces([]);
                 }
             } catch (err) {
                 console.error('Google Places Search Error:', err);
@@ -257,7 +279,6 @@ function MainContent() {
 
     const query = searchText ? searchText.toLowerCase().trim() : '';
 
-    // 【修正】自由検索中はカテゴリの縛りを緩め、キーワードが部分一致するものを柔軟に拾う
     const isLandmarkAllowed = query.length > 0 || !selectedCategory || (selectedCategory !== 'ホテル' && (selectedCategory === 'すべて' || selectedCategory));
     
     const filteredLandmarks = isLandmarkAllowed ? (bangkokLandmarks || []).filter(l => {
