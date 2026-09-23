@@ -6,7 +6,7 @@ import { bangkokExchangeShops, ExchangeShop } from '@/data/guides';
 import { bangkokRecommendations, RecommendedSpot } from '@/data/recommendations';
 
 interface GuideModalProps {
-    type: 'exchange' | 'squall' | 'prep' | 'manner' | 'recommend' | null;
+    type: 'exchange' | 'squall' | 'prep' | 'manner' | 'recommend' | 'transport' | null;
     onClose: () => void;
     onSelectExchangeShop: (shop: ExchangeShop) => void;
     onSelectRecommendedSpot?: (spot: RecommendedSpot) => void;
@@ -33,10 +33,18 @@ export default function GuideModal({
                 <div className="flex justify-between items-center border-b pb-3 mb-4">
                     <div className="flex items-center gap-2">
                         <span className="text-2xl">
-                            {type === 'exchange' ? '💴' : type === 'squall' ? '🌧️' : type === 'prep' ? '✈️' : type === 'recommend' ? '✨' : '📖'}
+                            {type === 'exchange' ? '💴' : 
+                             type === 'squall' ? '🌧️' : 
+                             type === 'prep' ? '✈️' : 
+                             type === 'recommend' ? '✨' : 
+                             type === 'transport' ? '🚆' : '📖'}
                         </span>
                         <h2 className="font-bold text-gray-900 text-base">
-                            {type === 'exchange' ? '高レート両替所ガイド (PR)' : type === 'squall' ? 'スコール避難スポット' : type === 'prep' ? 'タイ渡航の準備 (TDAC)' : type === 'recommend' ? '周辺おすすめリフレッシュ' : 'タイマナー ＆ チップ'}
+                            {type === 'exchange' ? '高レート両替所ガイド (PR)' : 
+                             type === 'squall' ? 'スコール避難スポット' : 
+                             type === 'prep' ? 'タイ渡航の準備 (TDAC)' : 
+                             type === 'recommend' ? '周辺おすすめリフレッシュ' : 
+                             type === 'transport' ? 'タイ国鉄・長距離移動ガイド' : 'タイマナー ＆ チップ'}
                         </h2>
                     </div>
                     <button 
@@ -49,7 +57,7 @@ export default function GuideModal({
 
                 {/* コンテンツ本文 */}
                 <div className="flex-1 overflow-y-auto flex flex-col gap-3 pr-1 text-xs text-gray-700">
-                    {/* 4. 周辺おすすめスポット（新設タブ） */}
+                    {/* 4. 周辺おすすめスポット（タブ） */}
                     {type === 'recommend' && (
                         <div className="flex flex-col gap-3">
                             <div className="bg-blue-50 border border-blue-200 p-3 rounded-2xl text-blue-900 text-[11px] leading-relaxed">
@@ -221,6 +229,43 @@ export default function GuideModal({
                             <div className="bg-gray-50 p-3 rounded-2xl border text-[11px] text-gray-600 space-y-1">
                                 <p><b>パスポート残存期間</b>: タイ入国時に6ヶ月以上残っている必要があります。</p>
                                 <p><b>航空券の準備</b>: 出国用の航空券（Eチケット等）の提示が求められる場合があります。</p>
+                            </div>
+                        </div>
+                    )}
+
+                    {type === 'transport' && (
+                        <div className="flex flex-col gap-3 leading-relaxed">
+                            <div className="bg-blue-50 border border-blue-200 p-3 rounded-2xl text-blue-900 text-[11px]">
+                                <span className="font-bold block mb-1">🚆 タイ国鉄（寝台列車など）切符予約の攻略法</span>
+                                タイ国内を走る長距離列車のチケット争奪戦を勝ち抜くための「二段構え」のコツをご紹介します。
+                            </div>
+
+                            <div className="bg-gray-50 border border-gray-200 p-3 rounded-2xl flex flex-col gap-2">
+                                <div>
+                                    <span className="bg-blue-600 text-white text-[9px] font-bold px-2 py-0.5 rounded-full">
+                                        本命（最安・最速）
+                                    </span>
+                                    <h3 className="font-bold text-gray-900 text-xs mt-1">タイ国鉄 公式サイト (D-Ticket / G-Ticket)</h3>
+                                </div>
+                                <p className="text-[11px] text-gray-600">
+                                    手数料が一番安く最速ですが、<b>とにかく動作が重くサーバーエラーが起きやすい</b>です。事前にアカウント作成・ログイン状態を確実に作っておきましょう。
+                                </p>
+                            </div>
+
+                            <div className="bg-gray-50 border border-gray-200 p-3 rounded-2xl flex flex-col gap-2">
+                                <div>
+                                    <span className="bg-indigo-600 text-white text-[9px] font-bold px-2 py-0.5 rounded-full">
+                                        保険・裏技（軽快・確実）
+                                    </span>
+                                    <h3 className="font-bold text-gray-900 text-xs mt-1">12Go / Baolau</h3>
+                                </div>
+                                <p className="text-[11px] text-gray-600">
+                                    タイ全土の主要路線をカバーしており、<b>画面が非常に軽くてスムーズ</b>です。公式が重くて繋がらない時の強力な逃げ道（バックアップ）として最適です（代行手数料が少し上乗せされます）。
+                                </p>
+                            </div>
+
+                            <div className="bg-amber-50 border border-amber-200 p-3 rounded-2xl text-amber-900 text-[11px] font-bold text-center">
+                                💡 発売開始の瞬間は公式を狙い、ダメなら即座に12Go等へ切り替えるのが鉄則！
                             </div>
                         </div>
                     )}
