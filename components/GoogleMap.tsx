@@ -10,7 +10,6 @@ interface GoogleMapProps {
     destinationTitle: string;
     travelMode?: string;
     onSelectArbitraryPoint?: (title: string, lat: number, lng: number) => void;
-    onPlacesServiceReady?: (service: google.maps.places.PlacesService) => void;
 }
 
 function TransitLinesComponent() {
@@ -192,19 +191,7 @@ function CustomPolylineRouteComponent({ destination, travelMode }: { destination
     return null;
 }
 
-function PlacesServiceInitializer({ onReady }: { onReady: (service: google.maps.places.PlacesService) => void }) {
-    const map = useMap();
-
-    useEffect(() => {
-        if (!map) return;
-        const service = new google.maps.places.PlacesService(map);
-        onReady(service);
-    }, [map, onReady]);
-
-    return null;
-}
-
-export default function GoogleMapComponent({ destinationCoordinate, destinationTitle, travelMode = 'transit', onSelectArbitraryPoint, onPlacesServiceReady }: GoogleMapProps) {
+export default function GoogleMapComponent({ destinationCoordinate, destinationTitle, travelMode = 'transit', onSelectArbitraryPoint }: GoogleMapProps) {
     const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
     const [activeStation, setActiveStation] = useState<Station | null>(null);
     const [isDestinationOpen, setIsDestinationOpen] = useState<boolean>(false);
@@ -237,8 +224,6 @@ export default function GoogleMapComponent({ destinationCoordinate, destinationT
                     scaleControl={true}
                     onClick={handleMapClick}
                 >
-                    {onPlacesServiceReady && <PlacesServiceInitializer onReady={onPlacesServiceReady} />}
-
                     <TransitLinesComponent />
                     <CustomPolylineRouteComponent destination={destinationCoordinate} travelMode={travelMode} />
 
