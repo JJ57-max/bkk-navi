@@ -6,7 +6,7 @@ import { bangkokExchangeShops, ExchangeShop } from '@/data/guides';
 import { bangkokRecommendations, RecommendedSpot } from '@/data/recommendations';
 
 interface GuideModalProps {
-    type: 'exchange' | 'squall' | 'prep' | 'manner' | 'recommend' | 'transport' | 'safety' | 'thai_phrases' | 'drive' | null;
+    type: 'exchange' | 'squall' | 'prep' | 'manner' | 'recommend' | 'transport' | 'safety' | 'thai_phrases' | 'drive' | 'stomach' | null;
     onClose: () => void;
     onSelectExchangeShop: (shop: ExchangeShop) => void;
     onSelectRecommendedSpot?: (spot: RecommendedSpot) => void;
@@ -65,7 +65,8 @@ export default function GuideModal({
                              type === 'transport' ? '🚆' : 
                              type === 'safety' ? '🛡️' : 
                              type === 'thai_phrases' ? '🗣️' : 
-                             type === 'drive' ? '🚗' : '📖'}
+                             type === 'drive' ? '🚗' : 
+                             type === 'stomach' ? '🧊' : '📖'}
                         </span>
                         <h2 className="font-bold text-gray-900 text-base">
                             {type === 'exchange' ? '高レート両替所ガイド (PR)' : 
@@ -75,7 +76,8 @@ export default function GuideModal({
                              type === 'transport' ? 'タイ国鉄・鉄道移動ガイド' : 
                              type === 'safety' ? '安全・治安＆注意エリアガイド' : 
                              type === 'thai_phrases' ? 'サバイバルタイ語会話' : 
-                             type === 'drive' ? 'タイの運転・レンタカーガイド' : 'タイマナー ＆ チップ'}
+                             type === 'drive' ? 'タイの運転・レンタカーガイド' : 
+                             type === 'stomach' ? '食あたり・水あたり対策ガイド' : 'タイマナー ＆ チップ'}
                         </h2>
                     </div>
                     <button 
@@ -151,6 +153,41 @@ export default function GuideModal({
                                     </button>
                                 </div>
                             ))}
+                        </div>
+                    )}
+
+                    {/* 食あたり・水あたり対策ガイドパネル */}
+                    {type === 'stomach' && (
+                        <div className="flex flex-col gap-3 leading-relaxed">
+                            <div className="bg-cyan-50 border border-cyan-200 p-3 rounded-2xl text-cyan-900 text-[11px]">
+                                <span className="font-bold block mb-1">🧊 食あたり・水あたりを防ぐ鉄則</span>
+                                タイ旅行で一番気をつけたいお腹のトラブルを防ぐためのポイントと、怪しい氷をスマートに断るタイ語をご紹介します。
+                            </div>
+
+                            <div className="bg-gray-50 p-3 rounded-2xl border space-y-2">
+                                <h4 className="font-bold text-gray-800 text-xs">💧 飲料水と「氷」の注意点</h4>
+                                <p className="text-[11px] text-gray-600">
+                                    水道水は絶対にそのまま飲まないようにしましょう（歯磨きの際もミネラルウォーターを使うのが理想です）。また、屋台やローカル店でドリンクの氷が心配なときは、以下のタイ語で氷抜きをリクエストできます。
+                                </p>
+                                <div className="bg-white p-2.5 rounded-xl border border-cyan-200 mt-1">
+                                    <div className="text-[10px] font-bold text-gray-500">「氷を入れないでください」</div>
+                                    <div className="text-cyan-800 font-extrabold text-xs mt-0.5">マイ・サイ・ナムケーン・カップ / カー</div>
+                                </div>
+                            </div>
+
+                            <div className="bg-gray-50 p-3 rounded-2xl border space-y-2">
+                                <h4 className="font-bold text-gray-800 text-xs">🍜 屋台や飲食店選びのコツ</h4>
+                                <p className="text-[11px] text-gray-600">
+                                    生肉、生魚、貝類などの生ものはなるべく避けましょう。作り置きされて衛生面が気になるお店は避け、<b>「目の前でアツアツに調理してくれる、回転率の良い人気店」</b>を選ぶのが安心です。
+                                </p>
+                            </div>
+
+                            <div className="bg-gray-50 p-3 rounded-2xl border space-y-2">
+                                <h4 className="font-bold text-gray-800 text-xs">💊 お腹を壊してしまったときの備え</h4>
+                                <p className="text-[11px] text-gray-600">
+                                    万が一お腹を壊した場合は、市内の大型薬局（BootsやWatsonsなど）に行けば、英語で相談して現地のお薬がすぐ手に入ります。日本から飲み慣れた正露丸や胃腸薬、処方薬を持参しておくと一番安心です。
+                                </p>
+                            </div>
                         </div>
                     )}
 
@@ -251,6 +288,12 @@ export default function GuideModal({
                                     <div className="font-bold text-gray-900 text-xs">こんにちは / お疲れ様です</div>
                                     <div className="text-blue-600 font-extrabold text-xs mt-0.5">サワディー・カップ / カー</div>
                                     <div className="text-[10px] text-gray-500">基本の挨拶。お店に入る時や会った時にいつでも使えます。</div>
+                                </div>
+
+                                <div className="border-b pb-2">
+                                    <div className="font-bold text-gray-900 text-xs">氷を入れないでください</div>
+                                    <div className="text-blue-600 font-extrabold text-xs mt-0.5">マイ・サイ・ナムケーン・カップ / カー</div>
+                                    <div className="text-[10px] text-gray-500">水あたりが心配なときの必須フレーズ。</div>
                                 </div>
 
                                 <div className="border-b pb-2">
