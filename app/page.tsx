@@ -257,27 +257,31 @@ function MainContent() {
 
     const query = searchText ? searchText.toLowerCase().trim() : '';
 
-    // 【修正】自由検索（query）がある場合、またはカテゴリ選択時（ホテル・空港以外）にランドマーク対象とする
+    // 【修正】自由検索中はカテゴリの縛りを緩め、キーワードが部分一致するものを柔軟に拾う
     const isLandmarkAllowed = query.length > 0 || !selectedCategory || (selectedCategory !== 'ホテル' && (selectedCategory === 'すべて' || selectedCategory));
     
     const filteredLandmarks = isLandmarkAllowed ? (bangkokLandmarks || []).filter(l => {
-        const matchCategory = selectedCategory && selectedCategory !== 'すべて' && selectedCategory !== 'ホテル' ? (l.category || '').includes(selectedCategory) : true;
-        const matchSearch = query ? (l.name || '').toLowerCase().includes(query) || (l.category || '').toLowerCase().includes(query) : true;
-        // 自由検索がある場合はカテゴリ絞り込みを無視してキーワードマッチを優先、カテゴリ選択時はカテゴリに一致するもの
-        if (query) return matchSearch;
-        return matchCategory;
+        const name = (l.name || '').toLowerCase();
+        const category = (l.category || '').toLowerCase();
+        if (query) {
+            return name.includes(query) || category.includes(query);
+        }
+        if (selectedCategory && selectedCategory !== 'すべて' && selectedCategory !== 'ホテル') {
+            return category.includes(selectedCategory);
+        }
+        return true;
     }) : [];
 
     const filteredStations = query ? (allBangkokStations || []).filter(s => 
         (s.name || '').toLowerCase().includes(query) || (s.line || '').toLowerCase().includes(query)
     ) : [];
 
-    // 【修正】自由検索がある場合、またはホテルカテゴリ選択時、または「すべて」のときにホテルを含める
     const isHotelAllowed = query.length > 0 || !selectedCategory || selectedCategory === 'すべて' || selectedCategory === 'ホテル';
     const filteredHotels = isHotelAllowed ? (agodaHotels || []).filter(h => {
-        const name = h.hotelName || h.name || '';
-        const matchSearch = query ? name.toLowerCase().includes(query) || 'ホテル'.includes(query) || 'hotel'.includes(query) : true;
-        if (query && !matchSearch) return false;
+        const name = (h.hotelName || h.name || '').toLowerCase();
+        if (query) {
+            return name.includes(query) || 'ホテル'.includes(query) || 'hotel'.includes(query);
+        }
         return true;
     }) : [];
 
