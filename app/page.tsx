@@ -28,8 +28,8 @@ function MainContent() {
     const [showDetailSheet, setShowDetailSheet] = useState<boolean>(false);
     const [showThaiCard, setShowThaiCard] = useState<boolean>(false);
     
-    // 【修正】activeGuide の型に 'stomach' を追加
-    const [activeGuide, setActiveGuide] = useState<'exchange' | 'squall' | 'prep' | 'manner' | 'recommend' | 'transport' | 'safety' | 'thai_phrases' | 'drive' | 'stomach' | null>(null);
+    // 【修正】activeGuide の型に 'shopping' を追加
+    const [activeGuide, setActiveGuide] = useState<'exchange' | 'squall' | 'prep' | 'manner' | 'recommend' | 'transport' | 'safety' | 'thai_phrases' | 'drive' | 'stomach' | 'shopping' | null>(null);
     
     const [showEmergencyModal, setShowEmergencyModal] = useState<boolean>(false);
 
@@ -410,8 +410,9 @@ function MainContent() {
                     <button onClick={() => setActiveGuide('safety')} className="whitespace-nowrap px-3 py-1.5 rounded-xl bg-rose-50 text-rose-800 border border-rose-200 text-xs font-bold shadow-sm shrink-0">🛡️ 安全</button>
                     <button onClick={() => setActiveGuide('thai_phrases')} className="whitespace-nowrap px-3 py-1.5 rounded-xl bg-purple-50 text-purple-700 border border-purple-200 text-xs font-bold shadow-sm shrink-0">🗣️ タイ語</button>
                     <button onClick={() => setActiveGuide('drive')} className="whitespace-nowrap px-3 py-1.5 rounded-xl bg-sky-50 text-sky-800 border border-sky-200 text-xs font-bold shadow-sm shrink-0">🚗 運転</button>
-                    {/* 【追加】食あたり・衛生対策ガイドを開くボタン */}
                     <button onClick={() => setActiveGuide('stomach')} className="whitespace-nowrap px-3 py-1.5 rounded-xl bg-teal-50 text-teal-800 border border-teal-200 text-xs font-bold shadow-sm shrink-0">🧊 衛生</button>
+                    {/* 【追加】お買い物・免税ガイドを開くボタン */}
+                    <button onClick={() => setActiveGuide('shopping')} className="whitespace-nowrap px-3 py-1.5 rounded-xl bg-pink-50 text-pink-700 border border-pink-200 text-xs font-bold shadow-sm shrink-0">🛍️ お買い物</button>
                     <button onClick={() => setActiveGuide('manner')} className="whitespace-nowrap px-3 py-1.5 rounded-xl bg-orange-50 text-orange-700 border border-orange-200 text-xs font-bold shadow-sm shrink-0">📖 マナー</button>
                 </div>
 

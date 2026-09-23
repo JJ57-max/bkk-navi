@@ -6,7 +6,7 @@ import { bangkokExchangeShops, ExchangeShop } from '@/data/guides';
 import { bangkokRecommendations, RecommendedSpot } from '@/data/recommendations';
 
 interface GuideModalProps {
-    type: 'exchange' | 'squall' | 'prep' | 'manner' | 'recommend' | 'transport' | 'safety' | 'thai_phrases' | 'drive' | 'stomach' | null;
+    type: 'exchange' | 'squall' | 'prep' | 'manner' | 'recommend' | 'transport' | 'safety' | 'thai_phrases' | 'drive' | 'stomach' | 'shopping' | null;
     onClose: () => void;
     onSelectExchangeShop: (shop: ExchangeShop) => void;
     onSelectRecommendedSpot?: (spot: RecommendedSpot) => void;
@@ -66,7 +66,8 @@ export default function GuideModal({
                              type === 'safety' ? '🛡️' : 
                              type === 'thai_phrases' ? '🗣️' : 
                              type === 'drive' ? '🚗' : 
-                             type === 'stomach' ? '🧊' : '📖'}
+                             type === 'stomach' ? '🧊' : 
+                             type === 'shopping' ? '🛍️' : '📖'}
                         </span>
                         <h2 className="font-bold text-gray-900 text-base">
                             {type === 'exchange' ? '高レート両替所ガイド (PR)' : 
@@ -77,7 +78,8 @@ export default function GuideModal({
                              type === 'safety' ? '安全・治安＆注意エリアガイド' : 
                              type === 'thai_phrases' ? 'サバイバルタイ語会話' : 
                              type === 'drive' ? 'タイの運転・レンタカーガイド' : 
-                             type === 'stomach' ? '食あたり・水あたり対策ガイド' : 'タイマナー ＆ チップ'}
+                             type === 'stomach' ? '食あたり・水あたり対策ガイド' : 
+                             type === 'shopping' ? 'お買い物 ＆ 免税手続き(VAT Refund)' : 'タイマナー ＆ チップ'}
                         </h2>
                     </div>
                     <button 
@@ -153,6 +155,39 @@ export default function GuideModal({
                                     </button>
                                 </div>
                             ))}
+                        </div>
+                    )}
+
+                    {/* お買い物 ＆ 免税手続きパネル */}
+                    {type === 'shopping' && (
+                        <div className="flex flex-col gap-3 leading-relaxed">
+                            <div className="bg-purple-50 border border-purple-200 p-3 rounded-2xl text-purple-900 text-[11px]">
+                                <span className="font-bold block mb-1">🛍️ バンコクお買い物 ＆ 免税のコツ</span>
+                                デパート等でのショッピングをお得に楽しむコツと、初めてでも安心な免税（VAT Refund）の手続き手順です。
+                            </div>
+
+                            <div className="bg-gray-50 p-3 rounded-2xl border space-y-2">
+                                <h4 className="font-bold text-gray-800 text-xs">💡 お買い物の便利ティップス</h4>
+                                <ul className="list-disc pl-4 space-y-1 text-[11px] text-gray-600">
+                                    <li><b>ツーリストカードの活用</b>: サイアム・パラゴンやセントラルなどの大型デパートのインフォメーションカウンターでパスポートを提示すると、外国人向けの割引カード（5〜10%OFFなど）がもらえます！</li>
+                                    <li><b>免税の条件</b>: 「VAT Refund for Tourists」の掲示があるお店で、<b>1日・1店舗あたり2,000バーツ以上</b>購入することが条件です。</li>
+                                </ul>
+                            </div>
+
+                            <div className="bg-gray-50 p-3 rounded-2xl border space-y-2">
+                                <h4 className="font-bold text-gray-800 text-xs">📄 免税書類（PP10）の作り方</h4>
+                                <p className="text-[11px] text-gray-600">
+                                    お買い物の当日、お店のレジや免税カウンターで<b>パスポートを提示</b>し、「VAT Refundお願いします」と伝えて、黄色い申請用紙（<b>PP10用紙</b>）を必ず発行してもらいましょう。
+                                </p>
+                            </div>
+
+                            <div className="bg-gray-50 p-3 rounded-2xl border space-y-2">
+                                <h4 className="font-bold text-gray-800 text-xs">✈️ 空港での免税手続きステップ</h4>
+                                <ol className="list-decimal pl-4 space-y-1 text-[11px] text-gray-600">
+                                    <li><b>チェックイン前</b>: 空港の税関（VAT Refund Office）に、パスポート・PP10用紙・購入品（高額品は現物確認あり）を持参してスタンプをもらう。</li>
+                                    <li><b>出国審査後</b>: 免税店エリア内の換金カウンター（VAT Refund Counter）でスタンプ済み用紙を出し、現金（バーツ）またはカードで還付金を受け取る。</li>
+                                </ol>
+                            </div>
                         </div>
                     )}
 
@@ -575,16 +610,29 @@ export default function GuideModal({
                         </div>
                     )}
 
+                    {/* 【拡充】マナー ＆ チップのガイドパネル */}
                     {type === 'manner' && (
                         <div className="flex flex-col gap-3 leading-relaxed">
                             <div className="bg-orange-50 border border-orange-200 p-3 rounded-2xl text-orange-900 text-[11px]">
                                 <span className="font-bold block mb-1">📖 知っておくべきタイの文化とマナー</span>
                                 王室への敬意、寺院での服装、チップの習慣など、最低限のマナーを知っておくとトラブルを防げます。
                             </div>
-                            <div className="bg-gray-50 border border-gray-200 p-3 rounded-2xl border space-y-2">
+                            <div className="bg-gray-50 p-3 rounded-2xl border space-y-2">
                                 <p><b>1. 寺院の服装</b>: 露出の多い服装（タンクトップや短パン）はNG。肩や膝が隠れる服装で行きましょう。</p>
-                                <p><b>2. チップの習慣</b>: 高級レストランやマッサージではお気持ち程度（20〜100バーツ紙幣）を渡すとスマートです。</p>
-                                <p><b>3. タクシーの乗車</b>: 乗る前に必ず「メーター（By Meter?）」と確認するか、配車アプリ（Grab / Bolt）の利用が安心です。</p>
+                                <p><b>2. タクシーの乗車</b>: 乗る前に必ず「メーター（By Meter?）」と確認するか、配車アプリ（Grab / Bolt）の利用が安心です。</p>
+                            </div>
+
+                            {/* 【追加】チップの仕組みと相場 */}
+                            <div className="bg-gray-50 p-3 rounded-2xl border space-y-2">
+                                <h4 className="font-bold text-gray-800 text-xs">💸 チップの習慣とスマートな相場</h4>
+                                <p className="text-[11px] text-gray-600">
+                                    タイは欧米のような強いチップ文化ではありませんが、サービスに満足した際には気持ちとして渡すとスマートです。
+                                </p>
+                                <ul className="list-disc pl-4 space-y-1 text-[11px] text-gray-600">
+                                    <li><b>サービス料込のお店</b>: メニューやレシートに「Service Charge 10%」と記載されている場合は、追加のチップは不要です。</li>
+                                    <li><b>マッサージ・スパ・高級店</b>: 丁寧な施術を受けた場合、大衆的なマッサージなら<b>20〜50バーツ</b>、高級スパなら<b>50〜100バーツ</b>程度を紙幣でお渡しすると喜ばれます。</li>
+                                    <li><b>グレーなお店・判断に迷う場合</b>: 仕組みが曖昧な場所や、サービスに満足できなかった場合は、無理に渡す必要は全くありません。</li>
+                                </ul>
                             </div>
 
                             <div className="bg-blue-50 border border-blue-200 p-3 rounded-2xl text-blue-900 text-[11px] mt-1">
