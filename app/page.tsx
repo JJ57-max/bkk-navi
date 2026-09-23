@@ -57,7 +57,6 @@ function MainContent() {
         fetchAgodaHotelsDirectly();
     }, []);
 
-    // 【修正】検索クエリをシンプルにし、PlacesServiceの動作ログを確実にコンソールに出力
     useEffect(() => {
         if (!searchText || searchText.trim().length < 2 || !placesService) {
             setGooglePlaces([]);
@@ -620,7 +619,7 @@ function MainContent() {
             />
 
             {showDetailSheet && (
-                /DetailSheet 
+                <DetailSheet 
                     title={destinationTitle} 
                     distanceKm={(() => {
                         const startLat = 13.7460;
