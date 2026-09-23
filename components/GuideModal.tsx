@@ -185,8 +185,8 @@ export default function GuideModal({
                                         className="bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 p-2.5 rounded-2xl flex flex-col items-center gap-1 transition-all text-center"
                                     >
                                         <span className="text-base">📶</span>
-                                        <span className="text-[11px] font-bold text-indigo-900 leading-tight">Airalo eSIM (PR)[cite: 3]</span>
-                                        <span className="text-[9px] text-indigo-600 font-medium">クーポン自動適用でお得[cite: 3]</span>
+                                        <span className="text-[11px] font-bold text-indigo-900 leading-tight">Airalo eSIM (PR)</span>
+                                        <span className="text-[9px] text-indigo-600 font-medium">クーポン自動適用でお得</span>
                                     </a>
                                 </div>
                             </div>

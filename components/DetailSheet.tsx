@@ -107,15 +107,16 @@ export default function DetailSheet({ title, distanceKm, onClose, onOpenThaiCard
                         <span className="text-[9px] text-amber-600 font-medium">Klook (PR)</span>
                     </a>
 
+                    {/* Airalo 専用トラッキングリンク (クーポン自動適用) */}
                     <a 
-                        href="https://www.airalo.com/" 
+                        href="https://airalo.pxf.io/BKKNAVI" 
                         target="_blank" 
                         rel="noopener noreferrer" 
                         className="bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 p-2.5 rounded-2xl flex flex-col items-center gap-1 transition-all text-center group"
                     >
                         <span className="text-base">📶</span>
                         <span className="text-[11px] font-bold text-indigo-900 leading-tight">タイ用eSIM</span>
-                        <span className="text-[9px] text-indigo-600 font-medium">Airalo (PR)</span>
+                        <span className="text-[9px] text-indigo-600 font-medium">Airalo (PR)[cite: 3]</span>
                     </a>
                 </div>
             </div>
