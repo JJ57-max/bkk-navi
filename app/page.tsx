@@ -28,8 +28,8 @@ function MainContent() {
     const [showDetailSheet, setShowDetailSheet] = useState<boolean>(false);
     const [showThaiCard, setShowThaiCard] = useState<boolean>(false);
     
-    // 【修正】activeGuide の型に 'transport', 'safety', 'thai_phrases' を追加
-    const [activeGuide, setActiveGuide] = useState<'exchange' | 'squall' | 'prep' | 'manner' | 'recommend' | 'transport' | 'safety' | 'thai_phrases' | null>(null);
+    // 【修正】activeGuide の型に 'drive' を追加
+    const [activeGuide, setActiveGuide] = useState<'exchange' | 'squall' | 'prep' | 'manner' | 'recommend' | 'transport' | 'safety' | 'thai_phrases' | 'drive' | null>(null);
     
     const [showEmergencyModal, setShowEmergencyModal] = useState<boolean>(false);
 
@@ -407,9 +407,10 @@ function MainContent() {
                     <button onClick={() => setActiveGuide('squall')} className="whitespace-nowrap px-3 py-1.5 rounded-xl bg-cyan-50 text-cyan-700 border border-cyan-200 text-xs font-bold shadow-sm shrink-0">🌧️ 避難</button>
                     <button onClick={() => setActiveGuide('prep')} className="whitespace-nowrap px-3 py-1.5 rounded-xl bg-amber-50 text-amber-800 border border-amber-200 text-xs font-bold shadow-sm shrink-0">✈️ 準備</button>
                     <button onClick={() => setActiveGuide('transport')} className="whitespace-nowrap px-3 py-1.5 rounded-xl bg-indigo-50 text-indigo-700 border border-indigo-200 text-xs font-bold shadow-sm shrink-0">🚆 移動</button>
-                    {/* 【追加】安全ガイド・タイ語会話を開くボタン */}
                     <button onClick={() => setActiveGuide('safety')} className="whitespace-nowrap px-3 py-1.5 rounded-xl bg-rose-50 text-rose-800 border border-rose-200 text-xs font-bold shadow-sm shrink-0">🛡️ 安全</button>
                     <button onClick={() => setActiveGuide('thai_phrases')} className="whitespace-nowrap px-3 py-1.5 rounded-xl bg-purple-50 text-purple-700 border border-purple-200 text-xs font-bold shadow-sm shrink-0">🗣️ タイ語</button>
+                    {/* 【追加】運転・レンタカーガイドを開くボタン */}
+                    <button onClick={() => setActiveGuide('drive')} className="whitespace-nowrap px-3 py-1.5 rounded-xl bg-sky-50 text-sky-800 border border-sky-200 text-xs font-bold shadow-sm shrink-0">🚗 運転</button>
                     <button onClick={() => setActiveGuide('manner')} className="whitespace-nowrap px-3 py-1.5 rounded-xl bg-orange-50 text-orange-700 border border-orange-200 text-xs font-bold shadow-sm shrink-0">📖 マナー</button>
                 </div>
 
@@ -662,7 +663,7 @@ function MainContent() {
                 onClose={() => setActiveGuide(null)} 
                 onSelectExchangeShop={handleSelectExchangeShop}
                 onSelectRecommendedSpot={handleSelectRecommendedSpot}
-                currentLocation={destinationCoordinate} // 【追加】現在地座標を渡して距離ソートを連動
+                currentLocation={destinationCoordinate}
             />
         </main>
     );

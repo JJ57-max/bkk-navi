@@ -6,7 +6,7 @@ import { bangkokExchangeShops, ExchangeShop } from '@/data/guides';
 import { bangkokRecommendations, RecommendedSpot } from '@/data/recommendations';
 
 interface GuideModalProps {
-    type: 'exchange' | 'squall' | 'prep' | 'manner' | 'recommend' | 'transport' | 'safety' | 'thai_phrases' | null;
+    type: 'exchange' | 'squall' | 'prep' | 'manner' | 'recommend' | 'transport' | 'safety' | 'thai_phrases' | 'drive' | null;
     onClose: () => void;
     onSelectExchangeShop: (shop: ExchangeShop) => void;
     onSelectRecommendedSpot?: (spot: RecommendedSpot) => void;
@@ -64,7 +64,8 @@ export default function GuideModal({
                              type === 'recommend' ? '✨' : 
                              type === 'transport' ? '🚆' : 
                              type === 'safety' ? '🛡️' : 
-                             type === 'thai_phrases' ? '🗣️' : '📖'}
+                             type === 'thai_phrases' ? '🗣️' : 
+                             type === 'drive' ? '🚗' : '📖'}
                         </span>
                         <h2 className="font-bold text-gray-900 text-base">
                             {type === 'exchange' ? '高レート両替所ガイド (PR)' : 
@@ -73,7 +74,8 @@ export default function GuideModal({
                              type === 'recommend' ? '周辺おすすめリフレッシュ' : 
                              type === 'transport' ? 'タイ国鉄・鉄道移動ガイド' : 
                              type === 'safety' ? '安全・治安＆注意エリアガイド' : 
-                             type === 'thai_phrases' ? 'サバイバルタイ語会話' : 'タイマナー ＆ チップ'}
+                             type === 'thai_phrases' ? 'サバイバルタイ語会話' : 
+                             type === 'drive' ? 'タイの運転・レンタカーガイド' : 'タイマナー ＆ チップ'}
                         </h2>
                     </div>
                     <button 
@@ -152,6 +154,48 @@ export default function GuideModal({
                         </div>
                     )}
 
+                    {/* タイの運転・レンタカーガイドパネル */}
+                    {type === 'drive' && (
+                        <div className="flex flex-col gap-3 leading-relaxed">
+                            <div className="bg-blue-50 border border-blue-200 p-3 rounded-2xl text-blue-900 text-[11px]">
+                                <span className="font-bold block mb-1">🚗 タイでの運転ルールと歩行者の心得</span>
+                                タイは日本と同じ「左側通行・右ハンドル」ですが、独特の交通ルールや運転マナーがあります。また、歩行者として道路を渡る際の大切なポイントを確認しておきましょう。
+                            </div>
+
+                            <div className="bg-gray-50 p-3 rounded-2xl border space-y-2">
+                                <h4 className="font-bold text-gray-800 text-xs">🚦 赤信号での右折ルール（T字路など）</h4>
+                                <p className="text-[11px] text-gray-600">
+                                    タイの一部の交差点やT字路では、周囲の安全をしっかり確認した上で、<b>赤信号のままでも右折（日本でいう左折の感覚）が許可されている</b>場合があります。ただし後続車からのプレッシャーに焦らず、安全第一で判断することが重要です。
+                                </p>
+                            </div>
+
+                            <div className="bg-gray-50 p-3 rounded-2xl border space-y-2">
+                                <h4 className="font-bold text-gray-800 text-xs">🛵 凄まじい量のバイクのすり抜け</h4>
+                                <p className="text-[11px] text-gray-600">
+                                    運転する際は、左右の車の間から大量のバイクがすり抜けてきます。日本以上に頻繁なミラー確認と、進路変更時の細心の注意が必要です。
+                                </p>
+                            </div>
+
+                            <div className="bg-amber-50 border border-amber-200 p-3 rounded-2xl text-amber-900 text-[11px]">
+                                <span className="font-bold block mb-1">🚶 歩行者は「歩道橋」を使うのが鉄則</span>
+                                大通りの車道は車がスピードを出しており、横断歩道があっても日本のように簡単に止まってくれません。無理に車道を渡るのは非常に危険なため、少し遠回りになっても<b>頑丈な屋根付きの「歩道橋」を積極的に利用する</b>のが安全かつ確実です。
+                            </div>
+
+                            <div className="bg-gray-50 border border-gray-200 p-3 rounded-2xl flex flex-col gap-2">
+                                <div className="flex justify-between items-start">
+                                    <div>
+                                        <span className="bg-indigo-600 text-white text-[9px] font-bold px-2 py-0.5 rounded-full">おすすめ予約 (PR)</span>
+                                        <h3 className="font-bold text-gray-900 text-xs mt-1">Rentalcars.com (レンタカーズ)</h3>
+                                    </div>
+                                </div>
+                                <p className="text-[11px] text-gray-600">郊外へのドライブや地方都市への旅行などでレンタカーを手配したいときは、世界中の大手レンタカー会社を比較・日本語で予約できるサービスが安心です。</p>
+                                <a href="https://www.rentalcars.com/" target="_blank" rel="noopener noreferrer" className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-1.5 px-3 rounded-xl text-center text-[10px] transition-colors">
+                                    🌐 Rentalcars.com 公式サイトを開く
+                                </a>
+                            </div>
+                        </div>
+                    )}
+
                     {/* 安全・治安＆注意エリアガイド */}
                     {type === 'safety' && (
                         <div className="flex flex-col gap-3 leading-relaxed">
@@ -217,7 +261,7 @@ export default function GuideModal({
 
                                 <div className="border-b pb-2">
                                     <div className="font-bold text-gray-900 text-xs">いくらですか？</div>
-                                    <div className="text-blue-600 font-extrabold text-xs mt-0.5">タorラーカ・タオライ・カップ / カー</div>
+                                    <div className="text-blue-600 font-extrabold text-xs mt-0.5">ラーカ・タオライ・カップ / カー</div>
                                     <div className="text-[10px] text-gray-500">屋台やマーケットでの買い物必須フレーズ。</div>
                                 </div>
 
