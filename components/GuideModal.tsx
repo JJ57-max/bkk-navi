@@ -44,7 +44,7 @@ export default function GuideModal({
                              type === 'squall' ? 'スコール避難スポット' : 
                              type === 'prep' ? 'タイ渡航の準備 (TDAC)' : 
                              type === 'recommend' ? '周辺おすすめリフレッシュ' : 
-                             type === 'transport' ? 'タイ国鉄・長距離移動ガイド' : 'タイマナー ＆ チップ'}
+                             type === 'transport' ? 'タイ国鉄・鉄道移動ガイド' : 'タイマナー ＆ チップ'}
                         </h2>
                     </div>
                     <button 
@@ -235,37 +235,61 @@ export default function GuideModal({
 
                     {type === 'transport' && (
                         <div className="flex flex-col gap-3 leading-relaxed">
+                            {/* タイ国鉄の予約・攻略 */}
                             <div className="bg-blue-50 border border-blue-200 p-3 rounded-2xl text-blue-900 text-[11px]">
                                 <span className="font-bold block mb-1">🚆 タイ国鉄（寝台列車など）切符予約の攻略法</span>
-                                タイ国内を走る長距離列車のチケット争奪戦を勝ち抜くための「二段構え」のコツをご紹介します。
+                                人気の寝台列車などのチケット争奪戦を勝ち抜くための「二段構え」のコツです。
                             </div>
 
                             <div className="bg-gray-50 border border-gray-200 p-3 rounded-2xl flex flex-col gap-2">
-                                <div>
-                                    <span className="bg-blue-600 text-white text-[9px] font-bold px-2 py-0.5 rounded-full">
-                                        本命（最安・最速）
-                                    </span>
-                                    <h3 className="font-bold text-gray-900 text-xs mt-1">タイ国鉄 公式サイト (D-Ticket / G-Ticket)</h3>
+                                <div className="flex justify-between items-start">
+                                    <div>
+                                        <span className="bg-blue-600 text-white text-[9px] font-bold px-2 py-0.5 rounded-full">本命（最安・最速）</span>
+                                        <h3 className="font-bold text-gray-900 text-xs mt-1">タイ国鉄 公式 (D-Ticket)</h3>
+                                    </div>
                                 </div>
-                                <p className="text-[11px] text-gray-600">
-                                    手数料が一番安く最速ですが、<b>とにかく動作が重くサーバーエラーが起きやすい</b>です。事前にアカウント作成・ログイン状態を確実に作っておきましょう。
+                                <p className="text-[11px] text-gray-600">手数料が一番安く最速ですが、<b>動作が重くエラーが起きやすい</b>です。事前のアカウント作成・ログインが必須。</p>
+                                <a href="https://www.dticket.railway.co.th/" target="_blank" rel="noopener noreferrer" className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-1.5 px-3 rounded-xl text-center text-[10px] transition-colors">
+                                    🌐 D-Ticket 公式サイトを開く
+                                </a>
+                            </div>
+
+                            <div className="bg-gray-50 border border-gray-200 p-3 rounded-2xl flex flex-col gap-2">
+                                <div className="flex justify-between items-start">
+                                    <div>
+                                        <span className="bg-indigo-600 text-white text-[9px] font-bold px-2 py-0.5 rounded-full">保険・裏技（軽快・確実）</span>
+                                        <h3 className="font-bold text-gray-900 text-xs mt-1">12Go / Baolau</h3>
+                                    </div>
+                                </div>
+                                <p className="text-[11px] text-gray-600">タイ全土をカバーし、<b>画面が非常に軽くてスムーズ</b>です。公式が繋がらない時のバックアップに最適（手数料あり）。</p>
+                                <div className="flex gap-2">
+                                    <a href="https://12go.asia/ja" target="_blank" rel="noopener noreferrer" className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-1.5 px-2 rounded-xl text-center text-[10px] transition-colors">
+                                        🌐 12Goを開く
+                                    </a>
+                                    <a href="https://www.baolau.com/" target="_blank" rel="noopener noreferrer" className="flex-1 bg-gray-700 hover:bg-gray-800 text-white font-bold py-1.5 px-2 rounded-xl text-center text-[10px] transition-colors">
+                                        🌐 Baolauを開く
+                                    </a>
+                                </div>
+                            </div>
+
+                            {/* BTS / MRT のチケットレス乗車ガイド */}
+                            <div className="bg-emerald-50 border border-emerald-200 p-3 rounded-2xl text-emerald-900 text-[11px] mt-1">
+                                <span className="font-bold block mb-1">💳 市内移動（BTS / MRT）のチケットレス術</span>
+                                券売機の長い行列に並ばず、日本のSUICA感覚でスムーズに乗車する方法です！
+                            </div>
+
+                            <div className="bg-gray-50 border border-gray-200 p-3 rounded-2xl flex flex-col gap-2">
+                                <h3 className="font-bold text-gray-900 text-xs">1. BTS（スカイトレイン）</h3>
+                                <p className="text-[11px] text-gray-600 leading-relaxed">
+                                    <b>ラビットカード (Rabbit Card)</b> という日本のSuicaのような交通系ICカードが窓口や駅構内で購入できます。または、<b>タッチ決済対応のクレジットカード（Visa/Mastercardのコンタクトレス）</b>が一部改札でそのまま使えます！
                                 </p>
                             </div>
 
                             <div className="bg-gray-50 border border-gray-200 p-3 rounded-2xl flex flex-col gap-2">
-                                <div>
-                                    <span className="bg-indigo-600 text-white text-[9px] font-bold px-2 py-0.5 rounded-full">
-                                        保険・裏技（軽快・確実）
-                                    </span>
-                                    <h3 className="font-bold text-gray-900 text-xs mt-1">12Go / Baolau</h3>
-                                </div>
-                                <p className="text-[11px] text-gray-600">
-                                    タイ全土の主要路線をカバーしており、<b>画面が非常に軽くてスムーズ</b>です。公式が重くて繋がらない時の強力な逃げ道（バックアップ）として最適です（代行手数料が少し上乗せされます）。
+                                <h3 className="font-bold text-gray-900 text-xs">2. MRT（地下鉄ブルーライン・パープルライン）</h3>
+                                <p className="text-[11px] text-gray-600 leading-relaxed">
+                                    窓口や券売機に並ばず、改札のタッチ部分に<b>タッチ決済対応のクレジットカード（Visa/Mastercard）やデビットカード（Wiseなど）を直接タッチ</b>するだけで、そのまま乗車・決済できます（※トークンを買う手間が省けて一番ラクです）。
                                 </p>
-                            </div>
-
-                            <div className="bg-amber-50 border border-amber-200 p-3 rounded-2xl text-amber-900 text-[11px] font-bold text-center">
-                                💡 発売開始の瞬間は公式を狙い、ダメなら即座に12Go等へ切り替えるのが鉄則！
                             </div>
                         </div>
                     )}
