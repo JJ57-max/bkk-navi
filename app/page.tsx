@@ -257,19 +257,23 @@ function MainContent() {
 
     const query = searchText ? searchText.toLowerCase().trim() : '';
 
-    // 【修正】ホテルと空港以外のカテゴリ、または「すべて」選択時、あるいはフリー検索時はランドマーク対象に含める
-    const isLandmarkAllowed = !selectedCategory || (selectedCategory !== 'ホテル' && (selectedCategory === 'すべて' || selectedCategory));
+    // 【修正】自由検索（query）がある場合、またはカテゴリ選択時（ホテル・空港以外）にランドマーク対象とする
+    const isLandmarkAllowed = query.length > 0 || !selectedCategory || (selectedCategory !== 'ホテル' && (selectedCategory === 'すべて' || selectedCategory));
+    
     const filteredLandmarks = isLandmarkAllowed ? (bangkokLandmarks || []).filter(l => {
         const matchCategory = selectedCategory && selectedCategory !== 'すべて' && selectedCategory !== 'ホテル' ? (l.category || '').includes(selectedCategory) : true;
         const matchSearch = query ? (l.name || '').toLowerCase().includes(query) || (l.category || '').toLowerCase().includes(query) : true;
-        return matchCategory && matchSearch;
+        // 自由検索がある場合はカテゴリ絞り込みを無視してキーワードマッチを優先、カテゴリ選択時はカテゴリに一致するもの
+        if (query) return matchSearch;
+        return matchCategory;
     }) : [];
 
     const filteredStations = query ? (allBangkokStations || []).filter(s => 
         (s.name || '').toLowerCase().includes(query) || (s.line || '').toLowerCase().includes(query)
     ) : [];
 
-    const isHotelAllowed = !selectedCategory || selectedCategory === 'すべて' || selectedCategory === 'ホテル' || query.length > 0;
+    // 【修正】自由検索がある場合、またはホテルカテゴリ選択時、または「すべて」のときにホテルを含める
+    const isHotelAllowed = query.length > 0 || !selectedCategory || selectedCategory === 'すべて' || selectedCategory === 'ホテル';
     const filteredHotels = isHotelAllowed ? (agodaHotels || []).filter(h => {
         const name = h.hotelName || h.name || '';
         const matchSearch = query ? name.toLowerCase().includes(query) || 'ホテル'.includes(query) || 'hotel'.includes(query) : true;
