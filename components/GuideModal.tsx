@@ -155,6 +155,26 @@ export default function GuideModal({
                                     </button>
                                 </div>
                             ))}
+
+                            {/* ガイド内KlookおすすめPR枠 */}
+                            <div className="mt-2 pt-3 border-t border-gray-100">
+                                <a 
+                                    href="https://ck.jp.ap.valuecommerce.com/servlet/referral?sid=3782281&pid=892711503&vc_url=https%3A%2F%2Fwww.klook.com%2Fja%2Fsearch%2Fresult%2F%3Fquery%3D%E3%83%90%E3%83%B3%E3%82%B3%E3%82%AF%26sort%3Dmost_relevant%26tab_key%3D2%26search_scope%3Dattraction%26spm%3DAttraction_Vertical.ChangeDestination.Destination%26clickId%3D29e47f2c7b" 
+                                    target="_blank" 
+                                    rel="noopener noreferrer" 
+                                    className="bg-amber-50 hover:bg-amber-100 border border-amber-200 p-3 rounded-2xl flex items-center justify-between gap-2 transition-all group"
+                                >
+                                    <img src="//ad.jp.ap.valuecommerce.com/servlet/gifbanner?sid=3782281&pid=892711503" height="1" width="0" border="0" alt="" className="hidden" />
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-xl">🎫</span>
+                                        <div>
+                                            <p className="text-xs font-bold text-amber-900">バンコクの観光施設・チケットを探す</p>
+                                            <p className="text-[9px] text-amber-600 font-medium">Klook (PR) - ムエタイ・サファリワールドなど</p>
+                                        </div>
+                                    </div>
+                                    <span className="text-amber-700 font-bold text-xs">→</span>
+                                </a>
+                            </div>
                         </div>
                     )}
 
@@ -617,13 +637,13 @@ export default function GuideModal({
                                 <span className="font-bold block mb-1">📖 知っておくべきタイの文化とマナー</span>
                                 王室への敬意、寺院での服装、チップの習慣など、最低限のマナーを知っておくとトラブルを防げます。
                             </div>
-                            <div className="bg-gray-50 p-3 rounded-2xl border space-y-2">
+                            <div className="bg-gray-50 border border-gray-200 p-3 rounded-2xl border space-y-2">
                                 <p><b>1. 寺院の服装</b>: 露出の多い服装（タンクトップや短パン）はNG。肩や膝が隠れる服装で行きましょう。</p>
                                 <p><b>2. タクシーの乗車</b>: 乗る前に必ず「メーター（By Meter?）」と確認するか、配車アプリ（Grab / Bolt）の利用が安心です。</p>
                             </div>
 
                             {/* 【追加】チップの仕組みと相場 */}
-                            <div className="bg-gray-50 p-3 rounded-2xl border space-y-2">
+                            <div className="bg-gray-50 border border-gray-200 p-3 rounded-2xl border space-y-2">
                                 <h4 className="font-bold text-gray-800 text-xs">💸 チップの習慣とスマートな相場</h4>
                                 <p className="text-[11px] text-gray-600">
                                     タイは欧米のような強いチップ文化ではありませんが、サービスに満足した際には気持ちとして渡すとスマートです。
