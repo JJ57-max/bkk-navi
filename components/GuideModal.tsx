@@ -156,15 +156,14 @@ export default function GuideModal({
                                 </div>
                             ))}
 
-                            {/* ガイド内KlookおすすめPR枠 */}
+                            {/* ガイド内KlookおすすめPR枠 (API経由) */}
                             <div className="mt-2 pt-3 border-t border-gray-100">
                                 <a 
-                                    href="https://ck.jp.ap.valuecommerce.com/servlet/referral?sid=3782281&pid=892711503&vc_url=https%3A%2F%2Fwww.klook.com%2Fja%2Fsearch%2Fresult%2F%3Fquery%3D%E3%83%90%E3%83%B3%E3%82%B3%E3%82%AF%26sort%3Dmost_relevant%26tab_key%3D2%26search_scope%3Dattraction%26spm%3DAttraction_Vertical.ChangeDestination.Destination%26clickId%3D29e47f2c7b" 
+                                    href="/api/klook" 
                                     target="_blank" 
                                     rel="noopener noreferrer" 
                                     className="bg-amber-50 hover:bg-amber-100 border border-amber-200 p-3 rounded-2xl flex items-center justify-between gap-2 transition-all group"
                                 >
-                                    <img src="//ad.jp.ap.valuecommerce.com/servlet/gifbanner?sid=3782281&pid=892711503" height="1" width="0" border="0" alt="" className="hidden" />
                                     <div className="flex items-center gap-2">
                                         <span className="text-xl">🎫</span>
                                         <div>

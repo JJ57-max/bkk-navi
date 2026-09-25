@@ -95,16 +95,13 @@ export default function DetailSheet({ title, distanceKm, onClose, onOpenThaiCard
                         <span className="text-[9px] text-blue-600 font-medium">Agoda (PR)</span>
                     </button>
                     
-                    {/* 現地ツアー (Klook) アフィリエイトリンク */}
+                    {/* 現地ツアー (Klook) アフィリエイトリンク (API経由) */}
                     <a 
-                        href="https://ck.jp.ap.valuecommerce.com/servlet/referral?sid=3782281&pid=892711503&vc_url=https%3A%2F%2Fwww.klook.com%2Fja%2Fsearch%2Fresult%2F%3Fquery%3D%E3%83%90%E3%83%B3%E3%82%B3%E3%82%AF%26sort%3Dmost_relevant%26tab_key%3D2%26search_scope%3Dattraction%26spm%3DAttraction_Vertical.ChangeDestination.Destination%26clickId%3D29e47f2c7b" 
+                        href="/api/klook" 
                         target="_blank" 
                         rel="noopener noreferrer" 
-                        className="bg-amber-50 hover:bg-amber-100 border border-amber-200 p-2.5 rounded-2xl flex flex-col items-center gap-1 transition-all text-center group relative"
+                        className="bg-amber-50 hover:bg-amber-100 border border-amber-200 p-2.5 rounded-2xl flex flex-col items-center gap-1 transition-all text-center group"
                     >
-                        {/* 計測用ピクセル画像（非表示） */}
-                        <img src="//ad.jp.ap.valuecommerce.com/servlet/gifbanner?sid=3782281&pid=892711503" height="1" width="0" border="0" alt="" className="hidden" />
-
                         <span className="text-base">🎫</span>
                         <span className="text-[11px] font-bold text-amber-900 leading-tight">現地ツアー</span>
                         <span className="text-[9px] text-amber-600 font-medium">Klook (PR)</span>
