@@ -156,22 +156,28 @@ export default function GuideModal({
                                 </div>
                             ))}
 
-                            {/* ガイド内KlookおすすめPR枠 (API経由) */}
-                            <div className="mt-2 pt-3 border-t border-gray-100">
+                            {/* ガイド内おすすめPR枠 (Klook & KKday) */}
+                            <div className="mt-2 pt-3 border-t border-gray-100 grid grid-cols-2 gap-2">
                                 <a 
                                     href="/api/klook" 
                                     target="_blank" 
                                     rel="noopener noreferrer" 
-                                    className="bg-amber-50 hover:bg-amber-100 border border-amber-200 p-3 rounded-2xl flex items-center justify-between gap-2 transition-all group"
+                                    className="bg-amber-50 hover:bg-amber-100 border border-amber-200 p-2.5 rounded-2xl flex flex-col items-center gap-1 transition-all text-center group"
                                 >
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-xl">🎫</span>
-                                        <div>
-                                            <p className="text-xs font-bold text-amber-900">バンコクの観光施設・チケットを探す</p>
-                                            <p className="text-[9px] text-amber-600 font-medium">Klook (PR) - ムエタイ・サファリワールドなど</p>
-                                        </div>
-                                    </div>
-                                    <span className="text-amber-700 font-bold text-xs">→</span>
+                                    <span className="text-base">🎫</span>
+                                    <span className="text-[11px] font-bold text-amber-900 leading-tight">現地ツアー検索</span>
+                                    <span className="text-[9px] text-amber-600 font-medium">Klook (PR)</span>
+                                </a>
+
+                                <a 
+                                    href="/api/kkday" 
+                                    target="_blank" 
+                                    rel="noopener noreferrer" 
+                                    className="bg-orange-50 hover:bg-orange-100 border border-orange-200 p-2.5 rounded-2xl flex flex-col items-center gap-1 transition-all text-center group"
+                                >
+                                    <span className="text-base">🎡</span>
+                                    <span className="text-[11px] font-bold text-orange-900 leading-tight">現地ツアー検索</span>
+                                    <span className="text-[9px] text-orange-600 font-medium">KKday (PR)</span>
                                 </a>
                             </div>
                         </div>

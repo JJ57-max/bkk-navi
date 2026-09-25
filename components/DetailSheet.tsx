@@ -85,17 +85,31 @@ export default function DetailSheet({ title, distanceKm, onClose, onOpenThaiCard
 
             <div className="flex flex-col gap-1.5 pt-1">
                 <p className="text-[10px] text-gray-400 font-bold px-1">現地で役立つおすすめサービス (PR)</p>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-2 gap-2">
                     <button 
                         onClick={() => setShowHotelModal(true)}
                         className="bg-blue-50 hover:bg-blue-100 border border-blue-200 p-2.5 rounded-2xl flex flex-col items-center gap-1 transition-all text-center group"
                     >
                         <span className="text-base">🏨</span>
-                        <span className="text-[11px] font-bold text-blue-900 leading-tight">ホテルを検索</span>
-                        <span className="text-[9px] text-blue-600 font-medium">Agoda (PR)</span>
+                        <span className="text-[11px] font-bold text-blue-900 leading-tight">ホテルを検索 (Agoda)</span>
+                        <span className="text-[9px] text-blue-600 font-medium">PR</span>
                     </button>
-                    
-                    {/* 現地ツアー (Klook) アフィリエイトリンク (API経由) */}
+
+                    {/* Airalo eSIM */}
+                    <a 
+                        href="https://airalo.pxf.io/BKKNAVI" 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 p-2.5 rounded-2xl flex flex-col items-center gap-1 transition-all text-center group"
+                    >
+                        <span className="text-base">📶</span>
+                        <span className="text-[11px] font-bold text-indigo-900 leading-tight">タイ用eSIM</span>
+                        <span className="text-[9px] text-indigo-600 font-medium">Airalo (PR)</span>
+                    </a>
+                </div>
+
+                {/* 現地ツアー (Klook & KKday) */}
+                <div className="grid grid-cols-2 gap-2 mt-1">
                     <a 
                         href="/api/klook" 
                         target="_blank" 
@@ -107,16 +121,15 @@ export default function DetailSheet({ title, distanceKm, onClose, onOpenThaiCard
                         <span className="text-[9px] text-amber-600 font-medium">Klook (PR)</span>
                     </a>
 
-                    {/* Airalo 専用トラッキングリンク (クーポン自動適用) */}
                     <a 
-                        href="https://airalo.pxf.io/BKKNAVI" 
+                        href="/api/kkday" 
                         target="_blank" 
                         rel="noopener noreferrer" 
-                        className="bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 p-2.5 rounded-2xl flex flex-col items-center gap-1 transition-all text-center group"
+                        className="bg-orange-50 hover:bg-orange-100 border border-orange-200 p-2.5 rounded-2xl flex flex-col items-center gap-1 transition-all text-center group"
                     >
-                        <span className="text-base">📶</span>
-                        <span className="text-[11px] font-bold text-indigo-900 leading-tight">タイ用eSIM</span>
-                        <span className="text-[9px] text-indigo-600 font-medium">Airalo (PR)</span>
+                        <span className="text-base">🎡</span>
+                        <span className="text-[11px] font-bold text-orange-900 leading-tight">現地ツアー</span>
+                        <span className="text-[9px] text-orange-600 font-medium">KKday (PR)</span>
                     </a>
                 </div>
             </div>
