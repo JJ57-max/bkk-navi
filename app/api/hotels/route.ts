@@ -1,21 +1,142 @@
-// app/api/hotels/route.ts
-import { NextResponse } from 'next/server';
 import { AGODA_CONFIG, getAgodaHeaders } from '@/lib/agoda';
+
+function formatDate(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+
+  return `${year}-${month}-${day}`;
+}
+
+function getBangkokToday(): Date {
+  const now = new Date();
+
+  const bangkokDateString = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Bangkok',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(now);
+
+  return new Date(`${bangkokDateString}T00:00:00`);
+}
+
+function isValidDateString(value: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return false;
+  }
+
+  const date = new Date(`${value}T00:00:00`);
+
+  return (
+    !Number.isNaN(date.getTime()) &&
+    formatDate(date) === value
+  );
+}
 
 export async function GET(request: Request) {
   try {
+    const { searchParams } = new URL(request.url);
+
+    /*
+     * 画面から日付が渡されていない場合は、
+     * バンコク時間の「明日 → 明後日」をデフォルトにする。
+     */
+    const bangkokToday = getBangkokToday();
+
+    const defaultCheckIn = new Date(bangkokToday);
+    defaultCheckIn.setDate(defaultCheckIn.getDate() + 1);
+
+    const defaultCheckOut = new Date(bangkokToday);
+    defaultCheckOut.setDate(defaultCheckOut.getDate() + 2);
+
+    const checkInDate =
+      searchParams.get('checkIn') || formatDate(defaultCheckIn);
+
+    const checkOutDate =
+      searchParams.get('checkOut') || formatDate(defaultCheckOut);
+
+    const adultsParam = searchParams.get('adults');
+    const roomsParam = searchParams.get('rooms');
+    const maxResultParam = searchParams.get('maxResult');
+
+    const numberOfAdults = adultsParam
+      ? Number(adultsParam)
+      : 2;
+
+    const numberOfRooms = roomsParam
+      ? Number(roomsParam)
+      : 1;
+
+    const maxResult = maxResultParam
+      ? Number(maxResultParam)
+      : 20;
+
+    /*
+     * 入力値チェック
+     */
+    if (
+      !isValidDateString(checkInDate) ||
+      !isValidDateString(checkOutDate)
+    ) {
+      return Response.json(
+        { error: 'Invalid check-in or check-out date' },
+        { status: 400 }
+      );
+    }
+
+    if (checkOutDate <= checkInDate) {
+      return Response.json(
+        { error: 'Check-out date must be after check-in date' },
+        { status: 400 }
+      );
+    }
+
+    if (
+      !Number.isInteger(numberOfAdults) ||
+      numberOfAdults < 1 ||
+      numberOfAdults > 20
+    ) {
+      return Response.json(
+        { error: 'Invalid number of adults' },
+        { status: 400 }
+      );
+    }
+
+    if (
+      !Number.isInteger(numberOfRooms) ||
+      numberOfRooms < 1 ||
+      numberOfRooms > 10
+    ) {
+      return Response.json(
+        { error: 'Invalid number of rooms' },
+        { status: 400 }
+      );
+    }
+
+    if (
+      !Number.isInteger(maxResult) ||
+      maxResult < 1 ||
+      maxResult > 50
+    ) {
+      return Response.json(
+        { error: 'Invalid maxResult' },
+        { status: 400 }
+      );
+    }
+
     const requestBody = {
       criteria: {
         cityId: 9391,
-        checkInDate: '2026-11-01',
-        checkOutDate: '2026-11-02',
-        numberOfAdults: 2,
-        numberOfRooms: 1,
+        checkInDate,
+        checkOutDate,
+        numberOfAdults,
+        numberOfRooms,
         additional: {
           currency: 'JPY',
           language: 'ja-jp',
-          maxResult: 20,
-        }
+          maxResult,
+        },
       },
     };
 
@@ -26,205 +147,78 @@ export async function GET(request: Request) {
     });
 
     const responseText = await response.text();
-    let hotelsArray = [];
 
-    if (response.ok) {
-      const data = JSON.parse(responseText);
-      if (!data.error && (data.results || data.hotelList || Array.isArray(data))) {
-        hotelsArray = data.results || data.hotelList || data;
-      }
+    /*
+     * HTTPレベルのエラー
+     */
+    if (!response.ok) {
+      console.error(
+        `Agoda API returned HTTP ${response.status}: ${responseText.slice(0, 500)}`
+      );
+
+      return Response.json([]);
     }
 
-    // バンコクの主要ホテルを網羅した充実のフォールバックデータ
-    if (!hotelsArray || hotelsArray.length === 0) {
-      hotelsArray = [
-        {
-          hotelId: 48641,
-          hotelName: 'サイアム ケンプンスキー ホテル バンコク',
-          imageURL: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=300&q=80',
-          dailyRate: 45000,
-          currency: 'JPY',
-          starRating: 5,
-          reviewScore: 9.2,
-          discountPercentage: 15,
-          latitude: 13.7447,
-          longitude: 100.5377,
-        },
-        {
-          hotelId: 528741,
-          hotelName: 'マリオット ホテル スクンビット',
-          imageURL: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=300&q=80',
-          dailyRate: 28000,
-          currency: 'JPY',
-          starRating: 4.5,
-          reviewScore: 8.9,
-          discountPercentage: 10,
-          latitude: 13.7196,
-          longitude: 100.5858,
-        },
-        {
-          hotelId: 386221,
-          hotelName: 'イーステイン グランデ ホテル サトーン',
-          imageURL: 'https://images.unsplash.com/photo-1591088398332-8a7791972843?auto=format&fit=crop&w=300&q=80',
-          dailyRate: 19000,
-          currency: 'JPY',
-          starRating: 4,
-          reviewScore: 9.0,
-          discountPercentage: 20,
-          latitude: 13.7191,
-          longitude: 100.5283,
-        },
-        {
-          hotelId: 6871,
-          hotelName: 'デュシタニ バンコク',
-          imageURL: 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=300&q=80',
-          dailyRate: 35000,
-          currency: 'JPY',
-          starRating: 5,
-          reviewScore: 9.1,
-          discountPercentage: 12,
-          latitude: 13.7275,
-          longitude: 100.5341,
-        },
-        {
-          hotelId: 10522,
-          hotelName: 'センター ポイント スクンビット 10',
-          imageURL: 'https://images.unsplash.com/photo-1561501900-3701fa6a0864?auto=format&fit=crop&w=300&q=80',
-          dailyRate: 14000,
-          currency: 'JPY',
-          starRating: 4,
-          reviewScore: 8.8,
-          discountPercentage: 10,
-          latitude: 13.7380,
-          longitude: 100.5560,
-        },
-        {
-          hotelId: 12455,
-          hotelName: 'マンダリン オリエンタル バンコク',
-          imageURL: 'https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=300&q=80',
-          dailyRate: 75000,
-          currency: 'JPY',
-          starRating: 5,
-          reviewScore: 9.6,
-          discountPercentage: 5,
-          latitude: 13.7225,
-          longitude: 100.5140,
-        },
-        {
-          hotelId: 23984,
-          hotelName: 'グランデ センター ポイント ターミナル21',
-          imageURL: 'https://images.unsplash.com/photo-1584132967334-10e028bd69f7?auto=format&fit=crop&w=300&q=80',
-          dailyRate: 22000,
-          currency: 'JPY',
-          starRating: 4.5,
-          reviewScore: 9.1,
-          discountPercentage: 15,
-          latitude: 13.7378,
-          longitude: 100.5604,
-        },
-        {
-          hotelId: 34912,
-          hotelName: 'ソラリア西鉄ホテルバンコク',
-          imageURL: 'https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=300&q=80',
-          dailyRate: 21000,
-          currency: 'JPY',
-          starRating: 4,
-          reviewScore: 9.3,
-          discountPercentage: 10,
-          latitude: 13.7363,
-          longitude: 100.5592,
-        },
-        {
-          hotelId: 49201,
-          hotelName: 'パークハイアット バンコク',
-          imageURL: 'https://images.unsplash.com/photo-1568495248636-6432b97bd949?auto=format&fit=crop&w=300&q=80',
-          dailyRate: 55000,
-          currency: 'JPY',
-          starRating: 5,
-          reviewScore: 9.4,
-          discountPercentage: 8,
-          latitude: 13.7441,
-          longitude: 100.5471,
-        },
-        {
-          hotelId: 61203,
-          hotelName: 'アマリ ウォーターゲート バンコク',
-          imageURL: 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&w=300&q=80',
-          dailyRate: 16000,
-          currency: 'JPY',
-          starRating: 4,
-          reviewScore: 8.6,
-          discountPercentage: 25,
-          latitude: 13.7505,
-          longitude: 100.5408,
-        },
-        {
-          hotelId: 78201,
-          hotelName: 'ノボテル バンコク スクンビット 4',
-          imageURL: 'https://images.unsplash.com/photo-1578683010236-d716f9a3f461?auto=format&fit=crop&w=300&q=80',
-          dailyRate: 12000,
-          currency: 'JPY',
-          starRating: 4,
-          reviewScore: 8.5,
-          discountPercentage: 20,
-          latitude: 13.7390,
-          longitude: 100.5532,
-        },
-        {
-          hotelId: 89310,
-          hotelName: 'チャトリウム ホテル リバーサイド バンコク',
-          imageURL: 'https://images.unsplash.com/photo-1507652313519-d4e9174996dd?auto=format&fit=crop&w=300&q=80',
-          dailyRate: 18000,
-          currency: 'JPY',
-          starRating: 4.5,
-          reviewScore: 9.0,
-          discountPercentage: 18,
-          latitude: 13.7093,
-          longitude: 100.5098,
-        },
-        {
-          hotelId: 91234,
-          hotelName: 'ホリデイ イン バンコク',
-          imageURL: 'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?auto=format&fit=crop&w=300&q=80',
-          dailyRate: 15000,
-          currency: 'JPY',
-          starRating: 4,
-          reviewScore: 8.7,
-          discountPercentage: 15,
-          latitude: 13.7456,
-          longitude: 100.5417,
-        },
-        {
-          hotelId: 10492,
-          hotelName: 'コンラッド バンコク',
-          imageURL: 'https://images.unsplash.com/photo-1535827841776-24afc1e255ac?auto=format&fit=crop&w=300&q=80',
-          dailyRate: 32000,
-          currency: 'JPY',
-          starRating: 5,
-          reviewScore: 9.1,
-          discountPercentage: 12,
-          latitude: 13.7422,
-          longitude: 100.5489,
-        },
-        {
-          hotelId: 11583,
-          hotelName: 'ヒルトン スクンビット バンコク',
-          imageURL: 'https://images.unsplash.com/photo-1596394516093-501ba68a0ba6?auto=format&fit=crop&w=300&q=80',
-          dailyRate: 26000,
-          currency: 'JPY',
-          starRating: 4.5,
-          reviewScore: 8.9,
-          discountPercentage: 10,
-          latitude: 13.7323,
-          longitude: 100.5701,
-        }
-      ];
+    /*
+     * JSONパース
+     */
+    let data: unknown;
+
+    try {
+      data = JSON.parse(responseText);
+    } catch (error) {
+      console.error('Failed to parse Agoda API response:', error);
+
+      return Response.json([]);
     }
 
-    return NextResponse.json(hotelsArray);
+    /*
+     * 想定外のレスポンス
+     */
+    if (!data || typeof data !== 'object') {
+      return Response.json([]);
+    }
 
-  } catch (error: any) {
+    const responseData = data as {
+      error?: unknown;
+      results?: unknown;
+      hotelList?: unknown;
+    };
+
+    /*
+     * Agoda APIがアプリケーションレベルのエラーを返した場合。
+     *
+     * 例:
+     * { id: 911, message: 'No search result' }
+     *
+     * この場合は500にせず、ホテル0件として返す。
+     */
+    if (responseData.error) {
+      console.warn(
+        'Agoda API returned an application-level error:',
+        responseData.error
+      );
+
+      return Response.json([]);
+    }
+
+    /*
+     * ホテル一覧の取得
+     */
+    let hotelsArray: unknown[] = [];
+
+    if (Array.isArray(responseData.results)) {
+      hotelsArray = responseData.results;
+    } else if (Array.isArray(responseData.hotelList)) {
+      hotelsArray = responseData.hotelList;
+    } else if (Array.isArray(data)) {
+      hotelsArray = data;
+    }
+
+    return Response.json(hotelsArray);
+  } catch (error) {
     console.error('Failed to fetch Agoda hotels:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+
+    return Response.json([]);
   }
 }
