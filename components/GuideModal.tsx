@@ -2,7 +2,10 @@
 
 import React, { useState } from 'react';
 import { bangkokExchangeShops, ExchangeShop } from '@/data/guides';
-import { bangkokRecommendations, RecommendedSpot } from '@/data/recommendations';
+import {
+    bangkokRecommendations,
+    RecommendedSpot,
+} from '@/data/recommendations';
 
 interface GuideModalProps {
     type:
@@ -42,8 +45,7 @@ const calculateDistance = (
             Math.cos(lat2 * (Math.PI / 180)) *
             Math.sin(dLon / 2) *
             Math.sin(dLon / 2);
-    const c =
-        2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
     return R * c;
 };
@@ -80,8 +82,7 @@ export default function GuideModal({
 
             return {
                 ...spot,
-                distance:
-                    Math.round(distance * 10) / 10,
+                distance: Math.round(distance * 10) / 10,
             };
         })
         .sort((a, b) => a.distance - b.distance);
@@ -115,22 +116,19 @@ export default function GuideModal({
                                         ? '🚆'
                                         : type === 'safety'
                                           ? '🛡️'
-                                          : type ===
-                                              'thai_phrases'
+                                          : type === 'thai_phrases'
                                             ? '🗣️'
                                             : type === 'drive'
                                               ? '🚗'
-                                              : type ===
-                                                  'stomach'
+                                              : type === 'stomach'
                                                 ? '🧊'
-                                                : type ===
-                                                    'shopping'
+                                                : type === 'shopping'
                                                   ? '🛍️'
                                                   : '📖'}
                         </span>
                         <h2 className="font-bold text-gray-900 text-base">
                             {type === 'exchange'
-                                ? '高レート両替所ガイド (PR)'
+                                ? 'バンコク両替ガイド (PR)'
                                 : type === 'squall'
                                   ? 'スコール避難スポット'
                                   : type === 'prep'
@@ -141,16 +139,13 @@ export default function GuideModal({
                                         ? 'タイ国鉄・鉄道移動ガイド'
                                         : type === 'safety'
                                           ? '安全・治安＆注意エリアガイド'
-                                          : type ===
-                                              'thai_phrases'
+                                          : type === 'thai_phrases'
                                             ? 'サバイバルタイ語会話'
                                             : type === 'drive'
                                               ? 'タイの運転・レンタカーガイド'
-                                              : type ===
-                                                  'stomach'
+                                              : type === 'stomach'
                                                 ? '食あたり・水あたり対策ガイド'
-                                                : type ===
-                                                    'shopping'
+                                                : type === 'shopping'
                                                   ? 'お買い物 ＆ 免税手続き(VAT Refund)'
                                                   : 'タイマナー ＆ チップ'}
                         </h2>
@@ -173,7 +168,7 @@ export default function GuideModal({
                                 <span className="font-bold block mb-1">
                                     ✨ 現在地周辺のおすすめリフレッシュ
                                 </span>
-                                バンコク市内の人気スパ・カフェ・屋台などを、あなたの現在地から近い順に表示しています。ワンタップで目的地に設定できます！
+                                掲載中のスパ・カフェ・グルメスポットなどを、あなたの現在地から近い順に表示しています。ワンタップで目的地に設定できます！
                             </div>
 
                             {/* カテゴリ切り替えボタン */}
@@ -323,7 +318,7 @@ export default function GuideModal({
                                 <span className="font-bold block mb-1">
                                     🛍️ バンコクお買い物 ＆ 免税のコツ
                                 </span>
-                                デパート等でのショッピングをお得に楽しむコツと、初めてでも安心な免税（VAT Refund）の手続き手順です。
+                                デパート等でのショッピングを楽しむ際に知っておきたいポイントと、免税（VAT Refund）の手続き手順です。
                             </div>
 
                             <div className="bg-gray-50 p-3 rounded-2xl border space-y-2">
@@ -336,7 +331,7 @@ export default function GuideModal({
                                         <b>
                                             ツーリストカードの活用
                                         </b>
-                                        : サイアム・パラゴンやセントラルなどの大型デパートのインフォメーションカウンターでパスポートを提示すると、外国人向けの割引カード（5〜10%OFFなど）がもらえます！
+                                        : サイアム・パラゴンやセントラルなどの大型デパートでは、外国人向けのキャンペーンや割引が行われることがあります。内容や条件は各施設のインフォメーションで確認しましょう。
                                     </li>
                                     <li>
                                         <b>免税の条件</b>
@@ -347,11 +342,15 @@ export default function GuideModal({
 
                             <div className="bg-gray-50 p-3 rounded-2xl border space-y-2">
                                 <h4 className="font-bold text-gray-800 text-xs">
-                                    📄 免税書類（PP10）の作り方
+                                    📄 免税書類（P.P.10）の作り方
                                 </h4>
 
                                 <p className="text-[11px] text-gray-600">
-                                    お買い物の当日、お店のレジや免税カウンターで<b>パスポートを提示</b>し、「VAT Refundお願いします」と伝えて、黄色い申請用紙（<b>PP10用紙</b>）を必ず発行してもらいましょう。
+                                    お買い物当日、お店のレジや免税カウンターで<b>パスポートを提示</b>し、VAT Refundの手続きを依頼します。対象店舗ではP.P.10またはe-P.P.10等の必要書類を発行してもらい、購入時の税務書類を保管してください。
+                                </p>
+
+                                <p className="text-[10px] text-gray-500">
+                                    ※購入品は原則として購入日から60日以内にタイ国外へ持ち出す必要があります。
                                 </p>
                             </div>
 
@@ -363,13 +362,17 @@ export default function GuideModal({
                                 <ol className="list-decimal pl-4 space-y-1 text-[11px] text-gray-600">
                                     <li>
                                         <b>チェックイン前</b>
-                                        : 空港の税関（VAT Refund Office）に、パスポート・PP10用紙・購入品（高額品は現物確認あり）を持参してスタンプをもらう。
+                                        : 出国当日の購入品合計が<b>20,000バーツ以上</b>の場合は、パスポート・P.P.10/e-P.P.10・原本の税務書類・購入品を税関へ提示して確認を受けます。
                                     </li>
                                     <li>
                                         <b>出国審査後</b>
-                                        : 免税店エリア内の換金カウンター（VAT Refund Counter）でスタンプ済み用紙を出し、現金（バーツ）またはカードで還付金を受け取る。
+                                        : VAT Refund Counterで必要書類を提出し、還付手続きを行います。
                                     </li>
                                 </ol>
+
+                                <p className="text-[10px] text-gray-500">
+                                    ※対象となる高額品などは、出国審査後に追加確認が必要な場合があります。
+                                </p>
                             </div>
                         </div>
                     )}
@@ -379,9 +382,9 @@ export default function GuideModal({
                         <div className="flex flex-col gap-3 leading-relaxed">
                             <div className="bg-cyan-50 border border-cyan-200 p-3 rounded-2xl text-cyan-900 text-[11px]">
                                 <span className="font-bold block mb-1">
-                                    🧊 食あたり・水あたりを防ぐ鉄則
+                                    🧊 食あたり・水あたりを防ぐポイント
                                 </span>
-                                タイ旅行で一番気をつけたいお腹のトラブルを防ぐためのポイントと、怪しい氷をスマートに断るタイ語をご紹介します。
+                                タイ旅行中のお腹のトラブルを避けるために、水・氷・食事について気をつけたいポイントと、氷を断るタイ語をご紹介します。
                             </div>
 
                             <div className="bg-gray-50 p-3 rounded-2xl border space-y-2">
@@ -390,7 +393,7 @@ export default function GuideModal({
                                 </h4>
 
                                 <p className="text-[11px] text-gray-600">
-                                    水道水は絶対にそのまま飲まないようにしましょう（歯磨きの際もミネラルウォーターを使うのが理想です）。また、屋台やローカル店でドリンクの氷が心配なときは、以下のタイ語で氷抜きをリクエストできます。
+                                    飲用にはボトル水など安全な水を利用し、水道水をそのまま飲むことは避けましょう。氷についても、水の衛生状態が分からない場合は避けると安心です。
                                 </p>
 
                                 <div className="bg-white p-2.5 rounded-xl border border-cyan-200 mt-1">
@@ -409,7 +412,7 @@ export default function GuideModal({
                                 </h4>
 
                                 <p className="text-[11px] text-gray-600">
-                                    生肉、生魚、貝類などの生ものはなるべく避けましょう。作り置きされて衛生面が気になるお店は避け、<b>「目の前でアツアツに調理してくれる、回転率の良い人気店」</b>を選ぶのが安心です。
+                                    生肉、生魚、貝類などの生・加熱不十分な食品には注意し、十分に加熱された料理を選びましょう。屋台や飲食店では、料理が高温で提供されるか、食品が適切に保管されているかも確認すると安心です。
                                 </p>
                             </div>
 
@@ -419,7 +422,7 @@ export default function GuideModal({
                                 </h4>
 
                                 <p className="text-[11px] text-gray-600">
-                                    万が一お腹を壊した場合は、市内の大型薬局（BootsやWatsonsなど）に行けば、英語で相談して現地のお薬がすぐ手に入ります。日本から飲み慣れた正露丸や胃腸薬、処方薬を持参しておくと一番安心です。
+                                    体調不良時は無理をせず、必要に応じて薬局や医療機関へ相談しましょう。普段使用している薬がある場合は、旅行前に必要量を準備しておくと安心です。
                                 </p>
                             </div>
                         </div>
@@ -432,34 +435,38 @@ export default function GuideModal({
                                 <span className="font-bold block mb-1">
                                     🚗 タイでの運転ルールと歩行者の心得
                                 </span>
-                                タイは日本と同じ「左側通行・右ハンドル」ですが、独特の交通ルールや運転マナーがあります。また、歩行者として道路を渡る際の大切なポイントを確認しておきましょう。
+                                タイは左側通行です。日本とは交通事情や道路上の動きが異なるため、信号・標識を確認し、周囲の車両や二輪車に十分注意して運転しましょう。
                             </div>
 
                             <div className="bg-gray-50 p-3 rounded-2xl border space-y-2">
                                 <h4 className="font-bold text-gray-800 text-xs">
-                                    🚦 赤信号での右折ルール（T字路など）
+                                    🪪 国際運転免許証について
                                 </h4>
 
                                 <p className="text-[11px] text-gray-600">
-                                    タイの一部の交差点やT字路では、周囲の安全をしっかり確認した上で、<b>赤信号のままでも右折（日本でいう左折の感覚）が許可されている</b>場合があります。ただし後続車からのプレッシャーに焦らず、安全第一で判断することが重要です。
+                                    タイで運転する場合は、<b>日本の運転免許証だけで運転できるとは限りません</b>。タイの運輸当局が認める国際運転免許証など、滞在条件に合った有効な免許を事前に確認してください。
+                                </p>
+
+                                <p className="text-[10px] text-gray-500">
+                                    ※レンタカー会社の貸出条件・保険条件も別途確認しましょう。
                                 </p>
                             </div>
 
                             <div className="bg-gray-50 p-3 rounded-2xl border space-y-2">
                                 <h4 className="font-bold text-gray-800 text-xs">
-                                    🛵 凄まじい量のバイクのすり抜け
+                                    🛵 バイクのすり抜けに注意
                                 </h4>
 
                                 <p className="text-[11px] text-gray-600">
-                                    運転する際は、左右の車の間から大量のバイクがすり抜けてきます。日本以上に頻繁なミラー確認と、進路変更時の細心の注意が必要です。
+                                    車線変更や右左折の際には、車両の左右から二輪車が近づいてくることがあります。ミラーだけに頼らず、周囲を十分確認してから進路変更を行いましょう。
                                 </p>
                             </div>
 
                             <div className="bg-amber-50 border border-amber-200 p-3 rounded-2xl text-amber-900 text-[11px]">
                                 <span className="font-bold block mb-1">
-                                    🚶 歩行者は「歩道橋」を使うのが鉄則
+                                    🚶 歩行者も安全第一
                                 </span>
-                                大通りの車道は車がスピードを出しており、横断歩道があっても日本のように簡単に止まってくれません。無理に車道を渡るのは非常に危険なため、少し遠回りになっても<b>頑丈な屋根付きの「歩道橋」を積極的に利用する</b>のが安全かつ確実です。
+                                大通りを横断する際は、信号・横断歩道・歩道橋などの安全な横断設備を利用しましょう。車両の接近がある場合は無理に横断せず、周囲を十分確認してください。
                             </div>
 
                             <div className="bg-gray-50 border border-gray-200 p-3 rounded-2xl flex flex-col gap-2">
@@ -476,7 +483,7 @@ export default function GuideModal({
                                 </div>
 
                                 <p className="text-[11px] text-gray-600">
-                                    郊外へのドライブや地方都市への旅行などでレンタカーを手配したいときは、世界中の大手レンタカー会社を比較・日本語で予約できるサービスが安心です。
+                                    郊外へのドライブや地方都市への旅行などでレンタカーを手配したい場合は、複数のレンタカー会社を比較できる予約サービスを利用する方法があります。利用前に貸出条件・免許条件・保険内容を確認しましょう。
                                 </p>
 
                                 <a
@@ -496,31 +503,28 @@ export default function GuideModal({
                         <div className="flex flex-col gap-3 leading-relaxed">
                             <div className="bg-rose-50 border border-rose-200 p-3 rounded-2xl text-rose-900 text-[11px]">
                                 <span className="font-bold block mb-1">
-                                    🛡️ バンコクの治安と注意すべきエリア
+                                    🛡️ バンコクの安全対策
                                 </span>
-                                バンコクは比較的治安の良い都市ですが、スリ、置き引き、悪質な声かけに対する心構えを持っておくと安心です。
+                                バンコクでは、スリ、置き引き、ひったくりなどに注意し、夜間や人通りの少ない場所では周囲を確認して行動しましょう。
                             </div>
 
                             <div className="bg-gray-50 p-3 rounded-2xl border space-y-2">
                                 <h4 className="font-bold text-gray-800 text-xs">
-                                    ⚠️ 「日本円を見せて」などの不審な声かけ
+                                    ⚠️ 不審な声かけに注意
                                 </h4>
 
                                 <p className="text-[11px] text-gray-600">
-                                    観光地などで「記念に日本円を見せて」「お札のデザインを見せて」と声をかけられても、<b>絶対に財布や現金を取り出さない</b>でください。巧みなスリや詐欺の手口であるため、完全無視してその場を離れましょう。
+                                    観光地などで知らない人から突然、金銭や財布・紙幣を見せるよう求められた場合は、応じず、その場を離れましょう。財布や現金を人前で取り出すことも避けると安心です。
                                 </p>
                             </div>
 
                             <div className="bg-gray-50 p-3 rounded-2xl border space-y-2">
                                 <h4 className="font-bold text-gray-800 text-xs">
-                                    ⚠️ 夜間の単独行動・注意が必要なエリア
+                                    ⚠️ 夜間の単独行動・人通りの少ない場所
                                 </h4>
 
                                 <p className="text-[11px] text-gray-600">
-                                    <b>
-                                        ナナプラザやソイ・カウボーイ周辺の裏通り、深夜の暗い路地：
-                                    </b>
-                                    華やかな歓楽街のメインから一本外れた路地や深夜の単独行動は、トラブルに巻き込まれやすくなります。夜間はなるべく大通りを歩き、配車アプリ（Grab/Bolt）を賢く利用しましょう。
+                                    夜間にナナプラザやソイ・カウボーイ周辺などの繁華街を歩く場合も、メイン通りから外れた暗い路地や人通りの少ない場所には注意しましょう。必要に応じて配車アプリ（Grab/Bolt）などを利用してください。
                                 </p>
                             </div>
 
@@ -530,7 +534,7 @@ export default function GuideModal({
                                 </h4>
 
                                 <p className="text-[11px] text-gray-600">
-                                    歩道でスマホを操作しながら歩くのは危険です。後ろから走ってきたバイクにひったくられる事例があるため、操作する際は建物側に寄って立ち止まりましょう。
+                                    道路側でスマートフォンやバッグを操作する際は注意しましょう。立ち止まる場合は、可能な範囲で建物側など車道から離れた場所を選ぶと安心です。
                                 </p>
                             </div>
 
@@ -541,15 +545,14 @@ export default function GuideModal({
 
                                 <ul className="list-disc pl-4 space-y-1 text-[10px] text-amber-900">
                                     <li>
-                                        <b>観光警察（英語対応可）</b>:
-                                        1155
+                                        <b>観光警察</b>: 1155（24時間）
                                     </li>
                                     <li>
                                         <b>警察（一般）</b>: 191
                                     </li>
                                     <li>
                                         <b>在タイ日本国大使館</b>:
-                                        +66-2-207-8500
+                                        +66-2-207-8500 / +66-2-696-3000
                                     </li>
                                 </ul>
                             </div>
@@ -563,12 +566,7 @@ export default function GuideModal({
                                 <span className="font-bold block mb-1">
                                     🗣️ 旅で役立つサバイバルタイ語
                                 </span>
-                                タイでは語尾に自分の性別をつけて敬意を表します。
-                                <br />
-                                <b>
-                                    男性：〜カップ / 女性：〜カー
-                                </b>{' '}
-                                をつけて話すと非常に好印象です！
+                                タイ語では、丁寧な文末表現として、男性話者は「〜カップ（ครับ）」、女性話者は「〜カー（ค่ะ / คะ）」を使います。
                             </div>
 
                             <div className="bg-gray-50 p-3 rounded-2xl border space-y-2.5">
@@ -580,7 +578,7 @@ export default function GuideModal({
                                         サワディー・カップ / カー
                                     </div>
                                     <div className="text-[10px] text-gray-500">
-                                        基本の挨拶。お店に入る時や会った時にいつでも使えます。
+                                        基本の挨拶。お店に入る時や人に会った時などに使えます。
                                     </div>
                                 </div>
 
@@ -592,7 +590,7 @@ export default function GuideModal({
                                         マイ・サイ・ナムケーン・カップ / カー
                                     </div>
                                     <div className="text-[10px] text-gray-500">
-                                        水あたりが心配なときの必須フレーズ。
+                                        氷を入れたくないときに使える表現です。
                                     </div>
                                 </div>
 
@@ -604,7 +602,7 @@ export default function GuideModal({
                                         コプ・クン・カップ / カー
                                     </div>
                                     <div className="text-[10px] text-gray-500">
-                                        お礼を伝えるときは笑顔でこれ一言。
+                                        お礼を伝える基本表現です。
                                     </div>
                                 </div>
 
@@ -616,7 +614,7 @@ export default function GuideModal({
                                         ラーカ・タオライ・カップ / カー
                                     </div>
                                     <div className="text-[10px] text-gray-500">
-                                        屋台やマーケットでの買い物必須フレーズ。
+                                        屋台やマーケットなどで価格を尋ねるときに使えます。
                                     </div>
                                 </div>
 
@@ -628,7 +626,7 @@ export default function GuideModal({
                                         マイ・ペット・カップ / カー
                                     </div>
                                     <div className="text-[10px] text-gray-500">
-                                        タイ料理が苦手・辛さを控えたいときに命を救う言葉です。
+                                        辛さを控えてほしいときに使える表現です。
                                     </div>
                                 </div>
 
@@ -640,32 +638,33 @@ export default function GuideModal({
                                         アロイ・カップ / カー
                                     </div>
                                     <div className="text-[10px] text-gray-500">
-                                        料理を作ってくれた店員さんに伝えるととても喜ばれます。
+                                        料理がおいしいことを伝える表現です。
                                     </div>
                                 </div>
 
                                 <div>
                                     <div className="font-bold text-gray-900 text-xs">
-                                        大丈夫です / 要りません (お断り)
+                                        いりません / 結構です
                                     </div>
                                     <div className="text-blue-600 font-extrabold text-xs mt-0.5">
-                                        マイ・ペン・ライ / プリッ・ノー
+                                        マイ・アオ・カップ / カー
                                     </div>
                                     <div className="text-[10px] text-gray-500">
-                                        キャッチや不要な勧誘をスマートに断る時の一言。
+                                        不要な商品や勧誘などを断るときに使える表現です。
                                     </div>
                                 </div>
                             </div>
                         </div>
                     )}
 
+                    {/* 両替ガイド */}
                     {type === 'exchange' && (
                         <div className="flex flex-col gap-3">
                             <div className="bg-emerald-50 border border-emerald-200 p-3 rounded-2xl text-emerald-800 text-[11px] leading-relaxed">
                                 <span className="font-bold block mb-1">
-                                    💡 バンコク両替の鉄則
+                                    💡 バンコク両替のポイント
                                 </span>
-                                空港やホテルの両替所はレートが低いため、市内の「高レート両替所」をピンポイントで利用するのが一番お得です！※必ずパスポートを持参してください。
+                                両替レートや手数料は、空港・ホテル・市内の店舗など場所や店舗によって異なります。複数の店舗を比較し、必要な金額だけ両替するのがおすすめです。両替時にはパスポートが必要になる場合があります。
                             </div>
 
                             {bangkokExchangeShops.map(
@@ -729,10 +728,10 @@ export default function GuideModal({
                                 )
                             )}
 
-                            {/* 両替所ガイド専用のお得なPRセクション（Wise・Airalo） */}
+                            {/* 両替所ガイド専用のPRセクション（Wise・Airalo） */}
                             <div className="mt-2 pt-3 border-t border-gray-100 flex flex-col gap-2">
                                 <p className="text-[10px] text-gray-400 font-bold px-1">
-                                    現金と合わせてお得な準備サービス (PR)
+                                    現金と合わせて便利な準備サービス (PR)
                                 </p>
 
                                 <div className="grid grid-cols-2 gap-2">
@@ -749,7 +748,7 @@ export default function GuideModal({
                                             Wiseデビットカード (PR)
                                         </span>
                                         <span className="text-[9px] text-emerald-600 font-medium">
-                                            手数料最安クラスで両替
+                                            海外利用に便利
                                         </span>
                                     </a>
 
@@ -766,7 +765,7 @@ export default function GuideModal({
                                             Airalo eSIM (PR)
                                         </span>
                                         <span className="text-[9px] text-indigo-600 font-medium">
-                                            クーポン自動適用でお得
+                                            eSIMサービス
                                         </span>
                                     </a>
                                 </div>
@@ -774,18 +773,19 @@ export default function GuideModal({
                         </div>
                     )}
 
+                    {/* スコール避難ガイド */}
                     {type === 'squall' && (
                         <div className="flex flex-col gap-3 leading-relaxed">
                             <div className="bg-cyan-50 border border-cyan-200 p-3 rounded-2xl text-cyan-900 text-[11px]">
                                 <span className="font-bold block mb-1">
-                                    🌧️ 雨季（5月〜10月）のスコール対策
+                                    🌧️ 雨季（一般に5月〜10月頃）のスコール対策
                                 </span>
-                                夕方以降に突然激しい雨が降ります。30分〜1時間程度で止むことが多いため、無理に歩かず大型商業施設や地下鉄駅へ避難するのがベストです。
+                                バンコクでは雨季に急な強い雨が降ることがあります。雨が強いときは無理に移動せず、大型商業施設や駅直結の屋内スペースなどへ避難しましょう。
                             </div>
 
                             <div className="bg-gray-50 p-3 rounded-2xl border">
                                 <h4 className="font-bold text-gray-800 mb-1">
-                                    🏢 おすすめの雨宿りスポット
+                                    🏢 雨宿りしやすいスポット
                                 </h4>
 
                                 <ul className="list-disc pl-4 space-y-1 text-gray-600">
@@ -793,32 +793,33 @@ export default function GuideModal({
                                         <b>
                                             サイアム・パラゴン / セントラル・ワールド
                                         </b>{' '}
-                                        (地下街や直結通路が充実)
+                                        (大型商業施設で屋内に避難しやすい)
                                     </li>
                                     <li>
                                         <b>
                                             ターミナル21アソーク
                                         </b>{' '}
-                                        (駅直結でフードコートもあり雨宿りに最適)
+                                        (駅直結で屋内施設へ移動しやすい)
                                     </li>
                                     <li>
                                         <b>
-                                            各MRT（地下鉄）の駅構内
+                                            BTS・MRTなどの駅周辺
                                         </b>{' '}
-                                        (地下のため完全に濡れません)
+                                        (駅直結の商業施設など、雨を避けられる屋内スペースを探しましょう)
                                     </li>
                                 </ul>
                             </div>
                         </div>
                     )}
 
+                    {/* 渡航準備ガイド */}
                     {type === 'prep' && (
                         <div className="flex flex-col gap-3 leading-relaxed">
                             <div className="bg-amber-50 border border-amber-200 p-3 rounded-2xl text-amber-900 text-[11px]">
                                 <span className="font-bold block mb-1">
-                                    ✈️ 入国前の事前準備：TDAC（入国カード）
+                                    ✈️ 入国前の事前準備：TDAC（デジタル到着カード）
                                 </span>
-                                タイ入国に際して、デジタル入国カード（TDAC）の事前登録が求められます。スムーズな渡航のために出発前にお済ませください。
+                                タイに入国する外国人は、原則としてデジタル到着カード（TDAC）の事前登録が必要です。<b>到着の72時間前から</b>登録できますので、出発前に公式サイトで手続きを済ませましょう。
 
                                 <div className="mt-2">
                                     <a
@@ -832,35 +833,36 @@ export default function GuideModal({
                                 </div>
                             </div>
 
-                            <div className="bg-gray-50 p-3 rounded-2xl border text-[11px] text-gray-600 space-y-1">
+                            <div className="bg-gray-50 p-3 rounded-2xl border text-[11px] text-gray-600 space-y-2">
                                 <p>
-                                    <b>パスポート残存期間</b>:
-                                    タイ入国時に6ヶ月以上残っている必要があります。
+                                    <b>TDACの登録タイミング</b>:
+                                    入国予定日の72時間前から登録できます。1回の入国に対して必要な手続きです。
                                 </p>
 
                                 <p>
-                                    <b>航空券の準備</b>:
-                                    出国用の航空券（Eチケット等）の提示が求められる場合があります。
+                                    <b>パスポート・入国条件</b>:
+                                    パスポートの残存期間や航空券などの入国条件は、国籍・滞在条件等によって異なる場合があります。出発前にタイ政府・大使館などの最新情報を確認してください。
                                 </p>
                             </div>
                         </div>
                     )}
 
+                    {/* 交通ガイド */}
                     {type === 'transport' && (
                         <div className="flex flex-col gap-3 leading-relaxed">
-                            {/* タイ国鉄の予約・攻略 */}
+                            {/* タイ国鉄の予約 */}
                             <div className="bg-blue-50 border border-blue-200 p-3 rounded-2xl text-blue-900 text-[11px]">
                                 <span className="font-bold block mb-1">
-                                    🚆 タイ国鉄（寝台列車など）切符予約の攻略法
+                                    🚆 タイ国鉄（寝台列車など）の切符予約
                                 </span>
-                                人気の寝台列車などのチケット争奪戦を勝ち抜くための「二段構え」のコツです。
+                                人気列車を予約する場合は、タイ国鉄の公式オンライン予約サービスを利用できます。必要に応じて民間予約サービスも比較しましょう。
                             </div>
 
                             <div className="bg-gray-50 border border-gray-200 p-3 rounded-2xl flex flex-col gap-2">
                                 <div className="flex justify-between items-start">
                                     <div>
                                         <span className="bg-blue-600 text-white text-[9px] font-bold px-2 py-0.5 rounded-full">
-                                            本命（最安・最速）
+                                            公式予約
                                         </span>
 
                                         <h3 className="font-bold text-gray-900 text-xs mt-1">
@@ -870,7 +872,7 @@ export default function GuideModal({
                                 </div>
 
                                 <p className="text-[11px] text-gray-600">
-                                    手数料が一番安く最速ですが、<b>動作が重くエラーが起きやすい</b>です。事前のアカウント作成・ログインが必須。
+                                    タイ国鉄（SRT）の公式オンライン予約サービスです。利用には会員登録・ログインが必要です。
                                 </p>
 
                                 <a
@@ -887,7 +889,7 @@ export default function GuideModal({
                                 <div className="flex justify-between items-start">
                                     <div>
                                         <span className="bg-indigo-600 text-white text-[9px] font-bold px-2 py-0.5 rounded-full">
-                                            保険・裏技（軽快・確実）
+                                            予約の選択肢
                                         </span>
 
                                         <h3 className="font-bold text-gray-900 text-xs mt-1">
@@ -897,7 +899,7 @@ export default function GuideModal({
                                 </div>
 
                                 <p className="text-[11px] text-gray-600">
-                                    タイ全土をカバーし、<b>画面が非常に軽くてスムーズ</b>です。公式が繋がらない時のバックアップに最適（手数料あり）。
+                                    複数の交通機関をまとめて検索・予約できる民間サービスです。公式サイトと比較する場合は、運賃・手数料・予約条件を確認しましょう。
                                 </p>
 
                                 <div className="flex gap-2">
@@ -926,7 +928,7 @@ export default function GuideModal({
                                 <span className="font-bold block mb-1">
                                     💳 市内移動（BTS / MRT）のチケットレス術
                                 </span>
-                                券売機の長い行列に並ばず、日本のSUICA感覚でスムーズに乗車する方法です！
+                                対応している駅・改札では、交通系カードやコンタクトレス決済を利用することで、乗車券購入の手間を減らせます。
                             </div>
 
                             <div className="bg-gray-50 border border-gray-200 p-3 rounded-2xl flex flex-col gap-2">
@@ -936,7 +938,7 @@ export default function GuideModal({
 
                                 <p className="text-[11px] text-gray-600 leading-relaxed">
                                     <b>ラビットカード (Rabbit Card)</b>{' '}
-                                    という日本のSuicaのような交通系ICカードが窓口や駅構内で購入できます。または、<b>タッチ決済対応のクレジットカード（Visa/Mastercardのコンタクトレス）</b>が一部改札でそのまま使えます！
+                                    という交通系ICカードが利用できます。また、タッチ決済対応カードについては、対応している駅・改札の案内を現地で確認してください。
                                 </p>
                             </div>
 
@@ -946,35 +948,35 @@ export default function GuideModal({
                                 </h3>
 
                                 <p className="text-[11px] text-gray-600 leading-relaxed">
-                                    窓口や券売機に並ばず、改札のタッチ部分に<b>タッチ決済対応のクレジットカード（Visa/Mastercard）やデビットカード（Wiseなど）を直接タッチ</b>するだけで、そのまま乗車・決済できます（※トークンを買う手間が省けて一番ラクです）。
+                                    MRT Blue Line / Purple Lineでは、対応する<b>Visa・Mastercard等のコンタクトレスカード</b>を改札で直接タッチして利用できます。カードの対応状況は公式案内を確認してください。
                                 </p>
                             </div>
 
                             {/* バスの乗り方ガイド */}
                             <div className="bg-amber-50 border border-amber-200 p-3 rounded-2xl text-amber-900 text-[11px] mt-1">
                                 <span className="font-bold block mb-1">
-                                    🚌 バンコク路線バスの乗り方・攻略法
+                                    🚌 バンコク路線バスの乗り方
                                 </span>
-                                ローカルな移動を楽しめますが、言葉の壁や難易度が高いため事前のコツが大切です！
+                                ローカルな移動を楽しめますが、路線・車両によって乗り方や支払い方法が異なるため、現地で確認しながら利用しましょう。
                             </div>
 
                             <div className="bg-gray-50 border border-gray-200 p-3 rounded-2xl flex flex-col gap-2">
                                 <h3 className="font-bold text-gray-800 text-xs">
-                                    1. 乗る（手を挙げてアピール）
+                                    1. 乗る
                                 </h3>
 
                                 <p className="text-[11px] text-gray-600 leading-relaxed">
-                                    バス停で目的のバスが見えたら、<b>運転手に向けて手を水平に高く差し出し「乗ります」のサイン</b>を必ず出します（出さないと通過してしまいます）。
+                                    バス停で目的のバスが近づいてきたら、運転手に乗車意思が伝わるよう手を挙げるなどしてアピールすると分かりやすいです。路線によって停車方法が異なる場合があります。
                                 </p>
                             </div>
 
                             <div className="bg-gray-50 border border-gray-200 p-3 rounded-2xl flex flex-col gap-2">
                                 <h3 className="font-bold text-gray-800 text-xs">
-                                    2. 料金を払う（車掌さんへ現金）
+                                    2. 料金を払う
                                 </h3>
 
                                 <p className="text-[11px] text-gray-600 leading-relaxed">
-                                    乗車後、集金バッグを持った車掌さんが席まで来るので、<b>現金（小銭か20バーツ札）</b>を渡して切符を受け取ります。
+                                    車内係員がいるバスでは、乗車後に運賃を現金で支払う方式が一般的です。路線・車両によって異なるため、細かい現金を用意しておくと便利です。
                                 </p>
                             </div>
 
@@ -984,7 +986,7 @@ export default function GuideModal({
                                 </h3>
 
                                 <p className="text-[11px] text-gray-600 leading-relaxed">
-                                    行き先がタイ文字で読めない・タイ語で伝えられない場合は、無理せず<b>「MTR」「BTS」「配車アプリ（Grab/Bolt）」</b>を使うのが圧倒的に安心です。どうしてもバスに乗る場合は、<b>行きたい場所のタイ語表記（Googleマップ画面など）を車掌さんに無言で見せる</b>と、降りるべき場所で教えてもらいやすくなります！
+                                    行き先がタイ文字で読めない・タイ語で伝えられない場合は、無理せず<b>「MRT」「BTS」「配車アプリ（Grab/Bolt）」</b>など分かりやすい交通手段を利用する方法があります。バスに乗る場合は、<b>行きたい場所のタイ語表記（Googleマップ画面など）を車掌さんに見せる</b>と、目的地を伝えやすくなります。
                                 </p>
                             </div>
 
@@ -993,7 +995,7 @@ export default function GuideModal({
                                 <span className="font-bold block mb-1">
                                     🏍️ バイタク ＆ 🛺 トゥクトゥクの乗り方
                                 </span>
-                                バンコクならではのスリル満点な移動手段ですが、安全に乗るためのコツがあります！
+                                バンコクならではの移動手段です。料金や安全面を確認して利用しましょう。
                             </div>
 
                             <div className="bg-gray-50 border border-gray-200 p-3 rounded-2xl flex flex-col gap-2">
@@ -1002,18 +1004,17 @@ export default function GuideModal({
                                 </h3>
 
                                 <p className="text-[11px] text-gray-600 leading-relaxed">
-                                    <b>大渋滞をすり抜ける最強の時短ツール</b>
-                                    です。街なかの専用ベストを着た運転手がたむろする「ウィン（Win）」と呼ばれる乗り場から乗ります。
+                                    渋滞時の移動手段の一つです。街なかの専用ベストを着た運転手が集まる「ウィン（Win）」と呼ばれる乗り場があります。
                                 </p>
 
                                 <ul className="list-disc pl-4 space-y-1 text-[10px] text-gray-600">
                                     <li>
-                                        <b>料金交渉が基本</b>:
-                                        乗る前に必ず行き先を告げて値段を確認（または配車アプリ「Grab / Bolt」経由で呼ぶとぼったくりが防げて安心）。
+                                        <b>料金を事前確認</b>:
+                                        乗る前に行き先を告げて料金を確認しましょう。配車アプリを利用する方法もあります。
                                     </li>
                                     <li>
                                         <b>安全第一</b>:
-                                        ヘルメットの着用が義務づけられています。スピードが出るため、しっかり捕まりましょう。
+                                        ヘルメットを着用し、走行中は運転手の指示に従いましょう。
                                     </li>
                                 </ul>
                             </div>
@@ -1024,17 +1025,17 @@ export default function GuideModal({
                                 </h3>
 
                                 <p className="text-[11px] text-gray-600 leading-relaxed">
-                                    風を切りながら走る観光の目玉ですが、<b>実用的な移動というよりは「エンタメ・観光体験」</b>として割り切るのがおすすめです。
+                                    バンコクらしい乗り物の一つです。メーターではなく料金交渉になることが多いため、乗車前に料金を確認して合意してから利用しましょう。
                                 </p>
 
                                 <ul className="list-disc pl-4 space-y-1 text-[10px] text-gray-600">
                                     <li>
-                                        <b>乗車前の価格交渉が必須</b>:
-                                        メーターがないため、乗る前に必ず「いくらか」を確認し、合意してから乗りましょう。
+                                        <b>乗車前の価格確認</b>:
+                                        行き先と料金を事前に確認しましょう。
                                     </li>
                                     <li>
                                         <b>排気ガスに注意</b>:
-                                        窓がないため大気汚染や排気ガスをダイレクトに浴びます。夜間の短距離や雰囲気を楽しむ用として使うのがスマートです。
+                                        車両の構造上、走行中に排気ガスや道路上の空気を受けやすいため、体調や空気の状態に応じて利用しましょう。
                                     </li>
                                 </ul>
                             </div>
@@ -1042,18 +1043,18 @@ export default function GuideModal({
                             {/* LINE MAN について */}
                             <div className="bg-emerald-50 border border-emerald-200 p-3 rounded-2xl text-emerald-900 text-[11px] mt-1">
                                 <span className="font-bold block mb-1">
-                                    🛵 タイの超定番ライフライン「LINE MAN」
+                                    🛵 タイの「LINE MAN」
                                 </span>
-                                フードデリバリーから移動まで何でも揃う国民的アプリです。
+                                タイで利用されているフードデリバリーや各種サービスのアプリです。
                             </div>
 
                             <div className="bg-gray-50 border border-gray-200 p-3 rounded-2xl flex flex-col gap-2">
                                 <p className="text-[11px] text-gray-600 leading-relaxed">
-                                    日本のLINEアプリとは別ですが、<b>タイに到着してから現地でアプリをダウンロードし、ご自身のLINEアカウントや電話番号でログインして利用可能</b>です。
+                                    LINE MANでは<b>LINE IDを使ったログイン</b>が案内されています。利用可能なサービスや提供エリアは現地の最新情報を確認してください。
                                 </p>
 
                                 <p className="text-[11px] text-gray-600 leading-relaxed">
-                                    ホテルの部屋から一歩も出ずにローカルフードを頼みたいときや、GrabやBoltのサブの配車手段として非常に強力な味方になります！
+                                    フードデリバリーなどを利用したい場合や、他の配車・配送サービスと比較したい場合の選択肢になります。
                                 </p>
                             </div>
                         </div>
@@ -1064,65 +1065,65 @@ export default function GuideModal({
                         <div className="flex flex-col gap-3 leading-relaxed">
                             <div className="bg-orange-50 border border-orange-200 p-3 rounded-2xl text-orange-900 text-[11px]">
                                 <span className="font-bold block mb-1">
-                                    📖 知っておくべきタイの文化とマナー
+                                    📖 知っておきたいタイの文化とマナー
                                 </span>
-                                王室への敬意、寺院での服装、チップの習慣など、最低限のマナーを知っておくとトラブルを防げます。
+                                王室への敬意、寺院での服装、チップの習慣など、現地の文化を尊重して行動しましょう。
                             </div>
 
-                            <div className="bg-gray-50 border border-gray-200 p-3 rounded-2xl border space-y-2">
+                            <div className="bg-gray-50 border border-gray-200 p-3 rounded-2xl space-y-2">
                                 <p>
                                     <b>1. 寺院の服装</b>:
-                                    露出の多い服装（タンクトップや短パン）はNG。肩や膝が隠れる服装で行きましょう。
+                                    寺院によって服装規定があります。肩や膝が隠れる服装を求められることが多いため、露出の少ない服装を準備しておくと安心です。
                                 </p>
 
                                 <p>
                                     <b>2. タクシーの乗車</b>:
-                                    乗る前に必ず「メーター（By Meter?）」と確認するか、配車アプリ（Grab / Bolt）の利用が安心です。
+                                    メータータクシーを利用する場合は、メーター使用を確認しましょう。配車アプリ（Grab / Bolt）を利用する方法もあります。
                                 </p>
                             </div>
 
-                            <div className="bg-gray-50 border border-gray-200 p-3 rounded-2xl border space-y-2">
+                            <div className="bg-gray-50 border border-gray-200 p-3 rounded-2xl space-y-2">
                                 <h4 className="font-bold text-gray-800 text-xs">
-                                    💸 チップの習慣とスマートな相場
+                                    💸 チップの考え方
                                 </h4>
 
                                 <p className="text-[11px] text-gray-600">
-                                    タイは欧米のような強いチップ文化ではありませんが、サービスに満足した際には気持ちとして渡すとスマートです。
+                                    タイでは欧米と同じ形の一律のチップ制度ではありません。サービス料（Service Charge）が含まれているかを確認し、チップを渡す場合はサービスや店舗の慣習に応じて判断しましょう。
                                 </p>
 
                                 <ul className="list-disc pl-4 space-y-1 text-[11px] text-gray-600">
                                     <li>
                                         <b>サービス料込のお店</b>:
-                                        メニューやレシートに「Service Charge 10%」と記載されている場合は、追加のチップは不要です。
+                                        メニューやレシートに「Service Charge」などの記載がある場合は、その内容を確認しましょう。
                                     </li>
                                     <li>
-                                        <b>マッサージ・スパ・高級店</b>:
-                                        丁寧な施術を受けた場合、大衆的なマッサージなら<b>20〜50バーツ</b>、高級スパなら<b>50〜100バーツ</b>程度を紙幣でお渡しすると喜ばれます。
+                                        <b>マッサージ・スパなど</b>:
+                                        チップを渡すかどうか、金額はサービス内容や店舗によって異なります。必須ではありません。
                                     </li>
                                     <li>
-                                        <b>グレーなお店・判断に迷う場合</b>:
-                                        仕組みが曖昧な場所や、サービスに満足できなかった場合は、無理に渡す必要は全くありません。
+                                        <b>判断に迷う場合</b>:
+                                        店舗の表示やスタッフへの確認を優先し、無理に渡す必要はありません。
                                     </li>
                                 </ul>
                             </div>
 
                             <div className="bg-blue-50 border border-blue-200 p-3 rounded-2xl text-blue-900 text-[11px] mt-1">
                                 <span className="font-bold block mb-1">
-                                    🚗 Grab / Boltを安全に使いこなすコツ
+                                    🚗 Grab / Boltを安全に使うコツ
                                 </span>
 
                                 <ul className="list-disc pl-4 space-y-1 text-blue-800">
                                     <li>
                                         <b>ナンバー照合</b>:
-                                        乗車前にアプリ表示と実際の車のナンバーを必ず確認。
+                                        乗車前にアプリ表示と実際の車のナンバーを確認。
                                     </li>
                                     <li>
-                                        <b>アプリ決済推奨</b>:
-                                        クレジットカード紐付けで、お釣りやぼったくりのトラブルを回避。
+                                        <b>アプリ決済</b>:
+                                        対応している場合はアプリ決済を利用すると、料金確認がしやすくなります。
                                     </li>
                                     <li>
                                         <b>GPSの確認</b>:
-                                        乗車中もスマホのマップで正しいルートを通っているかチェック。
+                                        必要に応じてスマートフォンのマップで現在地やルートを確認しましょう。
                                     </li>
                                 </ul>
                             </div>
