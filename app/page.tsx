@@ -13,6 +13,66 @@ import { ExchangeShop } from '@/data/guides';
 import { RecommendedSpot } from '@/data/recommendations';
 import { allBangkokStations } from '@/data/stations';
 
+type CoordinateCandidate = {
+    id?: string;
+    name?: string;
+    category?: string;
+    line?: string;
+    address?: string;
+    place_id?: string;
+    hotelId?: string | number;
+    hotelName?: string;
+    imageURL?: string;
+    imageUrl?: string;
+    dailyRate?: number | string;
+    price?: number | string;
+    currency?: string;
+    star?: number | string;
+    starRating?: number | string;
+    stars?: number | string;
+    reviewScore?: number | string;
+    discountPercentage?: number | string;
+    coordinate?: {
+        latitude?: number | string;
+        longitude?: number | string;
+        lat?: number | string;
+        lng?: number | string;
+    };
+    latitude?: number | string;
+    longitude?: number | string;
+    lat?: number | string;
+    lng?: number | string;
+};
+
+type GooglePlaceItem = CoordinateCandidate & {
+    id: string;
+    name: string;
+    address: string;
+    category: string;
+    latitude: number;
+    longitude: number;
+    rating: number;
+    userRatingsTotal: number;
+};
+
+type HotelDisplayItem = CoordinateCandidate & {
+    id?: string;
+    name?: string;
+};
+
+function createItineraryId(): string {
+    if (
+        typeof crypto !== 'undefined' &&
+        typeof crypto.randomUUID === 'function'
+    ) {
+        return crypto.randomUUID();
+    }
+
+    return `${Date.now()}-${Math.random()
+        .toString(36)
+        .slice(2, 11)}`;
+}
+
 function MainContent() {
     const [selectedMode, setSelectedMode] = useState<string>('transit');
     const [destinationCoordinate, setDestinationCoordinate] = useState({
@@ -50,10 +110,10 @@ function MainContent() {
 
     const [showEmergencyModal, setShowEmergencyModal] = useState<boolean>(false);
 
-    const [agodaHotels, setAgodaHotels] = useState<any[]>([]);
+    const [agodaHotels, setAgodaHotels] = useState<HotelDisplayItem[]>([]);
     const [agodaLoading, setAgodaLoading] = useState<boolean>(true);
 
-    const [googlePlaces, setGooglePlaces] = useState<any[]>([]);
+    const [googlePlaces, setGooglePlaces] = useState<GooglePlaceItem[]>([]);
     const [placesLoading, setPlacesLoading] = useState<boolean>(false);
 
     /*
@@ -72,14 +132,37 @@ function MainContent() {
                     );
                 }
 
-                const data = await res.json();
+                const data: unknown = await res.json();
 
-                const hotelList = Array.isArray(data)
-                    ? data
-                    : data.results || data.hotelList || data.data || [];
+                let hotelList: unknown[] = [];
+
+                if (Array.isArray(data)) {
+                    hotelList = data;
+                } else if (
+                    data &&
+                    typeof data === 'object'
+                ) {
+                    const responseData = data as {
+                        results?: unknown;
+                        hotelList?: unknown;
+                        data?: unknown;
+                    };
+
+                    if (Array.isArray(responseData.results)) {
+                        hotelList = responseData.results;
+                    } else if (
+                        Array.isArray(responseData.hotelList)
+                    ) {
+                        hotelList = responseData.hotelList;
+                    } else if (
+                        Array.isArray(responseData.data)
+                    ) {
+                        hotelList = responseData.data;
+                    }
+                }
 
                 setAgodaHotels(
-                    Array.isArray(hotelList) ? hotelList : []
+                    hotelList as HotelDisplayItem[]
                 );
             } catch (err) {
                 console.error('Direct Agoda Fetch Error:', err);
@@ -94,67 +177,110 @@ function MainContent() {
 
     /*
      * Google Places検索
+     *
+     * PlacesService.textSearch() から
+     * Places API (New) の Place.searchByText() に移行。
      */
     useEffect(() => {
         if (!searchText || searchText.trim().length < 2) {
-            setGooglePlaces([]);
-            setPlacesLoading(false);
+            setTimeout(() => {
+                setGooglePlaces([]);
+                setPlacesLoading(false);
+            }, 0);
+
             return;
         }
 
-        const timer = setTimeout(() => {
-            if (
-                typeof window === 'undefined' ||
-                !window.google?.maps?.places
-            ) {
-                console.log('Google Maps Places API not ready yet');
-                return;
-            }
+        let cancelled = false;
 
-            setPlacesLoading(true);
-
-            const dummyMapDiv = document.createElement('div');
-            const service = new google.maps.places.PlacesService(
-                dummyMapDiv
-            );
-
-            const request = {
-                query: searchText + ' バンコク',
-            };
-
-            service.textSearch(request, (results, status) => {
-                setPlacesLoading(false);
+        const timer = setTimeout(async () => {
+            try {
+                setPlacesLoading(true);
 
                 if (
-                    status === google.maps.places.PlacesServiceStatus.OK &&
-                    results
+                    typeof window === 'undefined' ||
+                    !window.google?.maps?.importLibrary
                 ) {
-                    const mapped = results.map((place) => ({
+                    console.log(
+                        'Google Maps Places API not ready yet'
+                    );
+                    return;
+                }
+
+                const placesLibrary =
+                    (await google.maps.importLibrary(
+                        'places'
+                    )) as google.maps.PlacesLibrary;
+
+                const { Place } = placesLibrary;
+
+                const { places } =
+                    await Place.searchByText({
+                        textQuery:
+                            searchText + ' バンコク',
+                        fields: [
+                            'id',
+                            'displayName',
+                            'formattedAddress',
+                            'location',
+                            'rating',
+                            'userRatingCount',
+                        ],
+                        language: 'ja',
+                        maxResultCount: 20,
+                    });
+
+                if (cancelled) {
+                    return;
+                }
+
+                const mapped: GooglePlaceItem[] =
+                    places.map((place) => ({
                         id:
-                            place.place_id ||
-                            Math.random().toString(),
-                        name: place.name || 'スポット',
-                        address: place.formatted_address || '',
+                            place.id ||
+                            createItineraryId(),
+                        name:
+                            place.displayName ||
+                            'スポット',
+                        address:
+                            place.formattedAddress ||
+                            '',
                         category: 'Googleスポット',
                         latitude:
-                            place.geometry?.location?.lat() ??
+                            place.location?.lat() ??
                             13.7460,
                         longitude:
-                            place.geometry?.location?.lng() ??
+                            place.location?.lng() ??
                             100.5347,
-                        rating: place.rating || 4.0,
+                        rating:
+                            place.rating ??
+                            4.0,
                         userRatingsTotal:
-                            place.user_ratings_total || 0,
+                            place.userRatingCount ??
+                            0,
                     }));
 
-                    setGooglePlaces(mapped);
-                } else {
+                setGooglePlaces(mapped);
+            } catch (error) {
+                if (!cancelled) {
+                    console.error(
+                        'Google Places search error:',
+                        error
+                    );
+
                     setGooglePlaces([]);
                 }
-            });
+            } finally {
+                if (!cancelled) {
+                    setPlacesLoading(false);
+                }
+            }
         }, 400);
 
-        return () => clearTimeout(timer);
+        return () => {
+            cancelled = true;
+            clearTimeout(timer);
+        };
     }, [searchText]);
 
     const categories = [
@@ -270,17 +396,21 @@ function MainContent() {
                 const pLng = parseFloat(lng);
 
                 if (!isNaN(pLat) && !isNaN(pLng)) {
-                    setDestinationCoordinate({
-                        lat: pLat,
-                        lng: pLng,
-                    });
+                    setTimeout(() => {
+                        setDestinationCoordinate({
+                            lat: pLat,
+                            lng: pLng,
+                        });
 
-                    setIsDemoMode(false);
+                        setIsDemoMode(false);
+                    }, 0);
                 }
             }
 
             if (title) {
-                setDestinationTitle(title);
+                setTimeout(() => {
+                    setDestinationTitle(title);
+                }, 0);
             }
 
             const savedPlan = localStorage.getItem(
@@ -289,12 +419,16 @@ function MainContent() {
 
             if (savedPlan) {
                 try {
-                    const parsed = JSON.parse(savedPlan);
+                    const parsed: unknown = JSON.parse(savedPlan);
 
                     if (Array.isArray(parsed)) {
-                        setItineraryItems(parsed);
+                        setTimeout(() => {
+                            setItineraryItems(
+                                parsed as ItineraryItem[]
+                            );
+                        }, 0);
                     }
-                } catch (e) {
+                } catch {
                     localStorage.removeItem(
                         'bkk_nav_itinerary'
                     );
@@ -330,12 +464,7 @@ function MainContent() {
         e.stopPropagation();
 
         const newItem: ItineraryItem = {
-            id:
-                String(Date.now()) +
-                '-' +
-                Math.random()
-                    .toString(36)
-                    .substr(2, 9),
+            id: createItineraryId(),
             title,
             category,
             lat,
@@ -423,7 +552,9 @@ function MainContent() {
     /*
      * 座標抽出
      */
-    const extractCoordinates = (item: any) => {
+    const extractCoordinates = (
+        item: CoordinateCandidate
+    ) => {
         const lat =
             item.coordinate?.latitude ??
             item.coordinate?.lat ??
@@ -447,7 +578,9 @@ function MainContent() {
     /*
      * ランドマーク選択
      */
-    const handleSelectLandmark = (landmark: any) => {
+    const handleSelectLandmark = (
+        landmark: CoordinateCandidate
+    ) => {
         const { lat, lng } =
             extractCoordinates(landmark);
 
@@ -481,7 +614,9 @@ function MainContent() {
     /*
      * 駅選択
      */
-    const handleSelectStation = (station: any) => {
+    const handleSelectStation = (
+        station: CoordinateCandidate
+    ) => {
         const { lat, lng } =
             extractCoordinates(station);
 
@@ -582,7 +717,9 @@ function MainContent() {
     /*
      * ホテル選択
      */
-    const handleSelectHotel = (hotel: any) => {
+    const handleSelectHotel = (
+        hotel: HotelDisplayItem
+    ) => {
         const { lat, lng } =
             extractCoordinates(hotel);
 
@@ -705,23 +842,25 @@ function MainContent() {
             ? [
                   ...bangkokHotels,
                   ...(agodaHotels || []),
-              ].filter((h: any) => {
-                  const name = (
-                      h.hotelName ||
-                      h.name ||
-                      ''
-                  ).toLowerCase();
+              ].filter(
+                  (h: HotelDisplayItem) => {
+                      const name = (
+                          h.hotelName ||
+                          h.name ||
+                          ''
+                      ).toLowerCase();
 
-                  if (query) {
-                      return (
-                          name.includes(query) ||
-                          'ホテル'.includes(query) ||
-                          'hotel'.includes(query)
-                      );
+                      if (query) {
+                          return (
+                              name.includes(query) ||
+                              'ホテル'.includes(query) ||
+                              'hotel'.includes(query)
+                          );
+                      }
+
+                      return true;
                   }
-
-                  return true;
-              })
+              )
             : [];
 
     const showDropdown =
@@ -1287,7 +1426,7 @@ function MainContent() {
                         {!agodaLoading &&
                             filteredHotels.map(
                                 (
-                                    hotel: any,
+                                    hotel: HotelDisplayItem,
                                     index: number
                                 ) => {
                                     const id =
@@ -1300,11 +1439,6 @@ function MainContent() {
                                         hotel.name ||
                                         'バンコクのホテル';
 
-                                    /*
-                                     * 実画像がある場合のみ画像を表示。
-                                     * Agoda等から画像が返らない場合は
-                                     * ホテル専用プレースホルダーを表示。
-                                     */
                                     const rawImage =
                                         hotel.imageURL ||
                                         hotel.imageUrl ||
@@ -1329,11 +1463,6 @@ function MainContent() {
                                         hotel.currency ||
                                         'JPY';
 
-                                    /*
-                                     * 固定ホテルは star、
-                                     * Agoda側は starRating / stars
-                                     * の可能性があるため両対応。
-                                     */
                                     const star =
                                         hotel.star ??
                                         hotel.starRating ??
@@ -1391,7 +1520,9 @@ function MainContent() {
                                                         </div>
                                                     )}
 
-                                                    {discount >
+                                                    {Number(
+                                                        discount
+                                                    ) >
                                                         0 && (
                                                         <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full shadow-sm">
                                                             {

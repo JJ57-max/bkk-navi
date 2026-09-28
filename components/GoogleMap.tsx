@@ -145,10 +145,19 @@ function CustomPolylineRouteComponent({
 }) {
     const map = useMap();
 
+    /*
+     * バンコクのデモ用座標を初期値にする。
+     *
+     * Geolocation取得前でもルート計算の起点を確保できるため、
+     * useEffect内で同期的にsetOrigin()する必要がない。
+     */
     const [origin, setOrigin] = useState<{
         lat: number;
         lng: number;
-    } | null>(null);
+    }>({
+        lat: 13.7367,
+        lng: 100.5606,
+    });
 
     const [pathCoordinates, setPathCoordinates] = useState<
         google.maps.LatLngLiteral[]
@@ -159,44 +168,43 @@ function CustomPolylineRouteComponent({
      *
      * 現在のアプリ仕様では、タイ国外などの位置からアクセスした場合、
      * Bangkokのデモ用座標をoriginとして使用する。
+     *
+     * Geolocationの取得に失敗した場合は、初期値である
+     * Bangkokのデモ用座標をそのまま使用する。
      */
     useEffect(() => {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    const lat = position.coords.latitude;
-                    const lng = position.coords.longitude;
+        if (!navigator.geolocation) {
+            return;
+        }
 
-                    if (lat > 20) {
-                        setOrigin({
-                            lat: 13.7367,
-                            lng: 100.5606,
-                        });
-                    } else {
-                        setOrigin({
-                            lat,
-                            lng,
-                        });
-                    }
-                },
-                () => {
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+
+                if (lat > 20) {
                     setOrigin({
                         lat: 13.7367,
                         lng: 100.5606,
                     });
-                },
-                {
-                    enableHighAccuracy: true,
-                    timeout: 10000,
-                    maximumAge: 0,
+                } else {
+                    setOrigin({
+                        lat,
+                        lng,
+                    });
                 }
-            );
-        } else {
-            setOrigin({
-                lat: 13.7367,
-                lng: 100.5606,
-            });
-        }
+            },
+            () => {
+                /*
+                 * 取得失敗時は初期値のバンコク座標を使用する。
+                 */
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 0,
+            }
+        );
     }, []);
 
     /*

@@ -1,4 +1,3 @@
-// components/GuideModal.tsx
 'use client';
 
 import React, { useState } from 'react';
@@ -6,23 +5,46 @@ import { bangkokExchangeShops, ExchangeShop } from '@/data/guides';
 import { bangkokRecommendations, RecommendedSpot } from '@/data/recommendations';
 
 interface GuideModalProps {
-    type: 'exchange' | 'squall' | 'prep' | 'manner' | 'recommend' | 'transport' | 'safety' | 'thai_phrases' | 'drive' | 'stomach' | 'shopping' | null;
+    type:
+        | 'exchange'
+        | 'squall'
+        | 'prep'
+        | 'manner'
+        | 'recommend'
+        | 'transport'
+        | 'safety'
+        | 'thai_phrases'
+        | 'drive'
+        | 'stomach'
+        | 'shopping'
+        | null;
     onClose: () => void;
     onSelectExchangeShop: (shop: ExchangeShop) => void;
     onSelectRecommendedSpot?: (spot: RecommendedSpot) => void;
     currentLocation?: { lat: number; lng: number };
 }
 
+type RecommendationCategory = 'all' | 'massage' | 'cafe' | 'food';
+
 // 2地点の緯度経度から直線距離(km)を算出するヘルパー関数
-const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
-    const R = 6371; // 地球の半径 (km)
+const calculateDistance = (
+    lat1: number,
+    lon1: number,
+    lat2: number,
+    lon2: number
+) => {
+    const R = 6371;
     const dLat = (lat2 - lat1) * (Math.PI / 180);
     const dLon = (lon2 - lon1) * (Math.PI / 180);
     const a =
         Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-        Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) *
-        Math.sin(dLon / 2) * Math.sin(dLon / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        Math.cos(lat1 * (Math.PI / 180)) *
+            Math.cos(lat2 * (Math.PI / 180)) *
+            Math.sin(dLon / 2) *
+            Math.sin(dLon / 2);
+    const c =
+        2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
     return R * c;
 };
 
@@ -31,25 +53,48 @@ export default function GuideModal({
     onClose,
     onSelectExchangeShop,
     onSelectRecommendedSpot,
-    currentLocation = { lat: 13.7462, lng: 100.5350 },
+    currentLocation = {
+        lat: 13.7462,
+        lng: 100.535,
+    },
 }: GuideModalProps) {
-    const [recCategory, setRecCategory] = useState<'all' | 'massage' | 'cafe' | 'food'>('all');
+    const [recCategory, setRecCategory] =
+        useState<RecommendationCategory>('all');
 
     if (!type) return null;
 
     // カテゴリでフィルタリングしつつ、現在地からの距離を計算して「近い順」にソート
     const filteredSpots = bangkokRecommendations
-        .filter(s => recCategory === 'all' || s.category === recCategory)
-        .map(spot => {
+        .filter(
+            (s) =>
+                recCategory === 'all' ||
+                s.category === recCategory
+        )
+        .map((spot) => {
             const distance = calculateDistance(
                 currentLocation.lat,
                 currentLocation.lng,
                 spot.coordinate.latitude,
                 spot.coordinate.longitude
             );
-            return { ...spot, distance: Math.round(distance * 10) / 10 };
+
+            return {
+                ...spot,
+                distance:
+                    Math.round(distance * 10) / 10,
+            };
         })
         .sort((a, b) => a.distance - b.distance);
+
+    const recommendationCategories: {
+        key: RecommendationCategory;
+        label: string;
+    }[] = [
+        { key: 'all', label: 'すべて' },
+        { key: 'massage', label: '💆 マッサージ' },
+        { key: 'cafe', label: '☕ カフェ' },
+        { key: 'food', label: '🍜 グルメ' },
+    ];
 
     return (
         <div className="absolute inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 pointer-events-auto">
@@ -58,31 +103,60 @@ export default function GuideModal({
                 <div className="flex justify-between items-center border-b pb-3 mb-4">
                     <div className="flex items-center gap-2">
                         <span className="text-2xl">
-                            {type === 'exchange' ? '💴' : 
-                             type === 'squall' ? '🌧️' : 
-                             type === 'prep' ? '✈️' : 
-                             type === 'recommend' ? '✨' : 
-                             type === 'transport' ? '🚆' : 
-                             type === 'safety' ? '🛡️' : 
-                             type === 'thai_phrases' ? '🗣️' : 
-                             type === 'drive' ? '🚗' : 
-                             type === 'stomach' ? '🧊' : 
-                             type === 'shopping' ? '🛍️' : '📖'}
+                            {type === 'exchange'
+                                ? '💴'
+                                : type === 'squall'
+                                  ? '🌧️'
+                                  : type === 'prep'
+                                    ? '✈️'
+                                    : type === 'recommend'
+                                      ? '✨'
+                                      : type === 'transport'
+                                        ? '🚆'
+                                        : type === 'safety'
+                                          ? '🛡️'
+                                          : type ===
+                                              'thai_phrases'
+                                            ? '🗣️'
+                                            : type === 'drive'
+                                              ? '🚗'
+                                              : type ===
+                                                  'stomach'
+                                                ? '🧊'
+                                                : type ===
+                                                    'shopping'
+                                                  ? '🛍️'
+                                                  : '📖'}
                         </span>
                         <h2 className="font-bold text-gray-900 text-base">
-                            {type === 'exchange' ? '高レート両替所ガイド (PR)' : 
-                             type === 'squall' ? 'スコール避難スポット' : 
-                             type === 'prep' ? 'タイ渡航の準備 (TDAC)' : 
-                             type === 'recommend' ? '周辺おすすめリフレッシュ' : 
-                             type === 'transport' ? 'タイ国鉄・鉄道移動ガイド' : 
-                             type === 'safety' ? '安全・治安＆注意エリアガイド' : 
-                             type === 'thai_phrases' ? 'サバイバルタイ語会話' : 
-                             type === 'drive' ? 'タイの運転・レンタカーガイド' : 
-                             type === 'stomach' ? '食あたり・水あたり対策ガイド' : 
-                             type === 'shopping' ? 'お買い物 ＆ 免税手続き(VAT Refund)' : 'タイマナー ＆ チップ'}
+                            {type === 'exchange'
+                                ? '高レート両替所ガイド (PR)'
+                                : type === 'squall'
+                                  ? 'スコール避難スポット'
+                                  : type === 'prep'
+                                    ? 'タイ渡航の準備 (TDAC)'
+                                    : type === 'recommend'
+                                      ? '周辺おすすめリフレッシュ'
+                                      : type === 'transport'
+                                        ? 'タイ国鉄・鉄道移動ガイド'
+                                        : type === 'safety'
+                                          ? '安全・治安＆注意エリアガイド'
+                                          : type ===
+                                              'thai_phrases'
+                                            ? 'サバイバルタイ語会話'
+                                            : type === 'drive'
+                                              ? 'タイの運転・レンタカーガイド'
+                                              : type ===
+                                                  'stomach'
+                                                ? '食あたり・水あたり対策ガイド'
+                                                : type ===
+                                                    'shopping'
+                                                  ? 'お買い物 ＆ 免税手続き(VAT Refund)'
+                                                  : 'タイマナー ＆ チップ'}
                         </h2>
                     </div>
-                    <button 
+
+                    <button
                         onClick={onClose}
                         className="text-gray-400 hover:text-gray-600 text-lg font-bold px-2 py-1"
                     >
@@ -96,88 +170,147 @@ export default function GuideModal({
                     {type === 'recommend' && (
                         <div className="flex flex-col gap-3">
                             <div className="bg-blue-50 border border-blue-200 p-3 rounded-2xl text-blue-900 text-[11px] leading-relaxed">
-                                <span className="font-bold block mb-1">✨ 現在地周辺のおすすめリフレッシュ</span>
+                                <span className="font-bold block mb-1">
+                                    ✨ 現在地周辺のおすすめリフレッシュ
+                                </span>
                                 バンコク市内の人気スパ・カフェ・屋台などを、あなたの現在地から近い順に表示しています。ワンタップで目的地に設定できます！
                             </div>
 
                             {/* カテゴリ切り替えボタン */}
                             <div className="flex gap-1.5 bg-gray-100 p-1 rounded-2xl">
-                                {[
-                                    { key: 'all', label: 'すべて' },
-                                    { key: 'massage', label: '💆 マッサージ' },
-                                    { key: 'cafe', label: '☕ カフェ' },
-                                    { key: 'food', label: '🍜 グルメ' },
-                                ].map((cat) => (
-                                    <button
-                                        key={cat.key}
-                                        onClick={() => setRecCategory(cat.key as any)}
-                                        className={`flex-1 py-1.5 text-[10px] font-bold rounded-xl transition-all ${
-                                            recCategory === cat.key ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-600 hover:bg-white'
-                                        }`}
-                                    >
-                                        {cat.label}
-                                    </button>
-                                ))}
+                                {recommendationCategories.map(
+                                    (cat) => (
+                                        <button
+                                            key={cat.key}
+                                            onClick={() =>
+                                                setRecCategory(
+                                                    cat.key
+                                                )
+                                            }
+                                            className={`flex-1 py-1.5 text-[10px] font-bold rounded-xl transition-all ${
+                                                recCategory ===
+                                                cat.key
+                                                    ? 'bg-blue-600 text-white shadow-sm'
+                                                    : 'text-gray-600 hover:bg-white'
+                                            }`}
+                                        >
+                                            {cat.label}
+                                        </button>
+                                    )
+                                )}
                             </div>
 
                             {/* スポット一覧（近い順に動的ソート） */}
-                            {filteredSpots.map((spot) => (
-                                <div key={spot.id} className="bg-gray-50 border border-gray-200 rounded-2xl p-3 flex flex-col gap-2">
-                                    <div className="flex justify-between items-start">
-                                        <div>
-                                            <div className="flex items-center gap-1.5 mb-1">
-                                                <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full text-white ${
-                                                    spot.category === 'massage' ? 'bg-purple-600' :
-                                                    spot.category === 'cafe' ? 'bg-amber-600' : 'bg-rose-600'
-                                                }`}>
-                                                    {spot.category === 'massage' ? 'マッサージ・スパ' : spot.category === 'cafe' ? 'カフェ・スイーツ' : 'グルメ・屋台'}
-                                                </span>
-                                                <span className="text-[10px] bg-blue-100 text-blue-800 font-extrabold px-2 py-0.5 rounded-full">
-                                                    現在地から約 {spot.distance} km
+                            {filteredSpots.map(
+                                (spot) => (
+                                    <div
+                                        key={spot.id}
+                                        className="bg-gray-50 border border-gray-200 rounded-2xl p-3 flex flex-col gap-2"
+                                    >
+                                        <div className="flex justify-between items-start">
+                                            <div>
+                                                <div className="flex items-center gap-1.5 mb-1">
+                                                    <span
+                                                        className={`text-[9px] font-bold px-2 py-0.5 rounded-full text-white ${
+                                                            spot.category ===
+                                                            'massage'
+                                                                ? 'bg-purple-600'
+                                                                : spot.category ===
+                                                                    'cafe'
+                                                                  ? 'bg-amber-600'
+                                                                  : 'bg-rose-600'
+                                                        }`}
+                                                    >
+                                                        {spot.category ===
+                                                        'massage'
+                                                            ? 'マッサージ・スパ'
+                                                            : spot.category ===
+                                                                'cafe'
+                                                              ? 'カフェ・スイーツ'
+                                                              : 'グルメ・屋台'}
+                                                    </span>
+
+                                                    <span className="text-[10px] bg-blue-100 text-blue-800 font-extrabold px-2 py-0.5 rounded-full">
+                                                        現在地から約{' '}
+                                                        {
+                                                            spot.distance
+                                                        }{' '}
+                                                        km
+                                                    </span>
+                                                </div>
+
+                                                <h3 className="font-bold text-gray-900 text-xs mt-1">
+                                                    {spot.name}
+                                                </h3>
+
+                                                <span className="text-[10px] text-gray-500 font-medium">
+                                                    📍 エリア:{' '}
+                                                    {spot.area}
                                                 </span>
                                             </div>
-                                            <h3 className="font-bold text-gray-900 text-xs mt-1">{spot.name}</h3>
-                                            <span className="text-[10px] text-gray-500 font-medium">📍 エリア: {spot.area}</span>
                                         </div>
-                                    </div>
-                                    <p className="text-[11px] text-gray-600 leading-relaxed">{spot.description}</p>
-                                    
-                                    <button
-                                        onClick={() => {
-                                            if (onSelectRecommendedSpot) {
-                                                onSelectRecommendedSpot(spot);
+
+                                        <p className="text-[11px] text-gray-600 leading-relaxed">
+                                            {
+                                                spot.description
                                             }
-                                            onClose();
-                                        }}
-                                        className="w-full bg-blue-600 text-white font-bold py-2 rounded-xl text-center hover:bg-blue-700 transition-colors shadow-sm flex items-center justify-center gap-1 mt-1"
-                                    >
-                                        <span>📍</span> マップで場所を見る（目的地に設定）
-                                    </button>
-                                </div>
-                            ))}
+                                        </p>
+
+                                        <button
+                                            onClick={() => {
+                                                if (
+                                                    onSelectRecommendedSpot
+                                                ) {
+                                                    onSelectRecommendedSpot(
+                                                        spot
+                                                    );
+                                                }
+
+                                                onClose();
+                                            }}
+                                            className="w-full bg-blue-600 text-white font-bold py-2 rounded-xl text-center hover:bg-blue-700 transition-colors shadow-sm flex items-center justify-center gap-1 mt-1"
+                                        >
+                                            <span>📍</span>{' '}
+                                            マップで場所を見る（目的地に設定）
+                                        </button>
+                                    </div>
+                                )
+                            )}
 
                             {/* ガイド内おすすめPR枠 (Klook & KKday) */}
                             <div className="mt-2 pt-3 border-t border-gray-100 grid grid-cols-2 gap-2">
-                                <a 
-                                    href="/api/klook" 
-                                    target="_blank" 
-                                    rel="noopener noreferrer" 
+                                <a
+                                    href="/api/klook"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
                                     className="bg-amber-50 hover:bg-amber-100 border border-amber-200 p-2.5 rounded-2xl flex flex-col items-center gap-1 transition-all text-center group"
                                 >
-                                    <span className="text-base">🎫</span>
-                                    <span className="text-[11px] font-bold text-amber-900 leading-tight">現地ツアー検索</span>
-                                    <span className="text-[9px] text-amber-600 font-medium">Klook (PR)</span>
+                                    <span className="text-base">
+                                        🎫
+                                    </span>
+                                    <span className="text-[11px] font-bold text-amber-900 leading-tight">
+                                        現地ツアー検索
+                                    </span>
+                                    <span className="text-[9px] text-amber-600 font-medium">
+                                        Klook (PR)
+                                    </span>
                                 </a>
 
-                                <a 
-                                    href="/api/kkday" 
-                                    target="_blank" 
-                                    rel="noopener noreferrer" 
+                                <a
+                                    href="/api/kkday"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
                                     className="bg-orange-50 hover:bg-orange-100 border border-orange-200 p-2.5 rounded-2xl flex flex-col items-center gap-1 transition-all text-center group"
                                 >
-                                    <span className="text-base">🎡</span>
-                                    <span className="text-[11px] font-bold text-orange-900 leading-tight">現地ツアー検索</span>
-                                    <span className="text-[9px] text-orange-600 font-medium">KKday (PR)</span>
+                                    <span className="text-base">
+                                        🎡
+                                    </span>
+                                    <span className="text-[11px] font-bold text-orange-900 leading-tight">
+                                        現地ツアー検索
+                                    </span>
+                                    <span className="text-[9px] text-orange-600 font-medium">
+                                        KKday (PR)
+                                    </span>
                                 </a>
                             </div>
                         </div>
@@ -187,30 +320,55 @@ export default function GuideModal({
                     {type === 'shopping' && (
                         <div className="flex flex-col gap-3 leading-relaxed">
                             <div className="bg-purple-50 border border-purple-200 p-3 rounded-2xl text-purple-900 text-[11px]">
-                                <span className="font-bold block mb-1">🛍️ バンコクお買い物 ＆ 免税のコツ</span>
+                                <span className="font-bold block mb-1">
+                                    🛍️ バンコクお買い物 ＆ 免税のコツ
+                                </span>
                                 デパート等でのショッピングをお得に楽しむコツと、初めてでも安心な免税（VAT Refund）の手続き手順です。
                             </div>
 
                             <div className="bg-gray-50 p-3 rounded-2xl border space-y-2">
-                                <h4 className="font-bold text-gray-800 text-xs">💡 お買い物の便利ティップス</h4>
+                                <h4 className="font-bold text-gray-800 text-xs">
+                                    💡 お買い物の便利ティップス
+                                </h4>
+
                                 <ul className="list-disc pl-4 space-y-1 text-[11px] text-gray-600">
-                                    <li><b>ツーリストカードの活用</b>: サイアム・パラゴンやセントラルなどの大型デパートのインフォメーションカウンターでパスポートを提示すると、外国人向けの割引カード（5〜10%OFFなど）がもらえます！</li>
-                                    <li><b>免税の条件</b>: 「VAT Refund for Tourists」の掲示があるお店で、<b>1日・1店舗あたり2,000バーツ以上</b>購入することが条件です。</li>
+                                    <li>
+                                        <b>
+                                            ツーリストカードの活用
+                                        </b>
+                                        : サイアム・パラゴンやセントラルなどの大型デパートのインフォメーションカウンターでパスポートを提示すると、外国人向けの割引カード（5〜10%OFFなど）がもらえます！
+                                    </li>
+                                    <li>
+                                        <b>免税の条件</b>
+                                        : 「VAT Refund for Tourists」の掲示があるお店で、<b>1日・1店舗あたり2,000バーツ以上</b>購入することが条件です。
+                                    </li>
                                 </ul>
                             </div>
 
                             <div className="bg-gray-50 p-3 rounded-2xl border space-y-2">
-                                <h4 className="font-bold text-gray-800 text-xs">📄 免税書類（PP10）の作り方</h4>
+                                <h4 className="font-bold text-gray-800 text-xs">
+                                    📄 免税書類（PP10）の作り方
+                                </h4>
+
                                 <p className="text-[11px] text-gray-600">
                                     お買い物の当日、お店のレジや免税カウンターで<b>パスポートを提示</b>し、「VAT Refundお願いします」と伝えて、黄色い申請用紙（<b>PP10用紙</b>）を必ず発行してもらいましょう。
                                 </p>
                             </div>
 
                             <div className="bg-gray-50 p-3 rounded-2xl border space-y-2">
-                                <h4 className="font-bold text-gray-800 text-xs">✈️ 空港での免税手続きステップ</h4>
+                                <h4 className="font-bold text-gray-800 text-xs">
+                                    ✈️ 空港での免税手続きステップ
+                                </h4>
+
                                 <ol className="list-decimal pl-4 space-y-1 text-[11px] text-gray-600">
-                                    <li><b>チェックイン前</b>: 空港の税関（VAT Refund Office）に、パスポート・PP10用紙・購入品（高額品は現物確認あり）を持参してスタンプをもらう。</li>
-                                    <li><b>出国審査後</b>: 免税店エリア内の換金カウンター（VAT Refund Counter）でスタンプ済み用紙を出し、現金（バーツ）またはカードで還付金を受け取る。</li>
+                                    <li>
+                                        <b>チェックイン前</b>
+                                        : 空港の税関（VAT Refund Office）に、パスポート・PP10用紙・購入品（高額品は現物確認あり）を持参してスタンプをもらう。
+                                    </li>
+                                    <li>
+                                        <b>出国審査後</b>
+                                        : 免税店エリア内の換金カウンター（VAT Refund Counter）でスタンプ済み用紙を出し、現金（バーツ）またはカードで還付金を受け取る。
+                                    </li>
                                 </ol>
                             </div>
                         </div>
@@ -220,30 +378,46 @@ export default function GuideModal({
                     {type === 'stomach' && (
                         <div className="flex flex-col gap-3 leading-relaxed">
                             <div className="bg-cyan-50 border border-cyan-200 p-3 rounded-2xl text-cyan-900 text-[11px]">
-                                <span className="font-bold block mb-1">🧊 食あたり・水あたりを防ぐ鉄則</span>
+                                <span className="font-bold block mb-1">
+                                    🧊 食あたり・水あたりを防ぐ鉄則
+                                </span>
                                 タイ旅行で一番気をつけたいお腹のトラブルを防ぐためのポイントと、怪しい氷をスマートに断るタイ語をご紹介します。
                             </div>
 
                             <div className="bg-gray-50 p-3 rounded-2xl border space-y-2">
-                                <h4 className="font-bold text-gray-800 text-xs">💧 飲料水と「氷」の注意点</h4>
+                                <h4 className="font-bold text-gray-800 text-xs">
+                                    💧 飲料水と「氷」の注意点
+                                </h4>
+
                                 <p className="text-[11px] text-gray-600">
                                     水道水は絶対にそのまま飲まないようにしましょう（歯磨きの際もミネラルウォーターを使うのが理想です）。また、屋台やローカル店でドリンクの氷が心配なときは、以下のタイ語で氷抜きをリクエストできます。
                                 </p>
+
                                 <div className="bg-white p-2.5 rounded-xl border border-cyan-200 mt-1">
-                                    <div className="text-[10px] font-bold text-gray-500">「氷を入れないでください」</div>
-                                    <div className="text-cyan-800 font-extrabold text-xs mt-0.5">マイ・サイ・ナムケーン・カップ / カー</div>
+                                    <div className="text-[10px] font-bold text-gray-500">
+                                        「氷を入れないでください」
+                                    </div>
+                                    <div className="text-cyan-800 font-extrabold text-xs mt-0.5">
+                                        マイ・サイ・ナムケーン・カップ / カー
+                                    </div>
                                 </div>
                             </div>
 
                             <div className="bg-gray-50 p-3 rounded-2xl border space-y-2">
-                                <h4 className="font-bold text-gray-800 text-xs">🍜 屋台や飲食店選びのコツ</h4>
+                                <h4 className="font-bold text-gray-800 text-xs">
+                                    🍜 屋台や飲食店選びのコツ
+                                </h4>
+
                                 <p className="text-[11px] text-gray-600">
                                     生肉、生魚、貝類などの生ものはなるべく避けましょう。作り置きされて衛生面が気になるお店は避け、<b>「目の前でアツアツに調理してくれる、回転率の良い人気店」</b>を選ぶのが安心です。
                                 </p>
                             </div>
 
                             <div className="bg-gray-50 p-3 rounded-2xl border space-y-2">
-                                <h4 className="font-bold text-gray-800 text-xs">💊 お腹を壊してしまったときの備え</h4>
+                                <h4 className="font-bold text-gray-800 text-xs">
+                                    💊 お腹を壊してしまったときの備え
+                                </h4>
+
                                 <p className="text-[11px] text-gray-600">
                                     万が一お腹を壊した場合は、市内の大型薬局（BootsやWatsonsなど）に行けば、英語で相談して現地のお薬がすぐ手に入ります。日本から飲み慣れた正露丸や胃腸薬、処方薬を持参しておくと一番安心です。
                                 </p>
@@ -255,38 +429,62 @@ export default function GuideModal({
                     {type === 'drive' && (
                         <div className="flex flex-col gap-3 leading-relaxed">
                             <div className="bg-blue-50 border border-blue-200 p-3 rounded-2xl text-blue-900 text-[11px]">
-                                <span className="font-bold block mb-1">🚗 タイでの運転ルールと歩行者の心得</span>
+                                <span className="font-bold block mb-1">
+                                    🚗 タイでの運転ルールと歩行者の心得
+                                </span>
                                 タイは日本と同じ「左側通行・右ハンドル」ですが、独特の交通ルールや運転マナーがあります。また、歩行者として道路を渡る際の大切なポイントを確認しておきましょう。
                             </div>
 
                             <div className="bg-gray-50 p-3 rounded-2xl border space-y-2">
-                                <h4 className="font-bold text-gray-800 text-xs">🚦 赤信号での右折ルール（T字路など）</h4>
+                                <h4 className="font-bold text-gray-800 text-xs">
+                                    🚦 赤信号での右折ルール（T字路など）
+                                </h4>
+
                                 <p className="text-[11px] text-gray-600">
                                     タイの一部の交差点やT字路では、周囲の安全をしっかり確認した上で、<b>赤信号のままでも右折（日本でいう左折の感覚）が許可されている</b>場合があります。ただし後続車からのプレッシャーに焦らず、安全第一で判断することが重要です。
                                 </p>
                             </div>
 
                             <div className="bg-gray-50 p-3 rounded-2xl border space-y-2">
-                                <h4 className="font-bold text-gray-800 text-xs">🛵 凄まじい量のバイクのすり抜け</h4>
+                                <h4 className="font-bold text-gray-800 text-xs">
+                                    🛵 凄まじい量のバイクのすり抜け
+                                </h4>
+
                                 <p className="text-[11px] text-gray-600">
                                     運転する際は、左右の車の間から大量のバイクがすり抜けてきます。日本以上に頻繁なミラー確認と、進路変更時の細心の注意が必要です。
                                 </p>
                             </div>
 
                             <div className="bg-amber-50 border border-amber-200 p-3 rounded-2xl text-amber-900 text-[11px]">
-                                <span className="font-bold block mb-1">🚶 歩行者は「歩道橋」を使うのが鉄則</span>
+                                <span className="font-bold block mb-1">
+                                    🚶 歩行者は「歩道橋」を使うのが鉄則
+                                </span>
                                 大通りの車道は車がスピードを出しており、横断歩道があっても日本のように簡単に止まってくれません。無理に車道を渡るのは非常に危険なため、少し遠回りになっても<b>頑丈な屋根付きの「歩道橋」を積極的に利用する</b>のが安全かつ確実です。
                             </div>
 
                             <div className="bg-gray-50 border border-gray-200 p-3 rounded-2xl flex flex-col gap-2">
                                 <div className="flex justify-between items-start">
                                     <div>
-                                        <span className="bg-indigo-600 text-white text-[9px] font-bold px-2 py-0.5 rounded-full">おすすめ予約 (PR)</span>
-                                        <h3 className="font-bold text-gray-900 text-xs mt-1">Rentalcars.com (レンタカーズ)</h3>
+                                        <span className="bg-indigo-600 text-white text-[9px] font-bold px-2 py-0.5 rounded-full">
+                                            おすすめ予約 (PR)
+                                        </span>
+
+                                        <h3 className="font-bold text-gray-900 text-xs mt-1">
+                                            Rentalcars.com (レンタカーズ)
+                                        </h3>
                                     </div>
                                 </div>
-                                <p className="text-[11px] text-gray-600">郊外へのドライブや地方都市への旅行などでレンタカーを手配したいときは、世界中の大手レンタカー会社を比較・日本語で予約できるサービスが安心です。</p>
-                                <a href="https://www.rentalcars.com/" target="_blank" rel="noopener noreferrer" className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-1.5 px-3 rounded-xl text-center text-[10px] transition-colors">
+
+                                <p className="text-[11px] text-gray-600">
+                                    郊外へのドライブや地方都市への旅行などでレンタカーを手配したいときは、世界中の大手レンタカー会社を比較・日本語で予約できるサービスが安心です。
+                                </p>
+
+                                <a
+                                    href="https://www.rentalcars.com/"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-1.5 px-3 rounded-xl text-center text-[10px] transition-colors"
+                                >
                                     🌐 Rentalcars.com 公式サイトを開く
                                 </a>
                             </div>
@@ -297,38 +495,62 @@ export default function GuideModal({
                     {type === 'safety' && (
                         <div className="flex flex-col gap-3 leading-relaxed">
                             <div className="bg-rose-50 border border-rose-200 p-3 rounded-2xl text-rose-900 text-[11px]">
-                                <span className="font-bold block mb-1">🛡️ バンコクの治安と注意すべきエリア</span>
+                                <span className="font-bold block mb-1">
+                                    🛡️ バンコクの治安と注意すべきエリア
+                                </span>
                                 バンコクは比較的治安の良い都市ですが、スリ、置き引き、悪質な声かけに対する心構えを持っておくと安心です。
                             </div>
 
                             <div className="bg-gray-50 p-3 rounded-2xl border space-y-2">
-                                <h4 className="font-bold text-gray-800 text-xs">⚠️ 「日本円を見せて」などの不審な声かけ</h4>
+                                <h4 className="font-bold text-gray-800 text-xs">
+                                    ⚠️ 「日本円を見せて」などの不審な声かけ
+                                </h4>
+
                                 <p className="text-[11px] text-gray-600">
                                     観光地などで「記念に日本円を見せて」「お札のデザインを見せて」と声をかけられても、<b>絶対に財布や現金を取り出さない</b>でください。巧みなスリや詐欺の手口であるため、完全無視してその場を離れましょう。
                                 </p>
                             </div>
 
                             <div className="bg-gray-50 p-3 rounded-2xl border space-y-2">
-                                <h4 className="font-bold text-gray-800 text-xs">⚠️ 夜間の単独行動・注意が必要なエリア</h4>
+                                <h4 className="font-bold text-gray-800 text-xs">
+                                    ⚠️ 夜間の単独行動・注意が必要なエリア
+                                </h4>
+
                                 <p className="text-[11px] text-gray-600">
-                                    <b>ナナプラザやソイ・カウボーイ周辺の裏通り、深夜の暗い路地：</b>
+                                    <b>
+                                        ナナプラザやソイ・カウボーイ周辺の裏通り、深夜の暗い路地：
+                                    </b>
                                     華やかな歓楽街のメインから一本外れた路地や深夜の単独行動は、トラブルに巻き込まれやすくなります。夜間はなるべく大通りを歩き、配車アプリ（Grab/Bolt）を賢く利用しましょう。
                                 </p>
                             </div>
 
                             <div className="bg-gray-50 p-3 rounded-2xl border space-y-2">
-                                <h4 className="font-bold text-gray-800 text-xs">🛵 バイクによるひったくりへの警戒</h4>
+                                <h4 className="font-bold text-gray-800 text-xs">
+                                    🛵 バイクによるひったくりへの警戒
+                                </h4>
+
                                 <p className="text-[11px] text-gray-600">
                                     歩道でスマホを操作しながら歩くのは危険です。後ろから走ってきたバイクにひったくられる事例があるため、操作する際は建物側に寄って立ち止まりましょう。
                                 </p>
                             </div>
 
                             <div className="bg-amber-50 border border-amber-200 p-3 rounded-2xl text-amber-900 text-[11px]">
-                                <span className="font-bold block mb-1">📞 緊急時の連絡先（お守りメモ）</span>
+                                <span className="font-bold block mb-1">
+                                    📞 緊急時の連絡先（お守りメモ）
+                                </span>
+
                                 <ul className="list-disc pl-4 space-y-1 text-[10px] text-amber-900">
-                                    <li><b>観光警察（英語対応可）</b>: 1155</li>
-                                    <li><b>警察（一般）</b>: 191</li>
-                                    <li><b>在タイ日本国大使館</b>: +66-2-207-8500</li>
+                                    <li>
+                                        <b>観光警察（英語対応可）</b>:
+                                        1155
+                                    </li>
+                                    <li>
+                                        <b>警察（一般）</b>: 191
+                                    </li>
+                                    <li>
+                                        <b>在タイ日本国大使館</b>:
+                                        +66-2-207-8500
+                                    </li>
                                 </ul>
                             </div>
                         </div>
@@ -338,52 +560,100 @@ export default function GuideModal({
                     {type === 'thai_phrases' && (
                         <div className="flex flex-col gap-3 leading-relaxed">
                             <div className="bg-indigo-50 border border-indigo-200 p-3 rounded-2xl text-indigo-900 text-[11px]">
-                                <span className="font-bold block mb-1">🗣️ 旅で役立つサバイバルタイ語</span>
-                                タイでは語尾に自分の性別をつけて敬意を表します。<br/>
-                                <b>男性：〜カップ / 女性：〜カー</b> をつけて話すと非常に好印象です！
+                                <span className="font-bold block mb-1">
+                                    🗣️ 旅で役立つサバイバルタイ語
+                                </span>
+                                タイでは語尾に自分の性別をつけて敬意を表します。
+                                <br />
+                                <b>
+                                    男性：〜カップ / 女性：〜カー
+                                </b>{' '}
+                                をつけて話すと非常に好印象です！
                             </div>
 
                             <div className="bg-gray-50 p-3 rounded-2xl border space-y-2.5">
                                 <div className="border-b pb-2">
-                                    <div className="font-bold text-gray-900 text-xs">こんにちは / お疲れ様です</div>
-                                    <div className="text-blue-600 font-extrabold text-xs mt-0.5">サワディー・カップ / カー</div>
-                                    <div className="text-[10px] text-gray-500">基本の挨拶。お店に入る時や会った時にいつでも使えます。</div>
+                                    <div className="font-bold text-gray-900 text-xs">
+                                        こんにちは / お疲れ様です
+                                    </div>
+                                    <div className="text-blue-600 font-extrabold text-xs mt-0.5">
+                                        サワディー・カップ / カー
+                                    </div>
+                                    <div className="text-[10px] text-gray-500">
+                                        基本の挨拶。お店に入る時や会った時にいつでも使えます。
+                                    </div>
                                 </div>
 
                                 <div className="border-b pb-2">
-                                    <div className="font-bold text-gray-900 text-xs">氷を入れないでください</div>
-                                    <div className="text-blue-600 font-extrabold text-xs mt-0.5">マイ・サイ・ナムケーン・カップ / カー</div>
-                                    <div className="text-[10px] text-gray-500">水あたりが心配なときの必須フレーズ。</div>
+                                    <div className="font-bold text-gray-900 text-xs">
+                                        氷を入れないでください
+                                    </div>
+                                    <div className="text-blue-600 font-extrabold text-xs mt-0.5">
+                                        マイ・サイ・ナムケーン・カップ / カー
+                                    </div>
+                                    <div className="text-[10px] text-gray-500">
+                                        水あたりが心配なときの必須フレーズ。
+                                    </div>
                                 </div>
 
                                 <div className="border-b pb-2">
-                                    <div className="font-bold text-gray-900 text-xs">ありがとうございます</div>
-                                    <div className="text-blue-600 font-extrabold text-xs mt-0.5">コプ・クン・カップ / カー</div>
-                                    <div className="text-[10px] text-gray-500">お礼を伝えるときは笑顔でこれ一言。</div>
+                                    <div className="font-bold text-gray-900 text-xs">
+                                        ありがとうございます
+                                    </div>
+                                    <div className="text-blue-600 font-extrabold text-xs mt-0.5">
+                                        コプ・クン・カップ / カー
+                                    </div>
+                                    <div className="text-[10px] text-gray-500">
+                                        お礼を伝えるときは笑顔でこれ一言。
+                                    </div>
                                 </div>
 
                                 <div className="border-b pb-2">
-                                    <div className="font-bold text-gray-900 text-xs">いくらですか？</div>
-                                    <div className="text-blue-600 font-extrabold text-xs mt-0.5">ラーカ・タオライ・カップ / カー</div>
-                                    <div className="text-[10px] text-gray-500">屋台やマーケットでの買い物必須フレーズ。</div>
+                                    <div className="font-bold text-gray-900 text-xs">
+                                        いくらですか？
+                                    </div>
+                                    <div className="text-blue-600 font-extrabold text-xs mt-0.5">
+                                        ラーカ・タオライ・カップ / カー
+                                    </div>
+                                    <div className="text-[10px] text-gray-500">
+                                        屋台やマーケットでの買い物必須フレーズ。
+                                    </div>
                                 </div>
 
                                 <div className="border-b pb-2">
-                                    <div className="font-bold text-gray-900 text-xs">辛くしないでください</div>
-                                    <div className="text-blue-600 font-extrabold text-xs mt-0.5">マイ・ペット・カップ / カー</div>
-                                    <div className="text-[10px] text-gray-500">タイ料理が苦手・辛さを控えたいときに命を救う言葉です。</div>
+                                    <div className="font-bold text-gray-900 text-xs">
+                                        辛くしないでください
+                                    </div>
+                                    <div className="text-blue-600 font-extrabold text-xs mt-0.5">
+                                        マイ・ペット・カップ / カー
+                                    </div>
+                                    <div className="text-[10px] text-gray-500">
+                                        タイ料理が苦手・辛さを控えたいときに命を救う言葉です。
+                                    </div>
                                 </div>
 
                                 <div className="border-b pb-2">
-                                    <div className="font-bold text-gray-900 text-xs">美味しいです！</div>
-                                    <div className="text-blue-600 font-extrabold text-xs mt-0.5">アロイ・カップ / カー</div>
-                                    <div className="text-[10px] text-gray-500">料理を作ってくれた店員さんに伝えるととても喜ばれます。</div>
+                                    <div className="font-bold text-gray-900 text-xs">
+                                        美味しいです！
+                                    </div>
+                                    <div className="text-blue-600 font-extrabold text-xs mt-0.5">
+                                        アロイ・カップ / カー
+                                    </div>
+                                    <div className="text-[10px] text-gray-500">
+                                        料理を作ってくれた店員さんに伝えるととても喜ばれます。
+                                    </div>
                                 </div>
 
                                 <div>
-                                    <div className="font-bold text-gray-900 text-xs">大丈夫です / 要りません (お断り)</div>
-                                    <div className="text-blue-600 font-extrabold text-xs mt-0.5">マイ・ペン・ライ / プリッ・ノー</div>
-                                    <div className="text-[10px] text-gray-500">キャッチや不要な勧誘をスマートに断る時の一言。</div>
+                                    <div className="font-bold text-gray-900 text-xs">
+                                        大丈夫です / 要りません (お断り)
+                                    </div>
+                                    <div className="text-blue-600 font-extrabold text-xs mt-0.5">
+                                        マイ・ペン・ライ / プリッ・ノー
+                                    </div>
+                                    <div className="text-[10px] text-gray-500">
+                                        キャッチや不要な勧誘をスマートに断る時の一言。
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -392,72 +662,112 @@ export default function GuideModal({
                     {type === 'exchange' && (
                         <div className="flex flex-col gap-3">
                             <div className="bg-emerald-50 border border-emerald-200 p-3 rounded-2xl text-emerald-800 text-[11px] leading-relaxed">
-                                <span className="font-bold block mb-1">💡 バンコク両替の鉄則</span>
+                                <span className="font-bold block mb-1">
+                                    💡 バンコク両替の鉄則
+                                </span>
                                 空港やホテルの両替所はレートが低いため、市内の「高レート両替所」をピンポイントで利用するのが一番お得です！※必ずパスポートを持参してください。
                             </div>
-                            
-                            {bangkokExchangeShops.map((shop) => (
-                                <div key={shop.id} className="bg-gray-50 border border-gray-200 rounded-2xl p-3 flex flex-col gap-2">
-                                    <div className="flex justify-between items-start">
-                                        <div>
-                                            <span className="bg-emerald-600 text-white text-[9px] font-bold px-2 py-0.5 rounded-full">
-                                                {shop.rateRank}
-                                            </span>
-                                            <h3 className="font-bold text-gray-900 text-xs mt-1">{shop.name}</h3>
-                                            <p className="text-[10px] text-gray-500">{shop.area}</p>
+
+                            {bangkokExchangeShops.map(
+                                (shop) => (
+                                    <div
+                                        key={shop.id}
+                                        className="bg-gray-50 border border-gray-200 rounded-2xl p-3 flex flex-col gap-2"
+                                    >
+                                        <div className="flex justify-between items-start">
+                                            <div>
+                                                <span className="bg-emerald-600 text-white text-[9px] font-bold px-2 py-0.5 rounded-full">
+                                                    {
+                                                        shop.rateRank
+                                                    }
+                                                </span>
+
+                                                <h3 className="font-bold text-gray-900 text-xs mt-1">
+                                                    {shop.name}
+                                                </h3>
+
+                                                <p className="text-[10px] text-gray-500">
+                                                    {shop.area}
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <p className="text-[11px] text-gray-600">
+                                            {
+                                                shop.description
+                                            }
+                                        </p>
+
+                                        <div className="flex gap-2 mt-1">
+                                            <button
+                                                onClick={() => {
+                                                    onSelectExchangeShop(
+                                                        shop
+                                                    );
+                                                    onClose();
+                                                }}
+                                                className="flex-1 bg-emerald-600 text-white font-bold py-2 rounded-xl text-center hover:bg-emerald-700 transition-colors"
+                                            >
+                                                📍 マップで場所を見る
+                                            </button>
+
+                                            {shop.affiliateUrl && (
+                                                <a
+                                                    href={
+                                                        shop.affiliateUrl
+                                                    }
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-3 rounded-xl text-center flex items-center justify-center"
+                                                    title="公式サイト・パートナーリンク"
+                                                >
+                                                    🌐
+                                                </a>
+                                            )}
                                         </div>
                                     </div>
-                                    <p className="text-[11px] text-gray-600">{shop.description}</p>
-                                    
-                                    <div className="flex gap-2 mt-1">
-                                        <button
-                                            onClick={() => {
-                                                onSelectExchangeShop(shop);
-                                                onClose();
-                                            }}
-                                            className="flex-1 bg-emerald-600 text-white font-bold py-2 rounded-xl text-center hover:bg-emerald-700 transition-colors"
-                                        >
-                                            📍 マップで場所を見る
-                                        </button>
-                                        {shop.affiliateUrl && (
-                                            <a
-                                                href={shop.affiliateUrl}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-3 rounded-xl text-center flex items-center justify-center"
-                                                title="公式サイト・パートナーリンク"
-                                            >
-                                                🌐
-                                            </a>
-                                        )}
-                                    </div>
-                                </div>
-                            ))}
+                                )
+                            )}
 
                             {/* 両替所ガイド専用のお得なPRセクション（Wise・Airalo） */}
                             <div className="mt-2 pt-3 border-t border-gray-100 flex flex-col gap-2">
-                                <p className="text-[10px] text-gray-400 font-bold px-1">現金と合わせてお得な準備サービス (PR)</p>
+                                <p className="text-[10px] text-gray-400 font-bold px-1">
+                                    現金と合わせてお得な準備サービス (PR)
+                                </p>
+
                                 <div className="grid grid-cols-2 gap-2">
-                                    <a 
-                                        href="https://wise.com/invite/dic/junichim52" 
-                                        target="_blank" 
-                                        rel="noopener noreferrer" 
+                                    <a
+                                        href="https://wise.com/invite/dic/junichim52"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
                                         className="bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 p-2.5 rounded-2xl flex flex-col items-center gap-1 transition-all text-center"
                                     >
-                                        <span className="text-base">💳</span>
-                                        <span className="text-[11px] font-bold text-emerald-900 leading-tight">Wiseデビットカード (PR)</span>
-                                        <span className="text-[9px] text-emerald-600 font-medium">手数料最安クラスで両替</span>
+                                        <span className="text-base">
+                                            💳
+                                        </span>
+                                        <span className="text-[11px] font-bold text-emerald-900 leading-tight">
+                                            Wiseデビットカード (PR)
+                                        </span>
+                                        <span className="text-[9px] text-emerald-600 font-medium">
+                                            手数料最安クラスで両替
+                                        </span>
                                     </a>
 
-                                    <a 
-                                        href="https://airalo.pxf.io/BKKNAVI" 
-                                        target="_blank" 
-                                        rel="noopener noreferrer" 
+                                    <a
+                                        href="https://airalo.pxf.io/BKKNAVI"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
                                         className="bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 p-2.5 rounded-2xl flex flex-col items-center gap-1 transition-all text-center"
                                     >
-                                        <span className="text-base">📶</span>
-                                        <span className="text-[11px] font-bold text-indigo-900 leading-tight">Airalo eSIM (PR)</span>
-                                        <span className="text-[9px] text-indigo-600 font-medium">クーポン自動適用でお得</span>
+                                        <span className="text-base">
+                                            📶
+                                        </span>
+                                        <span className="text-[11px] font-bold text-indigo-900 leading-tight">
+                                            Airalo eSIM (PR)
+                                        </span>
+                                        <span className="text-[9px] text-indigo-600 font-medium">
+                                            クーポン自動適用でお得
+                                        </span>
                                     </a>
                                 </div>
                             </div>
@@ -467,15 +777,36 @@ export default function GuideModal({
                     {type === 'squall' && (
                         <div className="flex flex-col gap-3 leading-relaxed">
                             <div className="bg-cyan-50 border border-cyan-200 p-3 rounded-2xl text-cyan-900 text-[11px]">
-                                <span className="font-bold block mb-1">🌧️ 雨季（5月〜10月）のスコール対策</span>
+                                <span className="font-bold block mb-1">
+                                    🌧️ 雨季（5月〜10月）のスコール対策
+                                </span>
                                 夕方以降に突然激しい雨が降ります。30分〜1時間程度で止むことが多いため、無理に歩かず大型商業施設や地下鉄駅へ避難するのがベストです。
                             </div>
+
                             <div className="bg-gray-50 p-3 rounded-2xl border">
-                                <h4 className="font-bold text-gray-800 mb-1">🏢 おすすめの雨宿りスポット</h4>
+                                <h4 className="font-bold text-gray-800 mb-1">
+                                    🏢 おすすめの雨宿りスポット
+                                </h4>
+
                                 <ul className="list-disc pl-4 space-y-1 text-gray-600">
-                                    <li><b>サイアム・パラゴン / セントラル・ワールド</b> (地下街や直結通路が充実)</li>
-                                    <li><b>ターミナル21アソーク</b> (駅直結でフードコートもあり雨宿りに最適)</li>
-                                    <li><b>各MRT（地下鉄）の駅構内</b> (地下のため完全に濡れません)</li>
+                                    <li>
+                                        <b>
+                                            サイアム・パラゴン / セントラル・ワールド
+                                        </b>{' '}
+                                        (地下街や直結通路が充実)
+                                    </li>
+                                    <li>
+                                        <b>
+                                            ターミナル21アソーク
+                                        </b>{' '}
+                                        (駅直結でフードコートもあり雨宿りに最適)
+                                    </li>
+                                    <li>
+                                        <b>
+                                            各MRT（地下鉄）の駅構内
+                                        </b>{' '}
+                                        (地下のため完全に濡れません)
+                                    </li>
                                 </ul>
                             </div>
                         </div>
@@ -484,22 +815,33 @@ export default function GuideModal({
                     {type === 'prep' && (
                         <div className="flex flex-col gap-3 leading-relaxed">
                             <div className="bg-amber-50 border border-amber-200 p-3 rounded-2xl text-amber-900 text-[11px]">
-                                <span className="font-bold block mb-1">✈️ 入国前の事前準備：TDAC（入国カード）</span>
+                                <span className="font-bold block mb-1">
+                                    ✈️ 入国前の事前準備：TDAC（入国カード）
+                                </span>
                                 タイ入国に際して、デジタル入国カード（TDAC）の事前登録が求められます。スムーズな渡航のために出発前にお済ませください。
+
                                 <div className="mt-2">
-                                    <a 
-                                        href="https://tdac.immigration.go.th" 
-                                        target="_blank" 
-                                        rel="noopener noreferrer" 
+                                    <a
+                                        href="https://tdac.immigration.go.th"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
                                         className="inline-flex items-center gap-1 bg-amber-600 hover:bg-amber-700 text-white font-bold py-1.5 px-3 rounded-xl text-[10px] transition-colors"
                                     >
                                         🌐 TDAC公式申請サイトを開く
                                     </a>
                                 </div>
                             </div>
+
                             <div className="bg-gray-50 p-3 rounded-2xl border text-[11px] text-gray-600 space-y-1">
-                                <p><b>パスポート残存期間</b>: タイ入国時に6ヶ月以上残っている必要があります。</p>
-                                <p><b>航空券の準備</b>: 出国用の航空券（Eチケット等）の提示が求められる場合があります。</p>
+                                <p>
+                                    <b>パスポート残存期間</b>:
+                                    タイ入国時に6ヶ月以上残っている必要があります。
+                                </p>
+
+                                <p>
+                                    <b>航空券の準備</b>:
+                                    出国用の航空券（Eチケット等）の提示が求められる場合があります。
+                                </p>
                             </div>
                         </div>
                     )}
@@ -508,19 +850,35 @@ export default function GuideModal({
                         <div className="flex flex-col gap-3 leading-relaxed">
                             {/* タイ国鉄の予約・攻略 */}
                             <div className="bg-blue-50 border border-blue-200 p-3 rounded-2xl text-blue-900 text-[11px]">
-                                <span className="font-bold block mb-1">🚆 タイ国鉄（寝台列車など）切符予約の攻略法</span>
+                                <span className="font-bold block mb-1">
+                                    🚆 タイ国鉄（寝台列車など）切符予約の攻略法
+                                </span>
                                 人気の寝台列車などのチケット争奪戦を勝ち抜くための「二段構え」のコツです。
                             </div>
 
                             <div className="bg-gray-50 border border-gray-200 p-3 rounded-2xl flex flex-col gap-2">
                                 <div className="flex justify-between items-start">
                                     <div>
-                                        <span className="bg-blue-600 text-white text-[9px] font-bold px-2 py-0.5 rounded-full">本命（最安・最速）</span>
-                                        <h3 className="font-bold text-gray-900 text-xs mt-1">タイ国鉄 公式 (D-Ticket)</h3>
+                                        <span className="bg-blue-600 text-white text-[9px] font-bold px-2 py-0.5 rounded-full">
+                                            本命（最安・最速）
+                                        </span>
+
+                                        <h3 className="font-bold text-gray-900 text-xs mt-1">
+                                            タイ国鉄 公式 (D-Ticket)
+                                        </h3>
                                     </div>
                                 </div>
-                                <p className="text-[11px] text-gray-600">手数料が一番安く最速ですが、<b>動作が重くエラーが起きやすい</b>です。事前のアカウント作成・ログインが必須。</p>
-                                <a href="https://www.dticket.railway.co.th/" target="_blank" rel="noopener noreferrer" className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-1.5 px-3 rounded-xl text-center text-[10px] transition-colors">
+
+                                <p className="text-[11px] text-gray-600">
+                                    手数料が一番安く最速ですが、<b>動作が重くエラーが起きやすい</b>です。事前のアカウント作成・ログインが必須。
+                                </p>
+
+                                <a
+                                    href="https://www.dticket.railway.co.th/"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-1.5 px-3 rounded-xl text-center text-[10px] transition-colors"
+                                >
                                     🌐 D-Ticket 公式サイトを開く
                                 </a>
                             </div>
@@ -528,16 +886,36 @@ export default function GuideModal({
                             <div className="bg-gray-50 border border-gray-200 p-3 rounded-2xl flex flex-col gap-2">
                                 <div className="flex justify-between items-start">
                                     <div>
-                                        <span className="bg-indigo-600 text-white text-[9px] font-bold px-2 py-0.5 rounded-full">保険・裏技（軽快・確実）</span>
-                                        <h3 className="font-bold text-gray-900 text-xs mt-1">12Go / Baolau</h3>
+                                        <span className="bg-indigo-600 text-white text-[9px] font-bold px-2 py-0.5 rounded-full">
+                                            保険・裏技（軽快・確実）
+                                        </span>
+
+                                        <h3 className="font-bold text-gray-900 text-xs mt-1">
+                                            12Go / Baolau
+                                        </h3>
                                     </div>
                                 </div>
-                                <p className="text-[11px] text-gray-600">タイ全土をカバーし、<b>画面が非常に軽くてスムーズ</b>です。公式が繋がらない時のバックアップに最適（手数料あり）。</p>
+
+                                <p className="text-[11px] text-gray-600">
+                                    タイ全土をカバーし、<b>画面が非常に軽くてスムーズ</b>です。公式が繋がらない時のバックアップに最適（手数料あり）。
+                                </p>
+
                                 <div className="flex gap-2">
-                                    <a href="https://12go.asia/ja" target="_blank" rel="noopener noreferrer" className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-1.5 px-2 rounded-xl text-center text-[10px] transition-colors">
+                                    <a
+                                        href="https://12go.asia/ja"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-1.5 px-2 rounded-xl text-center text-[10px] transition-colors"
+                                    >
                                         🌐 12Goを開く
                                     </a>
-                                    <a href="https://www.baolau.com/" target="_blank" rel="noopener noreferrer" className="flex-1 bg-gray-700 hover:bg-gray-800 text-white font-bold py-1.5 px-2 rounded-xl text-center text-[10px] transition-colors">
+
+                                    <a
+                                        href="https://www.baolau.com/"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="flex-1 bg-gray-700 hover:bg-gray-800 text-white font-bold py-1.5 px-2 rounded-xl text-center text-[10px] transition-colors"
+                                    >
                                         🌐 Baolauを開く
                                     </a>
                                 </div>
@@ -545,19 +923,28 @@ export default function GuideModal({
 
                             {/* BTS / MRT のチケットレス乗車ガイド */}
                             <div className="bg-emerald-50 border border-emerald-200 p-3 rounded-2xl text-emerald-900 text-[11px] mt-1">
-                                <span className="font-bold block mb-1">💳 市内移動（BTS / MRT）のチケットレス術</span>
+                                <span className="font-bold block mb-1">
+                                    💳 市内移動（BTS / MRT）のチケットレス術
+                                </span>
                                 券売機の長い行列に並ばず、日本のSUICA感覚でスムーズに乗車する方法です！
                             </div>
 
                             <div className="bg-gray-50 border border-gray-200 p-3 rounded-2xl flex flex-col gap-2">
-                                <h3 className="font-bold text-gray-900 text-xs">1. BTS（スカイトレイン）</h3>
+                                <h3 className="font-bold text-gray-900 text-xs">
+                                    1. BTS（スカイトレイン）
+                                </h3>
+
                                 <p className="text-[11px] text-gray-600 leading-relaxed">
-                                    <b>ラビットカード (Rabbit Card)</b> という日本のSuicaのような交通系ICカードが窓口や駅構内で購入できます。または、<b>タッチ決済対応のクレジットカード（Visa/Mastercardのコンタクトレス）</b>が一部改札でそのまま使えます！
+                                    <b>ラビットカード (Rabbit Card)</b>{' '}
+                                    という日本のSuicaのような交通系ICカードが窓口や駅構内で購入できます。または、<b>タッチ決済対応のクレジットカード（Visa/Mastercardのコンタクトレス）</b>が一部改札でそのまま使えます！
                                 </p>
                             </div>
 
                             <div className="bg-gray-50 border border-gray-200 p-3 rounded-2xl flex flex-col gap-2">
-                                <h3 className="font-bold text-gray-900 text-xs">2. MRT（地下鉄ブルーライン・パープルライン）</h3>
+                                <h3 className="font-bold text-gray-900 text-xs">
+                                    2. MRT（地下鉄ブルーライン・パープルライン）
+                                </h3>
+
                                 <p className="text-[11px] text-gray-600 leading-relaxed">
                                     窓口や券売機に並ばず、改札のタッチ部分に<b>タッチ決済対応のクレジットカード（Visa/Mastercard）やデビットカード（Wiseなど）を直接タッチ</b>するだけで、そのまま乗車・決済できます（※トークンを買う手間が省けて一番ラクです）。
                                 </p>
@@ -565,26 +952,37 @@ export default function GuideModal({
 
                             {/* バスの乗り方ガイド */}
                             <div className="bg-amber-50 border border-amber-200 p-3 rounded-2xl text-amber-900 text-[11px] mt-1">
-                                <span className="font-bold block mb-1">🚌 バンコク路線バスの乗り方・攻略法</span>
+                                <span className="font-bold block mb-1">
+                                    🚌 バンコク路線バスの乗り方・攻略法
+                                </span>
                                 ローカルな移動を楽しめますが、言葉の壁や難易度が高いため事前のコツが大切です！
                             </div>
 
                             <div className="bg-gray-50 border border-gray-200 p-3 rounded-2xl flex flex-col gap-2">
-                                <h3 className="font-bold text-gray-800 text-xs">1. 乗る（手を挙げてアピール）</h3>
+                                <h3 className="font-bold text-gray-800 text-xs">
+                                    1. 乗る（手を挙げてアピール）
+                                </h3>
+
                                 <p className="text-[11px] text-gray-600 leading-relaxed">
                                     バス停で目的のバスが見えたら、<b>運転手に向けて手を水平に高く差し出し「乗ります」のサイン</b>を必ず出します（出さないと通過してしまいます）。
                                 </p>
                             </div>
 
                             <div className="bg-gray-50 border border-gray-200 p-3 rounded-2xl flex flex-col gap-2">
-                                <h3 className="font-bold text-gray-800 text-xs">2. 料金を払う（車掌さんへ現金）</h3>
+                                <h3 className="font-bold text-gray-800 text-xs">
+                                    2. 料金を払う（車掌さんへ現金）
+                                </h3>
+
                                 <p className="text-[11px] text-gray-600 leading-relaxed">
                                     乗車後、集金バッグを持った車掌さんが席まで来るので、<b>現金（小銭か20バーツ札）</b>を渡して切符を受け取ります。
                                 </p>
                             </div>
 
                             <div className="bg-gray-50 border border-gray-200 p-3 rounded-2xl flex flex-col gap-2">
-                                <h3 className="font-bold text-gray-800 text-xs">💡 言葉が不安なときの対策＆アドバイス</h3>
+                                <h3 className="font-bold text-gray-800 text-xs">
+                                    💡 言葉が不安なときの対策＆アドバイス
+                                </h3>
+
                                 <p className="text-[11px] text-gray-600 leading-relaxed">
                                     行き先がタイ文字で読めない・タイ語で伝えられない場合は、無理せず<b>「MTR」「BTS」「配車アプリ（Grab/Bolt）」</b>を使うのが圧倒的に安心です。どうしてもバスに乗る場合は、<b>行きたい場所のタイ語表記（Googleマップ画面など）を車掌さんに無言で見せる</b>と、降りるべき場所で教えてもらいやすくなります！
                                 </p>
@@ -592,35 +990,60 @@ export default function GuideModal({
 
                             {/* バイタク＆トゥクトゥクの攻略ガイド */}
                             <div className="bg-purple-50 border border-purple-200 p-3 rounded-2xl text-purple-900 text-[11px] mt-1">
-                                <span className="font-bold block mb-1">🏍️ バイタク ＆ 🛺 トゥクトゥクの乗り方</span>
+                                <span className="font-bold block mb-1">
+                                    🏍️ バイタク ＆ 🛺 トゥクトゥクの乗り方
+                                </span>
                                 バンコクならではのスリル満点な移動手段ですが、安全に乗るためのコツがあります！
                             </div>
 
                             <div className="bg-gray-50 border border-gray-200 p-3 rounded-2xl flex flex-col gap-2">
-                                <h3 className="font-bold text-gray-800 text-xs">1. バイタク（バイクタクシー / Win）</h3>
+                                <h3 className="font-bold text-gray-800 text-xs">
+                                    1. バイタク（バイクタクシー / Win）
+                                </h3>
+
                                 <p className="text-[11px] text-gray-600 leading-relaxed">
-                                    <b>大渋滞をすり抜ける最強の時短ツール</b>です。街なかの専用ベストを着た運転手がたむろする「ウィン（Win）」と呼ばれる乗り場から乗ります。
+                                    <b>大渋滞をすり抜ける最強の時短ツール</b>
+                                    です。街なかの専用ベストを着た運転手がたむろする「ウィン（Win）」と呼ばれる乗り場から乗ります。
                                 </p>
+
                                 <ul className="list-disc pl-4 space-y-1 text-[10px] text-gray-600">
-                                    <li><b>料金交渉が基本</b>: 乗る前に必ず行き先を告げて値段を確認（または配車アプリ「Grab / Bolt」経由で呼ぶとぼったくりが防げて安心）。</li>
-                                    <li><b>安全第一</b>: ヘルメットの着用が義務づけられています。スピードが出るため、しっかり捕まりましょう。</li>
+                                    <li>
+                                        <b>料金交渉が基本</b>:
+                                        乗る前に必ず行き先を告げて値段を確認（または配車アプリ「Grab / Bolt」経由で呼ぶとぼったくりが防げて安心）。
+                                    </li>
+                                    <li>
+                                        <b>安全第一</b>:
+                                        ヘルメットの着用が義務づけられています。スピードが出るため、しっかり捕まりましょう。
+                                    </li>
                                 </ul>
                             </div>
 
                             <div className="bg-gray-50 border border-gray-200 p-3 rounded-2xl flex flex-col gap-2">
-                                <h3 className="font-bold text-gray-800 text-xs">2. トゥクトゥク（三輪タクシー）</h3>
+                                <h3 className="font-bold text-gray-800 text-xs">
+                                    2. トゥクトゥク（三輪タクシー）
+                                </h3>
+
                                 <p className="text-[11px] text-gray-600 leading-relaxed">
                                     風を切りながら走る観光の目玉ですが、<b>実用的な移動というよりは「エンタメ・観光体験」</b>として割り切るのがおすすめです。
                                 </p>
+
                                 <ul className="list-disc pl-4 space-y-1 text-[10px] text-gray-600">
-                                    <li><b>乗車前の価格交渉が必須</b>: メーターがないため、乗る前に必ず「いくらか」を確認し、合意してから乗りましょう。</li>
-                                    <li><b>排気ガスに注意</b>: 窓がないため大気汚染や排気ガスをダイレクトに浴びます。夜間の短距離や雰囲気を楽しむ用として使うのがスマートです。</li>
+                                    <li>
+                                        <b>乗車前の価格交渉が必須</b>:
+                                        メーターがないため、乗る前に必ず「いくらか」を確認し、合意してから乗りましょう。
+                                    </li>
+                                    <li>
+                                        <b>排気ガスに注意</b>:
+                                        窓がないため大気汚染や排気ガスをダイレクトに浴びます。夜間の短距離や雰囲気を楽しむ用として使うのがスマートです。
+                                    </li>
                                 </ul>
                             </div>
 
                             {/* LINE MAN について */}
                             <div className="bg-emerald-50 border border-emerald-200 p-3 rounded-2xl text-emerald-900 text-[11px] mt-1">
-                                <span className="font-bold block mb-1">🛵 タイの超定番ライフライン「LINE MAN」</span>
+                                <span className="font-bold block mb-1">
+                                    🛵 タイの超定番ライフライン「LINE MAN」
+                                </span>
                                 フードデリバリーから移動まで何でも揃う国民的アプリです。
                             </div>
 
@@ -628,6 +1051,7 @@ export default function GuideModal({
                                 <p className="text-[11px] text-gray-600 leading-relaxed">
                                     日本のLINEアプリとは別ですが、<b>タイに到着してから現地でアプリをダウンロードし、ご自身のLINEアカウントや電話番号でログインして利用可能</b>です。
                                 </p>
+
                                 <p className="text-[11px] text-gray-600 leading-relaxed">
                                     ホテルの部屋から一歩も出ずにローカルフードを頼みたいときや、GrabやBoltのサブの配車手段として非常に強力な味方になります！
                                 </p>
@@ -635,37 +1059,71 @@ export default function GuideModal({
                         </div>
                     )}
 
-                    {/* 【拡充】マナー ＆ チップのガイドパネル */}
+                    {/* マナー ＆ チップのガイドパネル */}
                     {type === 'manner' && (
                         <div className="flex flex-col gap-3 leading-relaxed">
                             <div className="bg-orange-50 border border-orange-200 p-3 rounded-2xl text-orange-900 text-[11px]">
-                                <span className="font-bold block mb-1">📖 知っておくべきタイの文化とマナー</span>
+                                <span className="font-bold block mb-1">
+                                    📖 知っておくべきタイの文化とマナー
+                                </span>
                                 王室への敬意、寺院での服装、チップの習慣など、最低限のマナーを知っておくとトラブルを防げます。
                             </div>
+
                             <div className="bg-gray-50 border border-gray-200 p-3 rounded-2xl border space-y-2">
-                                <p><b>1. 寺院の服装</b>: 露出の多い服装（タンクトップや短パン）はNG。肩や膝が隠れる服装で行きましょう。</p>
-                                <p><b>2. タクシーの乗車</b>: 乗る前に必ず「メーター（By Meter?）」と確認するか、配車アプリ（Grab / Bolt）の利用が安心です。</p>
+                                <p>
+                                    <b>1. 寺院の服装</b>:
+                                    露出の多い服装（タンクトップや短パン）はNG。肩や膝が隠れる服装で行きましょう。
+                                </p>
+
+                                <p>
+                                    <b>2. タクシーの乗車</b>:
+                                    乗る前に必ず「メーター（By Meter?）」と確認するか、配車アプリ（Grab / Bolt）の利用が安心です。
+                                </p>
                             </div>
 
-                            {/* 【追加】チップの仕組みと相場 */}
                             <div className="bg-gray-50 border border-gray-200 p-3 rounded-2xl border space-y-2">
-                                <h4 className="font-bold text-gray-800 text-xs">💸 チップの習慣とスマートな相場</h4>
+                                <h4 className="font-bold text-gray-800 text-xs">
+                                    💸 チップの習慣とスマートな相場
+                                </h4>
+
                                 <p className="text-[11px] text-gray-600">
                                     タイは欧米のような強いチップ文化ではありませんが、サービスに満足した際には気持ちとして渡すとスマートです。
                                 </p>
+
                                 <ul className="list-disc pl-4 space-y-1 text-[11px] text-gray-600">
-                                    <li><b>サービス料込のお店</b>: メニューやレシートに「Service Charge 10%」と記載されている場合は、追加のチップは不要です。</li>
-                                    <li><b>マッサージ・スパ・高級店</b>: 丁寧な施術を受けた場合、大衆的なマッサージなら<b>20〜50バーツ</b>、高級スパなら<b>50〜100バーツ</b>程度を紙幣でお渡しすると喜ばれます。</li>
-                                    <li><b>グレーなお店・判断に迷う場合</b>: 仕組みが曖昧な場所や、サービスに満足できなかった場合は、無理に渡す必要は全くありません。</li>
+                                    <li>
+                                        <b>サービス料込のお店</b>:
+                                        メニューやレシートに「Service Charge 10%」と記載されている場合は、追加のチップは不要です。
+                                    </li>
+                                    <li>
+                                        <b>マッサージ・スパ・高級店</b>:
+                                        丁寧な施術を受けた場合、大衆的なマッサージなら<b>20〜50バーツ</b>、高級スパなら<b>50〜100バーツ</b>程度を紙幣でお渡しすると喜ばれます。
+                                    </li>
+                                    <li>
+                                        <b>グレーなお店・判断に迷う場合</b>:
+                                        仕組みが曖昧な場所や、サービスに満足できなかった場合は、無理に渡す必要は全くありません。
+                                    </li>
                                 </ul>
                             </div>
 
                             <div className="bg-blue-50 border border-blue-200 p-3 rounded-2xl text-blue-900 text-[11px] mt-1">
-                                <span className="font-bold block mb-1">🚗 Grab / Boltを安全に使いこなすコツ</span>
+                                <span className="font-bold block mb-1">
+                                    🚗 Grab / Boltを安全に使いこなすコツ
+                                </span>
+
                                 <ul className="list-disc pl-4 space-y-1 text-blue-800">
-                                    <li><b>ナンバー照合</b>: 乗車前にアプリ表示と実際の車のナンバーを必ず確認。</li>
-                                    <li><b>アプリ決済推奨</b>: クレジットカード紐付けで、お釣りやぼったくりのトラブルを回避。</li>
-                                    <li><b>GPSの確認</b>: 乗車中もスマホのマップで正しいルートを通っているかチェック。</li>
+                                    <li>
+                                        <b>ナンバー照合</b>:
+                                        乗車前にアプリ表示と実際の車のナンバーを必ず確認。
+                                    </li>
+                                    <li>
+                                        <b>アプリ決済推奨</b>:
+                                        クレジットカード紐付けで、お釣りやぼったくりのトラブルを回避。
+                                    </li>
+                                    <li>
+                                        <b>GPSの確認</b>:
+                                        乗車中もスマホのマップで正しいルートを通っているかチェック。
+                                    </li>
                                 </ul>
                             </div>
                         </div>
