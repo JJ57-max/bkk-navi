@@ -5,7 +5,7 @@ function formatDate(date: Date): string {
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const day = String(date.getDate()).padStart(2, '0');
 
-  return `${year}-${month}-${day}`;
+  return year + '-' + month + '-' + day;
 }
 
 function getBangkokToday(): Date {
@@ -18,7 +18,7 @@ function getBangkokToday(): Date {
     day: '2-digit',
   }).format(now);
 
-  return new Date(`${bangkokDateString}T00:00:00`);
+  return new Date(bangkokDateString + 'T00:00:00');
 }
 
 function isValidDateString(value: string): boolean {
@@ -26,7 +26,7 @@ function isValidDateString(value: string): boolean {
     return false;
   }
 
-  const date = new Date(`${value}T00:00:00`);
+  const date = new Date(value + 'T00:00:00');
 
   return (
     !Number.isNaN(date.getTime()) &&
@@ -39,8 +39,8 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
 
     /*
-     * 画面から日付が渡されていない場合は、
-     * バンコク時間の「明日 → 明後日」をデフォルトにする。
+     * Agoda検索の日付はバンコク時間を基準にする。
+     * 日付指定がない場合は「明日 → 明後日」。
      */
     const bangkokToday = getBangkokToday();
 
@@ -57,16 +57,11 @@ export async function GET(request: Request) {
       searchParams.get('checkOut') || formatDate(defaultCheckOut);
 
     const adultsParam = searchParams.get('adults');
-    const roomsParam = searchParams.get('rooms');
     const maxResultParam = searchParams.get('maxResult');
 
     const numberOfAdults = adultsParam
       ? Number(adultsParam)
       : 2;
-
-    const numberOfRooms = roomsParam
-      ? Number(roomsParam)
-      : 1;
 
     const maxResult = maxResultParam
       ? Number(maxResultParam)
@@ -103,42 +98,41 @@ export async function GET(request: Request) {
       );
     }
 
-    if (
-      !Number.isInteger(numberOfRooms) ||
-      numberOfRooms < 1 ||
-      numberOfRooms > 10
-    ) {
-      return Response.json(
-        { error: 'Invalid number of rooms' },
-        { status: 400 }
-      );
-    }
-
-    if (
-      !Number.isInteger(maxResult) ||
-      maxResult < 1 ||
-      maxResult > 50
-    ) {
-      return Response.json(
-        { error: 'Invalid maxResult' },
-        { status: 400 }
-      );
-    }
-
+    /*
+     * Agoda Affiliate Long Tail Search API の
+     * City Search 仕様に合わせたリクエスト。
+     *
+     * 公式仕様では occupancy は additional の中にあり、
+     * numberOfAdult は単数形。
+     *
+     * numberOfRooms は Long Tail City Search の
+     * リクエストパラメータには存在しないため送信しない。
+     */
     const requestBody = {
       criteria: {
-        cityId: 9391,
+        cityId: 9395,
         checkInDate,
         checkOutDate,
-        numberOfAdults,
-        numberOfRooms,
         additional: {
           currency: 'JPY',
           language: 'ja-jp',
           maxResult,
+          occupancy: {
+            numberOfAdult: numberOfAdults,
+            numberOfChildren: 0,
+          },
         },
       },
     };
+
+    /*
+     * 診断用ログ。
+     * API Key / Site ID は出力しない。
+     */
+    console.log(
+      'Agoda request body:',
+      JSON.stringify(requestBody, null, 2)
+    );
 
     const response = await fetch(AGODA_CONFIG.endpoint, {
       method: 'POST',
@@ -153,7 +147,10 @@ export async function GET(request: Request) {
      */
     if (!response.ok) {
       console.error(
-        `Agoda API returned HTTP ${response.status}: ${responseText.slice(0, 500)}`
+        'Agoda API returned HTTP ' +
+          response.status +
+          ': ' +
+          responseText.slice(0, 500)
       );
 
       return Response.json([]);
@@ -176,6 +173,8 @@ export async function GET(request: Request) {
      * 想定外のレスポンス
      */
     if (!data || typeof data !== 'object') {
+      console.error('Unexpected Agoda API response:', responseText.slice(0, 500));
+
       return Response.json([]);
     }
 
@@ -187,11 +186,6 @@ export async function GET(request: Request) {
 
     /*
      * Agoda APIがアプリケーションレベルのエラーを返した場合。
-     *
-     * 例:
-     * { id: 911, message: 'No search result' }
-     *
-     * この場合は500にせず、ホテル0件として返す。
      */
     if (responseData.error) {
       console.warn(
@@ -214,6 +208,11 @@ export async function GET(request: Request) {
     } else if (Array.isArray(data)) {
       hotelsArray = data;
     }
+
+    console.log(
+      'Agoda hotel result count:',
+      hotelsArray.length
+    );
 
     return Response.json(hotelsArray);
   } catch (error) {
