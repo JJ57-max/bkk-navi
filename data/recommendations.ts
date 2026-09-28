@@ -154,11 +154,11 @@ export const bangkokRecommendations: RecommendedSpot[] = [
     // ==========================================
     {
         id: 'jodd_fairs',
-        name: 'JODD FAIRS (ジョド・フェアーズ)',
+        name: 'JODD FAIRS Ratchada (ジョド・フェアーズ・ラチャダー)',
         category: 'food',
-        area: 'ラマ9世',
-        description: '活気あふれる人気のナイトマーケット。巨大な豚の背骨タワーや多彩な屋台グルメが楽しめます。',
-        coordinate: { latitude: 13.7570, longitude: 100.5665 }
+        area: 'ラチャダー',
+        description: 'バンコクのナイトマーケット。多彩な屋台グルメやドリンク、衣類・雑貨などを楽しめます。MRTタイランド・カルチャーセンター駅から徒歩約2分です。',
+        coordinate: { latitude: 13.76833, longitude: 100.57094 }
     },
     {
         id: 'chinatown_yaowarat',

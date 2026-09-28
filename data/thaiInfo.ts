@@ -26,7 +26,7 @@ export function getThaiInfo(name: string): { thaiName: string; note: string } {
     } else if (lowerName.includes("ダンネラミット") || lowerName.includes("dan neramit")) {
         return { thaiName: "จ๊อดแฟร์ แดนเนรมิต", note: "Jodd Fairs DanNeramit" };
     } else if (lowerName.includes("ジョッド") || lowerName.includes("jodd") || lowerName.includes("フェアーズ")) {
-        return { thaiName: "ตลาดจ๊อดแฟร์", note: "Jodd Fairs Rama 9" };
+        return { thaiName: "จ๊อดแฟร์ รัชดา", note: "Jodd Fairs Ratchada" };
     } else if (lowerName.includes("シナカリン") || lowerName.includes("srinakarin") || lowerName.includes("鉄道市場")) {
         return { thaiName: "ตลาดนัดรถไฟ ศรีนครินทร์", note: "Train Night Market Srinakarin" };
     } else if (lowerName.includes("アジアティーク") || lowerName.includes("asiatique")) {

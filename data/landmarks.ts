@@ -1,7 +1,7 @@
 import { Landmark } from '@/types';
 
 export const bangkokLandmarks: Landmark[] = [
-    { id: "1", name: "ジョッドフェアーズ (Jodd Fairs Rama 9)", category: "観光・ナイトスポット", coordinate: { lat: 13.7569, lng: 100.5664 } },
+    { id: "1", name: "ジョッドフェアーズ (Jodd Fairs Ratchada)", category: "観光・ナイトスポット", coordinate: { lat: 13.76833, lng: 100.57094 } },
     { id: "2", name: "ジョッドフェアーズ・ダンネラミット", category: "観光・ナイトスポット", coordinate: { lat: 13.8122, lng: 100.5606 } },
     { id: "3", name: "カオサン通り (Khaosan Road)", category: "観光・ナイトスポット", coordinate: { lat: 13.7589, lng: 100.4973 } },
     { id: "4", name: "ヤワラート中華街 (夜市グルメ)", category: "観光・ナイトスポット", coordinate: { lat: 13.7413, lng: 100.5083 } },
