@@ -1,12 +1,15 @@
 'use client';
 
 import React, { useState, useEffect, Suspense } from 'react';
+import Image from 'next/image';
 import GoogleMapComponent from '@/components/GoogleMap';
 import DetailSheet from '@/components/DetailSheet';
 import ThaiDriverCardModal from '@/components/ThaiDriverCardModal';
 import GuideModal from '@/components/GuideModal';
 import EmergencyModal from '@/components/EmergencyModal';
-import TravelPlanDrawer, { ItineraryItem } from '@/components/TravelPlanDrawer';
+import TravelPlanDrawer, {
+    ItineraryItem,
+} from '@/components/TravelPlanDrawer';
 import { bangkokLandmarks } from '@/data/landmarks';
 import { bangkokHotels } from '@/data/hotels';
 import { ExchangeShop } from '@/data/guides';
@@ -16,8 +19,14 @@ import { allBangkokStations } from '@/data/stations';
 type CoordinateCandidate = {
     id?: string;
     name?: string;
+    nameJa?: string;
+    nameEn?: string;
     category?: string;
     line?: string;
+    route?: string;
+    stationCode?: string;
+    serviceStatus?: 'active' | 'limited' | 'inactive';
+    serviceNote?: string;
     address?: string;
     place_id?: string;
     hotelId?: string | number;
@@ -32,6 +41,8 @@ type CoordinateCandidate = {
     stars?: number | string;
     reviewScore?: number | string;
     discountPercentage?: number | string;
+    landingURL?: string;
+    landingUrl?: string;
     coordinate?: {
         latitude?: number | string;
         longitude?: number | string;
@@ -60,6 +71,76 @@ type HotelDisplayItem = CoordinateCandidate & {
     name?: string;
 };
 
+/**
+ * ---------------------------------------------------------
+ * デモ用の現在地
+ * ---------------------------------------------------------
+ *
+ * GPS取得前、または対象エリア外・取得失敗時に使用する。
+ *
+ * 重要:
+ * - 現在地(userLocation)と目的地(destinationCoordinate)は別管理。
+ * - この座標を目的地として扱わない。
+ */
+const DEMO_ORIGIN = {
+    lat: 13.7367,
+    lng: 100.5606,
+};
+
+/**
+ * ---------------------------------------------------------
+ * 直線距離計算
+ * ---------------------------------------------------------
+ *
+ * userLocation → destinationCoordinate の距離を
+ * Haversine formula で計算する。
+ */
+function calculateDistanceKm(
+    from: {
+        lat: number;
+        lng: number;
+    },
+    to: {
+        lat: number;
+        lng: number;
+    }
+): number {
+    const R = 6371;
+
+    const dLat =
+        (to.lat - from.lat) *
+        (Math.PI / 180);
+
+    const dLng =
+        (to.lng - from.lng) *
+        (Math.PI / 180);
+
+    const a =
+        Math.sin(dLat / 2) *
+            Math.sin(dLat / 2) +
+        Math.cos(
+            from.lat *
+                (Math.PI / 180)
+        ) *
+            Math.cos(
+                to.lat *
+                    (Math.PI / 180)
+            ) *
+            Math.sin(dLng / 2) *
+            Math.sin(dLng / 2);
+
+    const c =
+        2 *
+        Math.atan2(
+            Math.sqrt(a),
+            Math.sqrt(1 - a)
+        );
+
+    return Math.round(
+        R * c * 10
+    ) / 10;
+}
+
 function createItineraryId(): string {
     if (
         typeof crypto !== 'undefined' &&
@@ -74,208 +155,399 @@ function createItineraryId(): string {
 }
 
 function MainContent() {
-    const [selectedMode, setSelectedMode] = useState<string>('transit');
-    const [destinationCoordinate, setDestinationCoordinate] = useState({
-        lat: 13.7460,
-        lng: 100.5347,
-    });
-    const [destinationTitle, setDestinationTitle] = useState<string>(
-        'サイアム・パラゴン (デモモード)'
-    );
-    const [searchText, setSearchText] = useState<string>('');
-    const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-    const [bkkTime, setBkkTime] = useState<string>('');
-    const [isDemoMode, setIsDemoMode] = useState<boolean>(true);
-    const [toastMessage, setToastMessage] = useState<string | null>(null);
+    const [selectedMode, setSelectedMode] =
+        useState<string>('transit');
 
-    const [itineraryItems, setItineraryItems] = useState<ItineraryItem[]>([]);
-    const [showTravelPlanDrawer, setShowTravelPlanDrawer] = useState<boolean>(false);
-    const [showDetailSheet, setShowDetailSheet] = useState<boolean>(false);
-    const [showThaiCard, setShowThaiCard] = useState<boolean>(false);
+    /**
+     * -----------------------------------------------------
+     * 現在地
+     * -----------------------------------------------------
+     *
+     * GPSで取得する「出発地点」。
+     *
+     * 目的地とは完全に分離する。
+     */
+    const [userLocation, setUserLocation] =
+        useState<{
+            lat: number;
+            lng: number;
+        }>(DEMO_ORIGIN);
 
-    const [activeGuide, setActiveGuide] = useState<
-        | 'exchange'
-        | 'squall'
-        | 'prep'
-        | 'manner'
-        | 'recommend'
-        | 'transport'
-        | 'safety'
-        | 'thai_phrases'
-        | 'drive'
-        | 'stomach'
-        | 'shopping'
-        | null
-    >(null);
+    /**
+     * -----------------------------------------------------
+     * 目的地
+     * -----------------------------------------------------
+     */
+    const [destinationCoordinate, setDestinationCoordinate] =
+        useState({
+            lat: 13.7460,
+            lng: 100.5347,
+        });
 
-    const [showEmergencyModal, setShowEmergencyModal] = useState<boolean>(false);
+    const [destinationTitle, setDestinationTitle] =
+        useState<string>(
+            'サイアム・パラゴン (デモモード)'
+        );
 
-    const [agodaHotels, setAgodaHotels] = useState<HotelDisplayItem[]>([]);
-    const [agodaLoading, setAgodaLoading] = useState<boolean>(true);
+    const [searchText, setSearchText] =
+        useState<string>('');
 
-    const [googlePlaces, setGooglePlaces] = useState<GooglePlaceItem[]>([]);
-    const [placesLoading, setPlacesLoading] = useState<boolean>(false);
+    const [selectedCategory, setSelectedCategory] =
+        useState<string | null>(null);
+
+    const [bkkTime, setBkkTime] =
+        useState<string>('');
+
+    const [isDemoMode, setIsDemoMode] =
+        useState<boolean>(true);
+
+    const [toastMessage, setToastMessage] =
+        useState<string | null>(null);
+
+    const [itineraryItems, setItineraryItems] =
+        useState<ItineraryItem[]>([]);
+
+    useEffect(() => {
+        const savedPlan =
+            localStorage.getItem(
+                'bkk_nav_itinerary'
+            );
+
+        if (!savedPlan) {
+            return;
+        }
+
+        try {
+            const parsed: unknown =
+                JSON.parse(savedPlan);
+
+            if (Array.isArray(parsed)) {
+                queueMicrotask(() => {
+                    setItineraryItems(
+                        parsed as ItineraryItem[]
+                    );
+                });
+            }
+        } catch {
+            localStorage.removeItem(
+                'bkk_nav_itinerary'
+            );
+        }
+    }, []);
+
+    const [showTravelPlanDrawer, setShowTravelPlanDrawer] =
+        useState<boolean>(false);
+
+    const [showDetailSheet, setShowDetailSheet] =
+        useState<boolean>(false);
+
+    const [showThaiCard, setShowThaiCard] =
+        useState<boolean>(false);
+
+    const [activeGuide, setActiveGuide] =
+        useState<
+            | 'exchange'
+            | 'squall'
+            | 'prep'
+            | 'manner'
+            | 'recommend'
+            | 'transport'
+            | 'safety'
+            | 'thai_phrases'
+            | 'drive'
+            | 'stomach'
+            | 'shopping'
+            | null
+        >(null);
+
+    const [showEmergencyModal, setShowEmergencyModal] =
+        useState<boolean>(false);
+
+    const [agodaHotels, setAgodaHotels] =
+        useState<HotelDisplayItem[]>([]);
+
+    const [selectedAgodaHotel, setSelectedAgodaHotel] =
+        useState<{
+            title: string;
+            hotelId: string;
+        } | null>(null);
+
+    const [agodaLoading, setAgodaLoading] =
+        useState<boolean>(true);
+
+    const [googlePlaces, setGooglePlaces] =
+        useState<GooglePlaceItem[]>([]);
+
+    const [placesLoading, setPlacesLoading] =
+        useState<boolean>(false);
 
     /*
+     * ---------------------------------------------------------
      * Agodaホテル取得
+     * ---------------------------------------------------------
      */
     useEffect(() => {
-        const fetchAgodaHotelsDirectly = async () => {
-            try {
-                setAgodaLoading(true);
+        const fetchAgodaHotelsDirectly =
+            async () => {
+                try {
+                    setAgodaLoading(true);
 
-                const res = await fetch('/api/hotels');
+                    const res =
+                        await fetch(
+                            '/api/hotels'
+                        );
 
-                if (!res.ok) {
-                    throw new Error(
-                        'HTTP error! status: ' + res.status
-                    );
-                }
-
-                const data: unknown = await res.json();
-
-                let hotelList: unknown[] = [];
-
-                if (Array.isArray(data)) {
-                    hotelList = data;
-                } else if (
-                    data &&
-                    typeof data === 'object'
-                ) {
-                    const responseData = data as {
-                        results?: unknown;
-                        hotelList?: unknown;
-                        data?: unknown;
-                    };
-
-                    if (Array.isArray(responseData.results)) {
-                        hotelList = responseData.results;
-                    } else if (
-                        Array.isArray(responseData.hotelList)
-                    ) {
-                        hotelList = responseData.hotelList;
-                    } else if (
-                        Array.isArray(responseData.data)
-                    ) {
-                        hotelList = responseData.data;
+                    if (!res.ok) {
+                        throw new Error(
+                            'HTTP error! status: ' +
+                                res.status
+                        );
                     }
-                }
 
-                setAgodaHotels(
-                    hotelList as HotelDisplayItem[]
-                );
-            } catch (err) {
-                console.error('Direct Agoda Fetch Error:', err);
-                setAgodaHotels([]);
-            } finally {
-                setAgodaLoading(false);
-            }
-        };
+                    const data: unknown =
+                        await res.json();
+
+                    let hotelList: unknown[] =
+                        [];
+
+                    if (
+                        Array.isArray(data)
+                    ) {
+                        hotelList = data;
+                    } else if (
+                        data &&
+                        typeof data ===
+                            'object'
+                    ) {
+                        const responseData =
+                            data as {
+                                hotels?: unknown;
+                                results?: unknown;
+                                hotelList?: unknown;
+                                data?: unknown;
+                            };
+
+                        if (
+                            Array.isArray(
+                                responseData.hotels
+                            )
+                        ) {
+                            hotelList =
+                                responseData.hotels;
+                        } else if (
+                            Array.isArray(
+                                responseData.results
+                            )
+                        ) {
+                            hotelList =
+                                responseData.results;
+                        } else if (
+                            Array.isArray(
+                                responseData.hotelList
+                            )
+                        ) {
+                            hotelList =
+                                responseData.hotelList;
+                        } else if (
+                            Array.isArray(
+                                responseData.data
+                            )
+                        ) {
+                            hotelList =
+                                responseData.data;
+                        }
+                    }
+
+                    setAgodaHotels(
+                        hotelList as HotelDisplayItem[]
+                    );
+                } catch (err) {
+                    console.error(
+                        'Direct Agoda Fetch Error:',
+                        err
+                    );
+
+                    setAgodaHotels([]);
+                } finally {
+                    setAgodaLoading(false);
+                }
+            };
 
         fetchAgodaHotelsDirectly();
     }, []);
 
     /*
+     * ---------------------------------------------------------
+     * Toast
+     * ---------------------------------------------------------
+     */
+    const showToast = (
+        msg: string
+    ) => {
+        setToastMessage(msg);
+
+        setTimeout(() => {
+            setToastMessage(null);
+        }, 2500);
+    };
+
+    /*
+     * ---------------------------------------------------------
      * Google Places検索
+     * ---------------------------------------------------------
      *
      * PlacesService.textSearch() から
      * Places API (New) の Place.searchByText() に移行。
      */
     useEffect(() => {
-        if (!searchText || searchText.trim().length < 2) {
-            setTimeout(() => {
-                setGooglePlaces([]);
-                setPlacesLoading(false);
-            }, 0);
-
+        if (
+            !searchText ||
+            searchText.trim().length < 2
+        ) {
             return;
         }
 
         let cancelled = false;
 
-        const timer = setTimeout(async () => {
-            try {
-                setPlacesLoading(true);
+        const timer = setTimeout(
+            async () => {
+                try {
+                    setPlacesLoading(true);
 
-                if (
-                    typeof window === 'undefined' ||
-                    !window.google?.maps?.importLibrary
-                ) {
-                    console.log(
-                        'Google Maps Places API not ready yet'
-                    );
-                    return;
+                    if (
+                        typeof window ===
+                            'undefined' ||
+                        !window.google?.maps
+                            ?.importLibrary
+                    ) {
+                        console.log(
+                            'Google Maps Places API not ready yet'
+                        );
+
+                        setGooglePlaces([]);
+                        setPlacesLoading(false);
+
+                        return;
+                    }
+
+                    const placesLibrary =
+                        (await google.maps.importLibrary(
+                            'places'
+                        )) as google.maps.PlacesLibrary;
+
+                    const { Place } =
+                        placesLibrary;
+
+                    const { places } =
+                        await Place.searchByText(
+                            {
+                                textQuery:
+                                    searchText +
+                                    ' バンコク',
+                                fields: [
+                                    'id',
+                                    'displayName',
+                                    'formattedAddress',
+                                    'location',
+                                    'rating',
+                                    'userRatingCount',
+                                ],
+                                language: 'ja',
+                                maxResultCount: 20,
+                            }
+                        );
+
+                    if (cancelled) {
+                        return;
+                    }
+
+                    /**
+                     * 座標が存在しないGoogle Placeは
+                     * アプリの目的地候補として使用しない。
+                     *
+                     * 以前のように
+                     * 13.7460 / 100.5347 を
+                     * フォールバック座標にはしない。
+                     */
+                    const mapped: GooglePlaceItem[] =
+                        places
+                            .map((place) => {
+                                const latitude =
+                                    place.location?.lat();
+
+                                const longitude =
+                                    place.location?.lng();
+
+                                if (
+                                    !Number.isFinite(
+                                        latitude
+                                    ) ||
+                                    !Number.isFinite(
+                                        longitude
+                                    )
+                                ) {
+                                    return null;
+                                }
+
+                                return {
+                                    id:
+                                        place.id ||
+                                        createItineraryId(),
+
+                                    name:
+                                        place.displayName ||
+                                        'スポット',
+
+                                    address:
+                                        place.formattedAddress ||
+                                        '',
+
+                                    category:
+                                        'Googleスポット',
+
+                                    latitude,
+                                    longitude,
+
+                                    rating:
+                                        place.rating ??
+                                        0,
+
+                                    userRatingsTotal:
+                                        place.userRatingCount ??
+                                        0,
+                                };
+                            })
+                            .filter(
+                                (
+                                    place
+                                ): place is GooglePlaceItem =>
+                                    place !== null
+                            );
+
+                    setGooglePlaces(mapped);
+                } catch (error) {
+                    if (!cancelled) {
+                        console.error(
+                            'Google Places search error:',
+                            error
+                        );
+
+                        setGooglePlaces([]);
+
+                        showToast(
+                            '⚠️ 検索できませんでした。通信状態を確認して、もう一度お試しください'
+                        );
+                    }
+                } finally {
+                    if (!cancelled) {
+                        setPlacesLoading(
+                            false
+                        );
+                    }
                 }
-
-                const placesLibrary =
-                    (await google.maps.importLibrary(
-                        'places'
-                    )) as google.maps.PlacesLibrary;
-
-                const { Place } = placesLibrary;
-
-                const { places } =
-                    await Place.searchByText({
-                        textQuery:
-                            searchText + ' バンコク',
-                        fields: [
-                            'id',
-                            'displayName',
-                            'formattedAddress',
-                            'location',
-                            'rating',
-                            'userRatingCount',
-                        ],
-                        language: 'ja',
-                        maxResultCount: 20,
-                    });
-
-                if (cancelled) {
-                    return;
-                }
-
-                const mapped: GooglePlaceItem[] =
-                    places.map((place) => ({
-                        id:
-                            place.id ||
-                            createItineraryId(),
-                        name:
-                            place.displayName ||
-                            'スポット',
-                        address:
-                            place.formattedAddress ||
-                            '',
-                        category: 'Googleスポット',
-                        latitude:
-                            place.location?.lat() ??
-                            13.7460,
-                        longitude:
-                            place.location?.lng() ??
-                            100.5347,
-                        rating:
-                            place.rating ??
-                            4.0,
-                        userRatingsTotal:
-                            place.userRatingCount ??
-                            0,
-                    }));
-
-                setGooglePlaces(mapped);
-            } catch (error) {
-                if (!cancelled) {
-                    console.error(
-                        'Google Places search error:',
-                        error
-                    );
-
-                    setGooglePlaces([]);
-                }
-            } finally {
-                if (!cancelled) {
-                    setPlacesLoading(false);
-                }
-            }
-        }, 400);
+            },
+            700
+        );
 
         return () => {
             cancelled = true;
@@ -293,41 +565,61 @@ function MainContent() {
     ];
 
     /*
-     * Toast
-     */
-    const showToast = (msg: string) => {
-        setToastMessage(msg);
-
-        setTimeout(() => {
-            setToastMessage(null);
-        }, 2500);
-    };
-
-    /*
+     * ---------------------------------------------------------
      * バンコク周辺判定
+     * ---------------------------------------------------------
+     *
+     * 約100km以内を対象エリアとする。
+     *
+     * したがってUI上も「バンコク周辺」と表現する。
      */
-    const checkIsBangkokArea = (lat: number, lng: number) => {
+    const checkIsBangkokArea = (
+        lat: number,
+        lng: number
+    ) => {
         const bkkLat = 13.7460;
         const bkkLng = 100.5347;
 
-        const dLat = Math.abs(lat - bkkLat) * 111;
+        const dLat =
+            Math.abs(lat - bkkLat) *
+            111;
 
         const dLng =
             Math.abs(lng - bkkLng) *
             111 *
-            Math.cos(bkkLat * (Math.PI / 180));
+            Math.cos(
+                bkkLat *
+                    (Math.PI / 180)
+            );
 
-        return Math.sqrt(dLat * dLat + dLng * dLng) <= 100;
+        return (
+            Math.sqrt(
+                dLat * dLat +
+                    dLng * dLng
+            ) <= 100
+        );
     };
 
     /*
+     * ---------------------------------------------------------
      * 現在地取得
+     * ---------------------------------------------------------
+     *
+     * 重要:
+     * - GPSは userLocation にだけ反映する。
+     * - destinationCoordinate は変更しない。
+     * - destinationTitle も変更しない。
+     * - URLも変更しない。
      */
     const handleGetMyLocation = () => {
         if (!navigator.geolocation) {
-            alert(
-                'お使いのブラウザは位置情報取得に対応していません'
+            setUserLocation(DEMO_ORIGIN);
+            setIsDemoMode(true);
+
+            showToast(
+                '⚠️ このブラウザでは現在地を取得できません。デモ位置（バンコク）を表示しています'
             );
+
             return;
         }
 
@@ -339,36 +631,60 @@ function MainContent() {
                 const userLng = position.coords.longitude;
 
                 if (checkIsBangkokArea(userLat, userLng)) {
-                    setIsDemoMode(false);
-
-                    setDestinationCoordinate({
+                    setUserLocation({
                         lat: userLat,
                         lng: userLng,
                     });
 
-                    setDestinationTitle('あなたの現在地（GPS）');
-
-                    updateUrlParams(
-                        'あなたの現在地（GPS）',
-                        userLat,
-                        userLng
-                    );
+                    setIsDemoMode(false);
 
                     showToast(
-                        '📍 現在地（バンコク市内）を設定しました'
+                        '📍 現在地（バンコク周辺）を設定しました'
                     );
                 } else {
+                    setUserLocation(DEMO_ORIGIN);
                     setIsDemoMode(true);
 
                     showToast(
-                        '✈️ 現在地がタイ国外のためデモモードを維持します'
+                        '✈️ 現在地は対象エリア外です。デモ位置（バンコク）を表示しています'
                     );
                 }
             },
-            () => {
-                showToast(
-                    '⚠️ 位置情報の取得に失敗しました'
+            (error) => {
+                console.warn(
+                    'Geolocation error:',
+                    error
                 );
+
+                setUserLocation(DEMO_ORIGIN);
+                setIsDemoMode(true);
+
+                if (
+                    error.code ===
+                    error.PERMISSION_DENIED
+                ) {
+                    showToast(
+                        '⚠️ 位置情報が許可されていません。デモ位置（バンコク）を表示しています'
+                    );
+                } else if (
+                    error.code ===
+                    error.POSITION_UNAVAILABLE
+                ) {
+                    showToast(
+                        '⚠️ 現在地を取得できませんでした。デモ位置（バンコク）を表示しています'
+                    );
+                } else if (
+                    error.code ===
+                    error.TIMEOUT
+                ) {
+                    showToast(
+                        '⚠️ 現在地の取得がタイムアウトしました。デモ位置（バンコク）を表示しています'
+                    );
+                } else {
+                    showToast(
+                        '⚠️ 現在地の取得に失敗しました。デモ位置（バンコク）を表示しています'
+                    );
+                }
             },
             {
                 enableHighAccuracy: true,
@@ -379,80 +695,96 @@ function MainContent() {
     };
 
     /*
+     * ---------------------------------------------------------
      * URLパラメータ・保存済みプラン読み込み
+     * ---------------------------------------------------------
      */
     useEffect(() => {
-        if (typeof window !== 'undefined') {
-            const params = new URLSearchParams(
-                window.location.search
-            );
+        if (
+            typeof window !==
+            'undefined'
+        ) {
+            const params =
+                new URLSearchParams(
+                    window.location.search
+                );
 
-            const lat = params.get('lat');
-            const lng = params.get('lng');
-            const title = params.get('title');
+            const lat =
+                params.get('lat');
+
+            const lng =
+                params.get('lng');
+
+            const title =
+                params.get('title');
 
             if (lat && lng) {
-                const pLat = parseFloat(lat);
-                const pLng = parseFloat(lng);
+                const pLat =
+                    Number(lat);
 
-                if (!isNaN(pLat) && !isNaN(pLng)) {
-                    setTimeout(() => {
+                const pLng =
+                    Number(lng);
+
+                if (
+                    Number.isFinite(
+                        pLat
+                    ) &&
+                    Number.isFinite(
+                        pLng
+                    ) &&
+                    pLat >= -90 &&
+                    pLat <= 90 &&
+                    pLng >= -180 &&
+                    pLng <= 180
+                ) {
+                    queueMicrotask(() => {
                         setDestinationCoordinate({
                             lat: pLat,
                             lng: pLng,
                         });
-
                         setIsDemoMode(false);
-                    }, 0);
+                    });
                 }
             }
 
             if (title) {
-                setTimeout(() => {
+                queueMicrotask(() => {
                     setDestinationTitle(title);
-                }, 0);
+                });
             }
 
-            const savedPlan = localStorage.getItem(
-                'bkk_nav_itinerary'
-            );
-
-            if (savedPlan) {
-                try {
-                    const parsed: unknown = JSON.parse(savedPlan);
-
-                    if (Array.isArray(parsed)) {
-                        setTimeout(() => {
-                            setItineraryItems(
-                                parsed as ItineraryItem[]
-                            );
-                        }, 0);
-                    }
-                } catch {
-                    localStorage.removeItem(
-                        'bkk_nav_itinerary'
-                    );
-                }
-            }
         }
     }, []);
 
     /*
+     * ---------------------------------------------------------
      * マイプラン保存
+     * ---------------------------------------------------------
      */
-    const saveItinerary = (items: ItineraryItem[]) => {
-        setItineraryItems(items);
+    const saveItinerary = (
+        items: ItineraryItem[]
+    ) => {
+        setItineraryItems(
+            items
+        );
 
-        if (typeof window !== 'undefined') {
+        if (
+            typeof window !==
+            'undefined'
+        ) {
             localStorage.setItem(
                 'bkk_nav_itinerary',
-                JSON.stringify(items)
+                JSON.stringify(
+                    items
+                )
             );
         }
     };
 
     /*
+     * ---------------------------------------------------------
      * マイプラン追加
+     * ---------------------------------------------------------
      */
     const handleAddToPlan = (
         title: string,
@@ -463,13 +795,25 @@ function MainContent() {
     ) => {
         e.stopPropagation();
 
-        const newItem: ItineraryItem = {
-            id: createItineraryId(),
-            title,
-            category,
-            lat,
-            lng,
-        };
+        if (
+            !Number.isFinite(lat) ||
+            !Number.isFinite(lng)
+        ) {
+            showToast(
+                '⚠️ この場所の座標を取得できないため、プランに追加できません'
+            );
+
+            return;
+        }
+
+        const newItem: ItineraryItem =
+            {
+                id: createItineraryId(),
+                title,
+                category,
+                lat,
+                lng,
+            };
 
         saveItinerary([
             ...itineraryItems,
@@ -484,119 +828,228 @@ function MainContent() {
     };
 
     /*
+     * ---------------------------------------------------------
      * マイプラン削除
+     * ---------------------------------------------------------
      */
-    const handleRemoveFromPlan = (id: string) => {
-        const updated = itineraryItems.filter(
-            (item) => item.id !== id
-        );
+    const handleRemoveFromPlan = (
+        id: string
+    ) => {
+        const updated =
+            itineraryItems.filter(
+                (item) =>
+                    item.id !== id
+            );
 
-        saveItinerary(updated);
+        saveItinerary(
+            updated
+        );
     };
 
     /*
+     * ---------------------------------------------------------
      * バンコク時刻
+     * ---------------------------------------------------------
      */
     useEffect(() => {
-        const updateBkkTime = () => {
-            const now = new Date();
+        const updateBkkTime =
+            () => {
+                const now =
+                    new Date();
 
-            setBkkTime(
-                new Intl.DateTimeFormat('ja-JP', {
-                    timeZone: 'Asia/Bangkok',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    second: '2-digit',
-                    hour12: false,
-                }).format(now)
-            );
-        };
+                setBkkTime(
+                    new Intl.DateTimeFormat(
+                        'ja-JP',
+                        {
+                            timeZone:
+                                'Asia/Bangkok',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            second: '2-digit',
+                            hour12: false,
+                        }
+                    ).format(now)
+                );
+            };
 
         updateBkkTime();
 
-        const timer = setInterval(
-            updateBkkTime,
-            1000
-        );
+        const timer =
+            setInterval(
+                updateBkkTime,
+                1000
+            );
 
-        return () => clearInterval(timer);
+        return () =>
+            clearInterval(
+                timer
+            );
     }, []);
 
     /*
+     * ---------------------------------------------------------
      * URLパラメータ更新
+     * ---------------------------------------------------------
      */
     const updateUrlParams = (
         title: string,
         lat: number,
         lng: number
     ) => {
-        if (typeof window !== 'undefined') {
-            const params = new URLSearchParams(
-                window.location.search
+        if (
+            typeof window !==
+            'undefined'
+        ) {
+            const params =
+                new URLSearchParams(
+                    window.location.search
+                );
+
+            params.set(
+                'title',
+                title
             );
 
-            params.set('title', title);
-            params.set('lat', lat.toString());
-            params.set('lng', lng.toString());
+            params.set(
+                'lat',
+                lat.toString()
+            );
+
+            params.set(
+                'lng',
+                lng.toString()
+            );
+
+            const queryString =
+                params.toString();
 
             window.history.replaceState(
                 {},
                 '',
                 window.location.pathname +
-                    '?' +
-                    params.toString()
+                    (
+                        queryString
+                            ? '?' +
+                              queryString
+                            : ''
+                    )
             );
         }
     };
 
     /*
+     * ---------------------------------------------------------
      * 座標抽出
+     * ---------------------------------------------------------
+     *
+     * 座標が存在しない場合は null。
+     *
+     * 以前のように、
+     * 不明な座標をバンコク中心部へ
+     * 勝手にフォールバックしない。
      */
     const extractCoordinates = (
         item: CoordinateCandidate
-    ) => {
-        const lat =
+    ): {
+        lat: number;
+        lng: number;
+    } | null => {
+        const rawLat =
             item.coordinate?.latitude ??
             item.coordinate?.lat ??
             item.latitude ??
-            item.lat ??
-            13.7460;
+            item.lat;
 
-        const lng =
+        const rawLng =
             item.coordinate?.longitude ??
             item.coordinate?.lng ??
             item.longitude ??
-            item.lng ??
-            100.5347;
+            item.lng;
+
+        if (
+            rawLat == null ||
+            rawLng == null
+        ) {
+            return null;
+        }
+
+        const lat =
+            Number(rawLat);
+
+        const lng =
+            Number(rawLng);
+
+        if (
+            !Number.isFinite(lat) ||
+            !Number.isFinite(lng) ||
+            lat < -90 ||
+            lat > 90 ||
+            lng < -180 ||
+            lng > 180
+        ) {
+            return null;
+        }
 
         return {
-            lat: Number(lat),
-            lng: Number(lng),
+            lat,
+            lng,
         };
     };
 
     /*
+     * ---------------------------------------------------------
      * ランドマーク選択
+     * ---------------------------------------------------------
      */
     const handleSelectLandmark = (
         landmark: CoordinateCandidate
     ) => {
-        const { lat, lng } =
-            extractCoordinates(landmark);
+        const coordinates =
+            extractCoordinates(
+                landmark
+            );
 
-        const name =
-            landmark.name || 'スポット';
+        if (!coordinates) {
+            showToast(
+                '⚠️ このスポットの位置情報を取得できません'
+            );
 
-        setDestinationCoordinate({
+            return;
+        }
+
+        const {
             lat,
             lng,
-        });
+        } = coordinates;
 
-        setDestinationTitle(name);
-        setSelectedCategory(null);
+        const name =
+            landmark.name ||
+            'スポット';
+
+        setDestinationCoordinate(
+            {
+                lat,
+                lng,
+            }
+        );
+
+        setDestinationTitle(
+            name
+        );
+
+        setSelectedCategory(
+            null
+        );
+
         setSearchText('');
-        setShowDetailSheet(false);
-        setIsDemoMode(false);
+
+        setShowDetailSheet(
+            false
+        );
+
+        setIsDemoMode(
+            false
+        );
 
         updateUrlParams(
             name,
@@ -612,30 +1065,68 @@ function MainContent() {
     };
 
     /*
+     * ---------------------------------------------------------
      * 駅選択
+     * ---------------------------------------------------------
      */
     const handleSelectStation = (
         station: CoordinateCandidate
     ) => {
-        const { lat, lng } =
-            extractCoordinates(station);
+        const coordinates =
+            extractCoordinates(
+                station
+            );
 
-        const title =
-            (station.name || '駅') +
-            ' (' +
-            (station.line || 'BTS/MRT') +
-            ')';
+        if (!coordinates) {
+            showToast(
+                '⚠️ この駅の位置情報を取得できません'
+            );
 
-        setDestinationCoordinate({
+            return;
+        }
+
+        const {
             lat,
             lng,
-        });
+        } = coordinates;
 
-        setDestinationTitle(title);
-        setSelectedCategory(null);
+        const stationDisplayName =
+            station.nameJa ??
+            station.nameEn ??
+            station.name ??
+            '駅';
+
+        const title =
+            stationDisplayName +
+            ' (' +
+            (station.line ||
+                'BTS/MRT') +
+            ')';
+
+        setDestinationCoordinate(
+            {
+                lat,
+                lng,
+            }
+        );
+
+        setDestinationTitle(
+            title
+        );
+
+        setSelectedCategory(
+            null
+        );
+
         setSearchText('');
-        setShowDetailSheet(false);
-        setIsDemoMode(false);
+
+        setShowDetailSheet(
+            false
+        );
+
+        setIsDemoMode(
+            false
+        );
 
         updateUrlParams(
             title,
@@ -643,31 +1134,79 @@ function MainContent() {
             lng
         );
 
-        showToast(
-            '📍 「' +
-                title +
-                '」を目的地に設定しました'
-        );
+        if (
+            station.line === 'Boat' &&
+            station.serviceStatus === 'inactive'
+        ) {
+            showToast(
+                '⚠️ 「' +
+                    title +
+                    '」は現在通常運航では利用できません'
+            );
+        } else if (
+            station.line === 'Boat' &&
+            station.serviceStatus === 'limited'
+        ) {
+            showToast(
+                '⚠️ 「' +
+                    title +
+                    '」は利用条件・運航状況をご確認ください'
+            );
+        } else {
+            showToast(
+                '📍 「' +
+                    title +
+                    '」を目的地に設定しました'
+            );
+        }
     };
 
     /*
+     * ---------------------------------------------------------
      * 両替店選択
+     * ---------------------------------------------------------
      */
     const handleSelectExchangeShop = (
         shop: ExchangeShop
     ) => {
-        const { lat, lng } =
-            extractCoordinates(shop);
+        const coordinates =
+            extractCoordinates(
+                shop
+            );
 
-        setDestinationCoordinate({
+        if (!coordinates) {
+            showToast(
+                '⚠️ この両替店の位置情報を取得できません'
+            );
+
+            return;
+        }
+
+        const {
             lat,
             lng,
-        });
+        } = coordinates;
 
-        setDestinationTitle(shop.name);
+        setDestinationCoordinate(
+            {
+                lat,
+                lng,
+            }
+        );
+
+        setDestinationTitle(
+            shop.name
+        );
+
         setSearchText('');
-        setShowDetailSheet(false);
-        setIsDemoMode(false);
+
+        setShowDetailSheet(
+            false
+        );
+
+        setIsDemoMode(
+            false
+        );
 
         updateUrlParams(
             shop.name,
@@ -683,23 +1222,51 @@ function MainContent() {
     };
 
     /*
+     * ---------------------------------------------------------
      * おすすめスポット選択
+     * ---------------------------------------------------------
      */
     const handleSelectRecommendedSpot = (
         spot: RecommendedSpot
     ) => {
-        const { lat, lng } =
-            extractCoordinates(spot);
+        const coordinates =
+            extractCoordinates(
+                spot
+            );
 
-        setDestinationCoordinate({
+        if (!coordinates) {
+            showToast(
+                '⚠️ このスポットの位置情報を取得できません'
+            );
+
+            return;
+        }
+
+        const {
             lat,
             lng,
-        });
+        } = coordinates;
 
-        setDestinationTitle(spot.name);
+        setDestinationCoordinate(
+            {
+                lat,
+                lng,
+            }
+        );
+
+        setDestinationTitle(
+            spot.name
+        );
+
         setSearchText('');
-        setShowDetailSheet(false);
-        setIsDemoMode(false);
+
+        setShowDetailSheet(
+            false
+        );
+
+        setIsDemoMode(
+            false
+        );
 
         updateUrlParams(
             spot.name,
@@ -715,29 +1282,63 @@ function MainContent() {
     };
 
     /*
+     * ---------------------------------------------------------
      * ホテル選択
+     * ---------------------------------------------------------
      */
     const handleSelectHotel = (
         hotel: HotelDisplayItem
     ) => {
-        const { lat, lng } =
-            extractCoordinates(hotel);
+        const coordinates =
+            extractCoordinates(
+                hotel
+            );
+
+        if (!coordinates) {
+            showToast(
+                '⚠️ このホテルの位置情報を取得できません'
+            );
+
+            return;
+        }
+
+        const {
+            lat,
+            lng,
+        } = coordinates;
 
         const name =
             hotel.hotelName ||
             hotel.name ||
             'バンコクのホテル';
 
-        setDestinationCoordinate({
-            lat,
-            lng,
-        });
+        const agodaHotelId = hotel.hotelId != null ? String(hotel.hotelId) : '';
+        setSelectedAgodaHotel(agodaHotelId ? { title: name, hotelId: agodaHotelId } : null);
 
-        setDestinationTitle(name);
-        setSelectedCategory(null);
+        setDestinationCoordinate(
+            {
+                lat,
+                lng,
+            }
+        );
+
+        setDestinationTitle(
+            name
+        );
+
+        setSelectedCategory(
+            null
+        );
+
         setSearchText('');
-        setShowDetailSheet(false);
-        setIsDemoMode(false);
+
+        setShowDetailSheet(
+            false
+        );
+
+        setIsDemoMode(
+            false
+        );
 
         updateUrlParams(
             name,
@@ -753,52 +1354,75 @@ function MainContent() {
     };
 
     /*
+     * ---------------------------------------------------------
      * 検索文字列
+     * ---------------------------------------------------------
      */
     const query = searchText
-        ? searchText.toLowerCase().trim()
+        ? searchText
+              .toLowerCase()
+              .trim()
         : '';
 
     /*
+     * ---------------------------------------------------------
      * ランドマーク表示条件
+     * ---------------------------------------------------------
      */
     const isLandmarkAllowed =
         query.length > 0 ||
         !selectedCategory ||
         (
-            selectedCategory !== 'ホテル' &&
+            selectedCategory !==
+                'ホテル' &&
             (
-                selectedCategory === 'すべて' ||
+                selectedCategory ===
+                    'すべて' ||
                 selectedCategory
             )
         );
 
     /*
+     * ---------------------------------------------------------
      * ランドマーク検索
+     * ---------------------------------------------------------
      */
     const filteredLandmarks =
         isLandmarkAllowed
-            ? (bangkokLandmarks || []).filter(
+            ? (
+                  bangkokLandmarks ||
+                  []
+              ).filter(
                   (l) => {
                       const name =
-                          (l.name || '')
-                              .toLowerCase();
+                          (
+                              l.name ||
+                              ''
+                          ).toLowerCase();
 
                       const category =
-                          (l.category || '')
-                              .toLowerCase();
+                          (
+                              l.category ||
+                              ''
+                          ).toLowerCase();
 
                       if (query) {
                           return (
-                              name.includes(query) ||
-                              category.includes(query)
+                              name.includes(
+                                  query
+                              ) ||
+                              category.includes(
+                                  query
+                              )
                           );
                       }
 
                       if (
                           selectedCategory &&
-                          selectedCategory !== 'すべて' &&
-                          selectedCategory !== 'ホテル'
+                          selectedCategory !==
+                              'すべて' &&
+                          selectedCategory !==
+                              'ホテル'
                       ) {
                           return category.includes(
                               selectedCategory
@@ -811,50 +1435,81 @@ function MainContent() {
             : [];
 
     /*
+     * ---------------------------------------------------------
      * 駅検索
+     * ---------------------------------------------------------
      */
-    const filteredStations = query
-        ? (allBangkokStations || []).filter(
-              (s) =>
-                  (s.name || '')
-                      .toLowerCase()
-                      .includes(query) ||
-                  (s.line || '')
-                      .toLowerCase()
-                      .includes(query)
-          )
-        : [];
+    const filteredStations =
+        query
+            ? (
+                  allBangkokStations ||
+                  []
+              ).filter((s) => {
+                  const searchableStation =
+                      [
+                          s.name,
+                          s.nameJa,
+                          s.nameEn,
+                          s.line,
+                          s.route,
+                          s.stationCode,
+                      ]
+                          .filter(Boolean)
+                          .join(' ')
+                          .toLowerCase();
+
+                  return searchableStation.includes(
+                      query
+                  );
+              })
+            : [];
 
     /*
+     * ---------------------------------------------------------
      * ホテル表示条件
+     * ---------------------------------------------------------
      */
     const isHotelAllowed =
         query.length > 0 ||
         !selectedCategory ||
-        selectedCategory === 'すべて' ||
-        selectedCategory === 'ホテル';
+        selectedCategory ===
+            'すべて' ||
+        selectedCategory ===
+            'ホテル';
 
     /*
+     * ---------------------------------------------------------
      * 固定ホテル + Agodaホテル
+     * ---------------------------------------------------------
      */
     const filteredHotels =
         isHotelAllowed
             ? [
                   ...bangkokHotels,
-                  ...(agodaHotels || []),
+                  ...(agodaHotels ||
+                      []),
               ].filter(
-                  (h: HotelDisplayItem) => {
-                      const name = (
-                          h.hotelName ||
-                          h.name ||
-                          ''
-                      ).toLowerCase();
+                  (
+                      h: HotelDisplayItem
+                  ) => {
+                      const name =
+                          (
+                              h.hotelName ||
+                              h.name ||
+                              ''
+                          ).toLowerCase();
 
                       if (query) {
                           return (
-                              name.includes(query) ||
-                              'ホテル'.includes(query) ||
-                              'hotel'.includes(query)
+                              name.includes(
+                                  query
+                              ) ||
+                              'ホテル'.includes(
+                                  query
+                              ) ||
+                              'hotel'.includes(
+                                  query
+                              )
                           );
                       }
 
@@ -867,17 +1522,38 @@ function MainContent() {
         selectedCategory !== null ||
         searchText.trim().length > 0;
 
+    const shouldShowGooglePlaces =
+        searchText.trim().length >= 2;
+
+    const visibleGooglePlaces = shouldShowGooglePlaces
+        ? googlePlaces
+        : [];
+
+    const visiblePlacesLoading =
+        shouldShowGooglePlaces && placesLoading;
+
     return (
         <main className="relative w-screen h-[100dvh] block bg-gray-100 overflow-hidden">
             <div className="absolute inset-0 z-0 w-full h-full pointer-events-auto">
                 <GoogleMapComponent
+                    userLocation={
+                        userLocation
+                    }
                     destinationCoordinate={
                         destinationCoordinate
                     }
                     destinationTitle={
                         destinationTitle
                     }
-                    travelMode={selectedMode}
+                    travelMode={
+                        selectedMode
+                    }
+                    isDetailSheetOpen={
+                        showDetailSheet
+                    }
+                    onSelectStation={
+                        handleSelectStation
+                    }
                     onSelectArbitraryPoint={async (
                         title,
                         lat,
@@ -890,24 +1566,37 @@ function MainContent() {
                             lng.toFixed(4) +
                             ')';
 
-                        setDestinationCoordinate({
-                            lat,
-                            lng,
-                        });
+                        /*
+                         * 地図クリックは目的地変更。
+                         *
+                         * userLocation は変更しない。
+                         */
+                        setDestinationCoordinate(
+                            {
+                                lat,
+                                lng,
+                            }
+                        );
 
                         setDestinationTitle(
                             tempTitle
                         );
 
-                        setIsDemoMode(false);
+                        setIsDemoMode(
+                            false
+                        );
 
                         try {
                             const res =
                                 await fetch(
                                     '/api/geocode?lat=' +
-                                        lat +
+                                        encodeURIComponent(
+                                            lat.toString()
+                                        ) +
                                         '&lng=' +
-                                        lng
+                                        encodeURIComponent(
+                                            lng.toString()
+                                        )
                                 );
 
                             if (res.ok) {
@@ -972,7 +1661,9 @@ function MainContent() {
                         ✨
                     </span>
 
-                    <span>{toastMessage}</span>
+                    <span>
+                        {toastMessage}
+                    </span>
                 </div>
             )}
 
@@ -980,7 +1671,9 @@ function MainContent() {
                 <div className="pointer-events-auto bg-white/95 backdrop-blur-md p-3.5 rounded-2xl shadow-lg flex flex-col gap-2 max-w-md mx-auto w-full box-border">
                     <div className="flex items-center justify-between text-xs font-bold text-emerald-600">
                         <div className="flex items-center gap-1.5 min-w-0">
-                            <span>🛡️</span>
+                            <span>
+                                🛡️
+                            </span>
 
                             <span className="truncate">
                                 バンコクおまもりコンパス
@@ -995,7 +1688,8 @@ function MainContent() {
 
                         <div className="flex items-center gap-1.5 bg-gray-100 px-2 py-1 rounded-lg text-[11px] text-gray-700 shrink-0">
                             <span>
-                                🇹🇭 {bkkTime}
+                                🇹🇭{' '}
+                                {bkkTime}
                             </span>
                         </div>
                     </div>
@@ -1009,10 +1703,15 @@ function MainContent() {
                             <input
                                 type="text"
                                 placeholder="スポット・駅・ホテルを自由検索..."
-                                value={searchText}
-                                onChange={(e) =>
+                                value={
+                                    searchText
+                                }
+                                onChange={(
+                                    e
+                                ) =>
                                     setSearchText(
-                                        e.target.value
+                                        e.target
+                                            .value
                                     )
                                 }
                                 className="bg-transparent w-full outline-none text-sm text-gray-800 min-w-0"
@@ -1021,7 +1720,9 @@ function MainContent() {
                             {searchText && (
                                 <button
                                     onClick={() =>
-                                        setSearchText('')
+                                        setSearchText(
+                                            ''
+                                        )
                                     }
                                     className="text-gray-400 hover:text-gray-600 shrink-0"
                                 >
@@ -1041,7 +1742,7 @@ function MainContent() {
                     </div>
                 </div>
 
-                <div className="pointer-events-auto flex gap-2 overflow-x-auto pb-1 px-2 no-scrollbar max-w-md mx-auto w-full items-center">
+                <div className="pointer-events-auto horizontal-scroll-safe flex gap-2 overflow-x-auto px-2 max-w-md mx-auto w-full items-center">
                     <button
                         onClick={() =>
                             setShowTravelPlanDrawer(
@@ -1050,8 +1751,14 @@ function MainContent() {
                         }
                         className="whitespace-nowrap px-3 py-1.5 rounded-xl bg-blue-600 text-white text-xs font-bold shadow-md flex items-center gap-1.5 shrink-0"
                     >
-                        <span>📋</span> マイプラン (
-                        {itineraryItems.length})
+                        <span>
+                            📋
+                        </span>{' '}
+                        マイプラン (
+                        {
+                            itineraryItems.length
+                        }
+                        )
                     </button>
 
                     <div className="h-4 w-[1px] bg-gray-300 mx-0.5 shrink-0"></div>
@@ -1102,7 +1809,9 @@ function MainContent() {
 
                     <button
                         onClick={() =>
-                            setActiveGuide('prep')
+                            setActiveGuide(
+                                'prep'
+                            )
                         }
                         className="whitespace-nowrap px-3 py-1.5 rounded-xl bg-amber-50 text-amber-800 border border-amber-200 text-xs font-bold shadow-sm shrink-0"
                     >
@@ -1144,7 +1853,9 @@ function MainContent() {
 
                     <button
                         onClick={() =>
-                            setActiveGuide('drive')
+                            setActiveGuide(
+                                'drive'
+                            )
                         }
                         className="whitespace-nowrap px-3 py-1.5 rounded-xl bg-sky-50 text-sky-800 border border-sky-200 text-xs font-bold shadow-sm shrink-0"
                     >
@@ -1153,7 +1864,9 @@ function MainContent() {
 
                     <button
                         onClick={() =>
-                            setActiveGuide('stomach')
+                            setActiveGuide(
+                                'stomach'
+                            )
                         }
                         className="whitespace-nowrap px-3 py-1.5 rounded-xl bg-teal-50 text-teal-800 border border-teal-200 text-xs font-bold shadow-sm shrink-0"
                     >
@@ -1173,7 +1886,9 @@ function MainContent() {
 
                     <button
                         onClick={() =>
-                            setActiveGuide('manner')
+                            setActiveGuide(
+                                'manner'
+                            )
                         }
                         className="whitespace-nowrap px-3 py-1.5 rounded-xl bg-orange-50 text-orange-700 border border-orange-200 text-xs font-bold shadow-sm shrink-0"
                     >
@@ -1181,11 +1896,15 @@ function MainContent() {
                     </button>
                 </div>
 
-                <div className="pointer-events-auto flex gap-2 overflow-x-auto pb-1 px-2 no-scrollbar max-w-md mx-auto w-full">
+                <div className="pointer-events-auto horizontal-scroll-safe flex gap-2 overflow-x-auto px-2 max-w-md mx-auto w-full">
                     {categories.map(
-                        (category) => (
+                        (
+                            category
+                        ) => (
                             <button
-                                key={category}
+                                key={
+                                    category
+                                }
                                 onClick={() =>
                                     setSelectedCategory(
                                         selectedCategory ===
@@ -1204,7 +1923,9 @@ function MainContent() {
                                     )
                                 }
                             >
-                                {category}
+                                {
+                                    category
+                                }
                             </button>
                         )
                     )}
@@ -1213,14 +1934,25 @@ function MainContent() {
                 {showDropdown && (
                     <div className="pointer-events-auto bg-white/95 backdrop-blur-md rounded-2xl shadow-xl max-w-md mx-auto w-full max-h-72 overflow-y-auto p-2 flex flex-col gap-1 box-border">
                         {filteredLandmarks.map(
-                            (landmark) => {
+                            (
+                                landmark
+                            ) => {
+                                const coordinates =
+                                    extractCoordinates(
+                                        landmark
+                                    );
+
+                                if (
+                                    !coordinates
+                                ) {
+                                    return null;
+                                }
+
                                 const {
                                     lat,
                                     lng,
                                 } =
-                                    extractCoordinates(
-                                        landmark
-                                    );
+                                    coordinates;
 
                                 return (
                                     <div
@@ -1257,7 +1989,8 @@ function MainContent() {
                                                 e
                                             ) =>
                                                 handleAddToPlan(
-                                                    landmark.name,
+                                                    landmark.name ||
+                                                        'スポット',
                                                     landmark.category ||
                                                         'スポット',
                                                     lat,
@@ -1276,22 +2009,47 @@ function MainContent() {
 
                         {filteredStations.map(
                             (
-                                station,
-                                idx
+                                station
                             ) => {
+                                const coordinates =
+                                    extractCoordinates(
+                                        station
+                                    );
+
+                                if (
+                                    !coordinates
+                                ) {
+                                    return null;
+                                }
+
                                 const {
                                     lat,
                                     lng,
                                 } =
-                                    extractCoordinates(
-                                        station
-                                    );
+                                    coordinates;
+
+                                const stationStatus =
+                                    station as CoordinateCandidate;
+
+                                const isBoat =
+                                    station.line ===
+                                    'Boat';
+
+                                const serviceStatus =
+                                    stationStatus.serviceStatus;
+
+                                const serviceNote =
+                                    stationStatus.serviceNote;
 
                                 return (
                                     <div
                                         key={
                                             'station-' +
-                                            idx
+                                            station.line +
+                                            '-' +
+                                            (
+                                                station.stationCode || station.name
+                                            )
                                         }
                                         onClick={() =>
                                             handleSelectStation(
@@ -1303,15 +2061,46 @@ function MainContent() {
                                         <div className="min-w-0 flex-1 pr-2">
                                             <p className="text-sm font-bold text-gray-800 truncate">
                                                 {
+                                                    station.nameJa ??
+                                                    station.nameEn ??
                                                     station.name
                                                 }
                                             </p>
 
-                                            <p className="text-[10px] text-gray-500">
-                                                {
-                                                    station.line
-                                                }
-                                            </p>
+                                            <div className="flex flex-wrap items-center gap-1.5 mt-0.5">
+                                                <p className="text-[10px] text-gray-500">
+                                                    {
+                                                        station.line
+                                                    }
+                                                </p>
+
+                                                {isBoat &&
+                                                    serviceStatus ===
+                                                        'limited' && (
+                                                        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-200">
+                                                            ⚠️ 利用制限あり
+                                                        </span>
+                                                    )}
+
+                                                {isBoat &&
+                                                    serviceStatus ===
+                                                        'inactive' && (
+                                                        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-gray-200 text-gray-700 border border-gray-300">
+                                                            現在利用不可
+                                                        </span>
+                                                    )}
+                                            </div>
+
+                                            {isBoat &&
+                                                serviceStatus !==
+                                                    'active' &&
+                                                serviceNote && (
+                                                    <p className="text-[10px] text-amber-700 mt-1 leading-relaxed">
+                                                        {
+                                                            serviceNote
+                                                        }
+                                                    </p>
+                                                )}
                                         </div>
 
                                         <button
@@ -1345,22 +2134,33 @@ function MainContent() {
                             }
                         )}
 
-                        {placesLoading && (
+                        {visiblePlacesLoading && (
                             <div className="p-2 text-center text-xs text-blue-600 font-bold">
                                 Googleマップからスポットを検索中...
                             </div>
                         )}
 
-                        {!placesLoading &&
-                            googlePlaces.map(
-                                (place) => {
+                        {!visiblePlacesLoading &&
+                            visibleGooglePlaces.map(
+                                (
+                                    place
+                                ) => {
+                                    const coordinates =
+                                        extractCoordinates(
+                                            place
+                                        );
+
+                                    if (
+                                        !coordinates
+                                    ) {
+                                        return null;
+                                    }
+
                                     const {
                                         lat,
                                         lng,
                                     } =
-                                        extractCoordinates(
-                                            place
-                                        );
+                                        coordinates;
 
                                     return (
                                         <div
@@ -1429,6 +2229,23 @@ function MainContent() {
                                     hotel: HotelDisplayItem,
                                     index: number
                                 ) => {
+                                    const coordinates =
+                                        extractCoordinates(
+                                            hotel
+                                        );
+
+                                    if (
+                                        !coordinates
+                                    ) {
+                                        return null;
+                                    }
+
+                                    const {
+                                        lat,
+                                        lng,
+                                    } =
+                                        coordinates;
+
                                     const id =
                                         hotel.hotelId ||
                                         hotel.id ||
@@ -1445,14 +2262,18 @@ function MainContent() {
                                         '';
 
                                     const hasHotelImage =
-                                        Boolean(rawImage) &&
+                                        Boolean(
+                                            rawImage
+                                        ) &&
                                         !rawImage.includes(
                                             'via.placeholder.com'
                                         );
 
                                     const hasPrice =
-                                        hotel.dailyRate != null ||
-                                        hotel.price != null;
+                                        hotel.dailyRate !=
+                                            null ||
+                                        hotel.price !=
+                                            null;
 
                                     const price =
                                         hotel.dailyRate ??
@@ -1477,14 +2298,6 @@ function MainContent() {
                                         hotel.discountPercentage ??
                                         0;
 
-                                    const {
-                                        lat,
-                                        lng,
-                                    } =
-                                        extractCoordinates(
-                                            hotel
-                                        );
-
                                     return (
                                         <div
                                             key={
@@ -1501,9 +2314,12 @@ function MainContent() {
                                             <div className="flex gap-3 items-center min-w-0 flex-1">
                                                 <div className="shrink-0 relative">
                                                     {hasHotelImage ? (
-                                                        <img
+                                                        <Image
                                                             src={rawImage}
                                                             alt={name}
+                                                            width={56}
+                                                            height={56}
+                                                            unoptimized
                                                             className="w-14 h-14 object-cover rounded-lg shadow-sm border border-gray-200"
                                                         />
                                                     ) : (
@@ -1610,12 +2426,16 @@ function MainContent() {
                                 }
                             )}
 
-                        {filteredLandmarks.length === 0 &&
-                            filteredStations.length === 0 &&
-                            filteredHotels.length === 0 &&
-                            googlePlaces.length === 0 &&
+                        {filteredLandmarks.length ===
+                            0 &&
+                            filteredStations.length ===
+                                0 &&
+                            filteredHotels.length ===
+                                0 &&
+                            visibleGooglePlaces.length ===
+                                0 &&
                             !agodaLoading &&
-                            !placesLoading && (
+                            !visiblePlacesLoading && (
                                 <div className="p-4 text-center text-xs text-gray-500">
                                     該当するスポットやホテルが見つかりませんでした
                                 </div>
@@ -1634,10 +2454,15 @@ function MainContent() {
                         }
                         className="pointer-events-auto bg-white/95 backdrop-blur-md px-5 py-3 rounded-2xl shadow-xl flex items-center gap-2 text-xs md:text-sm font-bold text-gray-800 hover:bg-white transition-all max-w-md w-full justify-center"
                     >
-                        <span>📍</span>
+                        <span>
+                            📍
+                        </span>
 
                         <span className="truncate">
-                            {destinationTitle} の詳細 ＆ アクセス相場
+                            {
+                                destinationTitle
+                            }{' '}
+                            の詳細 ＆ アクセス相場
                         </span>
 
                         <span className="text-blue-600 shrink-0">
@@ -1670,44 +2495,56 @@ function MainContent() {
                             label: 'タクシー',
                             icon: '🚕',
                         },
-                    ].map((m) => (
-                        <button
-                            key={m.mode}
-                            onClick={() =>
-                                setSelectedMode(
+                    ].map(
+                        (m) => (
+                            <button
+                                key={
                                     m.mode
-                                )
-                            }
-                            className={
-                                'flex-1 flex flex-col items-center py-1.5 rounded-xl text-[11px] font-semibold transition-all ' +
-                                (
-                                    selectedMode ===
-                                    m.mode
-                                        ? 'bg-blue-600 text-white shadow-md'
-                                        : 'text-gray-700 hover:bg-gray-100'
-                                )
-                            }
-                        >
-                            <span className="text-sm">
-                                {m.icon}
-                            </span>
+                                }
+                                onClick={() =>
+                                    setSelectedMode(
+                                        m.mode
+                                    )
+                                }
+                                className={
+                                    'flex-1 flex flex-col items-center py-1.5 rounded-xl text-[11px] font-semibold transition-all ' +
+                                    (
+                                        selectedMode ===
+                                        m.mode
+                                            ? 'bg-blue-600 text-white shadow-md'
+                                            : 'text-gray-700 hover:bg-gray-100'
+                                    )
+                                }
+                            >
+                                <span className="text-sm">
+                                    {
+                                        m.icon
+                                    }
+                                </span>
 
-                            <span className="truncate">
-                                {m.label}
-                            </span>
-                        </button>
-                    ))}
+                                <span className="truncate">
+                                    {
+                                        m.label
+                                    }
+                                </span>
+                            </button>
+                        )
+                    )}
                 </div>
             </div>
 
             <TravelPlanDrawer
-                isOpen={showTravelPlanDrawer}
+                isOpen={
+                    showTravelPlanDrawer
+                }
                 onClose={() =>
                     setShowTravelPlanDrawer(
                         false
                     )
                 }
-                items={itineraryItems}
+                items={
+                    itineraryItems
+                }
                 onRemoveItem={
                     handleRemoveFromPlan
                 }
@@ -1716,13 +2553,20 @@ function MainContent() {
                     lat,
                     lng
                 ) => {
-                    setDestinationCoordinate({
-                        lat,
-                        lng,
-                    });
+                    setDestinationCoordinate(
+                        {
+                            lat,
+                            lng,
+                        }
+                    );
 
-                    setDestinationTitle(title);
-                    setIsDemoMode(false);
+                    setDestinationTitle(
+                        title
+                    );
+
+                    setIsDemoMode(
+                        false
+                    );
 
                     updateUrlParams(
                         title,
@@ -1733,7 +2577,9 @@ function MainContent() {
             />
 
             <EmergencyModal
-                isOpen={showEmergencyModal}
+                isOpen={
+                    showEmergencyModal
+                }
                 onClose={() =>
                     setShowEmergencyModal(
                         false
@@ -1744,13 +2590,20 @@ function MainContent() {
                     lat,
                     lng
                 ) => {
-                    setDestinationCoordinate({
-                        lat,
-                        lng,
-                    });
+                    setDestinationCoordinate(
+                        {
+                            lat,
+                            lng,
+                        }
+                    );
 
-                    setDestinationTitle(title);
-                    setIsDemoMode(false);
+                    setDestinationTitle(
+                        title
+                    );
+
+                    setIsDemoMode(
+                        false
+                    );
 
                     updateUrlParams(
                         title,
@@ -1768,62 +2621,27 @@ function MainContent() {
 
             {showDetailSheet && (
                 <DetailSheet
-                    title={destinationTitle}
-                    distanceKm={(() => {
-                        const startLat = 13.7460;
-                        const startLng = 100.5347;
-
-                        const destLat =
-                            destinationCoordinate.lat;
-
-                        const destLng =
-                            destinationCoordinate.lng;
-
-                        const R = 6371;
-
-                        const dLat =
-                            (destLat - startLat) *
-                            (Math.PI / 180);
-
-                        const dLng =
-                            (destLng - startLng) *
-                            (Math.PI / 180);
-
-                        const a =
-                            Math.sin(dLat / 2) *
-                                Math.sin(dLat / 2) +
-                            Math.cos(
-                                startLat *
-                                    (Math.PI / 180)
-                            ) *
-                                Math.cos(
-                                    destLat *
-                                        (Math.PI / 180)
-                                ) *
-                                Math.sin(dLng / 2) *
-                                Math.sin(dLng / 2);
-
-                        const c =
-                            2 *
-                            Math.atan2(
-                                Math.sqrt(a),
-                                Math.sqrt(1 - a)
-                            );
-
-                        const distance =
-                            R * c;
-
-                        return Math.round(
-                            distance * 10
-                        ) / 10;
-                    })()}
+                    title={
+                        destinationTitle
+                    }
+                    distanceKm={calculateDistanceKm(
+                        userLocation,
+                        destinationCoordinate
+                    )}
+                    agodaHotelId={
+                        selectedAgodaHotel?.title === destinationTitle
+                            ? selectedAgodaHotel.hotelId
+                            : undefined
+                    }
                     onClose={() =>
                         setShowDetailSheet(
                             false
                         )
                     }
                     onOpenThaiCard={() =>
-                        setShowThaiCard(true)
+                        setShowThaiCard(
+                            true
+                        )
                     }
                 />
             )}
@@ -1834,15 +2652,21 @@ function MainContent() {
                         destinationTitle
                     }
                     onClose={() =>
-                        setShowThaiCard(false)
+                        setShowThaiCard(
+                            false
+                        )
                     }
                 />
             )}
 
             <GuideModal
-                type={activeGuide}
+                type={
+                    activeGuide
+                }
                 onClose={() =>
-                    setActiveGuide(null)
+                    setActiveGuide(
+                        null
+                    )
                 }
                 onSelectExchangeShop={
                     handleSelectExchangeShop
@@ -1851,7 +2675,7 @@ function MainContent() {
                     handleSelectRecommendedSpot
                 }
                 currentLocation={
-                    destinationCoordinate
+                    userLocation
                 }
             />
         </main>

@@ -1,6 +1,6 @@
 // public/sw.js
 
-const CACHE_NAME = 'bkk-nav-cache-v2';
+const CACHE_NAME = 'bkk-nav-cache-v3';
 
 const STATIC_ASSETS = [
   '/manifest.json',
@@ -20,19 +20,22 @@ self.addEventListener('install', (event) => {
 // 新しいService Workerをすぐに有効化
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
-            return caches.delete(cacheName);
-          }
+    caches
+      .keys()
+      .then((cacheNames) => {
+        return Promise.all(
+          cacheNames.map((cacheName) => {
+            if (cacheName !== CACHE_NAME) {
+              return caches.delete(cacheName);
+            }
 
-          return undefined;
-        })
-      );
-    }).then(() => {
-      return self.clients.claim();
-    })
+            return undefined;
+          })
+        );
+      })
+      .then(() => {
+        return self.clients.claim();
+      })
   );
 });
 
@@ -60,22 +63,40 @@ self.addEventListener('fetch', (event) => {
   // ページナビゲーションはNetwork First
   if (request.mode === 'navigate') {
     event.respondWith(
-      fetch(request)
-        .then((response) => {
-          return response;
-        })
-        .catch(() => {
-          return caches.match('/');
-        })
+      fetch(request).catch(async () => {
+        const cachedResponse = await caches.match(request);
+
+        if (cachedResponse) {
+          return cachedResponse;
+        }
+
+        return new Response('Network unavailable', {
+          status: 503,
+          statusText: 'Service Unavailable',
+          headers: {
+            'Content-Type': 'text/plain; charset=utf-8',
+          },
+        });
+      })
     );
 
     return;
   }
 
-  // manifestなど、明示的にキャッシュした静的ファイルは
-  // Network Firstで取得し、ネットワーク障害時だけキャッシュを使用
+  // 同一オリジンのGETリクエストはNetwork First。
+  // ネットワーク障害時、キャッシュが存在する場合のみキャッシュを使用する。
   event.respondWith(
-    fetch(request)
-      .catch(() => caches.match(request))
+    fetch(request).catch(async () => {
+      const cachedResponse = await caches.match(request);
+
+      if (cachedResponse) {
+        return cachedResponse;
+      }
+
+      return new Response('', {
+        status: 503,
+        statusText: 'Service Unavailable',
+      });
+    })
   );
 });

@@ -38,9 +38,9 @@ export default function ThaiDriverCardModal({ destinationTitle, onClose }: ThaiD
     };
 
     return (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-            <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6 relative animate-scale-up">
-                <div className="flex justify-between items-center mb-4">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 overflow-hidden">
+            <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full max-h-[calc(100dvh-1rem)] min-h-0 p-4 sm:p-6 relative animate-scale-up flex flex-col overflow-hidden">
+                <div className="sticky top-0 z-10 flex justify-between items-center mb-4 bg-white">
                     <span className="text-xs font-bold text-gray-500">運転手さんに見せてください</span>
                     <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl font-bold">
                         ✕
@@ -48,7 +48,7 @@ export default function ThaiDriverCardModal({ destinationTitle, onClose }: ThaiD
                 </div>
 
                 {/* タイ語カード本体 */}
-                <div className="bg-yellow-50 border-2 border-orange-400 rounded-2xl p-6 text-center shadow-inner mb-4">
+                <div className="bg-yellow-50 border-2 border-orange-400 rounded-2xl p-4 sm:p-6 text-center shadow-inner mb-4 overflow-y-auto overscroll-contain">
                     <p className="text-sm text-gray-600 mb-2">กรุณาไปส่งที่</p>
                     <h2 className="text-2xl font-extrabold text-gray-900 mb-3 leading-relaxed">
                         {displayThaiTitle}

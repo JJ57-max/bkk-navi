@@ -46,7 +46,7 @@ export default function TravelPlanDrawer({
 
     return (
         <div className="absolute inset-0 z-50 bg-black/40 backdrop-blur-sm flex justify-end pointer-events-auto">
-            <div className="w-full max-w-sm bg-white h-full shadow-2xl flex flex-col p-5 animate-slide-left">
+            <div className="w-full max-w-sm bg-white h-[100dvh] max-h-[100dvh] min-h-0 shadow-2xl flex flex-col p-4 sm:p-5 animate-slide-left overflow-hidden">
                 {/* ヘッダー */}
                 <div className="flex justify-between items-center border-b pb-3 mb-4">
                     <div className="flex items-center gap-2">
@@ -73,7 +73,7 @@ export default function TravelPlanDrawer({
                 )}
 
                 {/* リストエリア */}
-                <div className="flex-1 overflow-y-auto flex flex-col gap-3 pr-1">
+                <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain flex flex-col gap-3 pr-1">
                     {items.length === 0 ? (
                         <div className="text-center py-12 text-gray-400 text-sm">
                             <p className="text-3xl mb-2">🗺️</p>

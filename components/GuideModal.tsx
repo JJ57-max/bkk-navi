@@ -98,8 +98,8 @@ export default function GuideModal({
     ];
 
     return (
-        <div className="absolute inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 pointer-events-auto">
-            <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full max-h-[85vh] flex flex-col p-6 animate-scale-up border border-gray-100">
+        <div className="absolute inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 pointer-events-auto overflow-hidden">
+            <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full max-h-[calc(100dvh-1rem)] min-h-0 flex flex-col p-4 sm:p-6 animate-scale-up border border-gray-100 overflow-hidden">
                 {/* ヘッダー */}
                 <div className="flex justify-between items-center border-b pb-3 mb-4">
                     <div className="flex items-center gap-2">
@@ -160,7 +160,7 @@ export default function GuideModal({
                 </div>
 
                 {/* コンテンツ本文 */}
-                <div className="flex-1 overflow-y-auto flex flex-col gap-3 pr-1 text-xs text-gray-700">
+                <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain flex flex-col gap-3 pr-1 text-xs text-gray-700">
                     {/* 周辺おすすめスポット */}
                     {type === 'recommend' && (
                         <div className="flex flex-col gap-3">
@@ -752,22 +752,33 @@ export default function GuideModal({
                                         </span>
                                     </a>
 
-                                    <a
-                                        href="https://airalo.pxf.io/BKKNAVI"
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 p-2.5 rounded-2xl flex flex-col items-center gap-1 transition-all text-center"
-                                    >
+                                    <div className="bg-indigo-50 border border-indigo-200 p-2.5 rounded-2xl flex flex-col items-center gap-1.5 text-center">
                                         <span className="text-base">
                                             📶
                                         </span>
                                         <span className="text-[11px] font-bold text-indigo-900 leading-tight">
                                             Airalo eSIM (PR)
                                         </span>
-                                        <span className="text-[9px] text-indigo-600 font-medium">
-                                            eSIMサービス
+                                        <a
+                                            href="https://airalo.pxf.io/BKKNAVI"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white text-[9px] font-bold py-1.5 px-2 rounded-lg transition-colors"
+                                        >
+                                            全ユーザー 10% OFF
+                                        </a>
+                                        <a
+                                            href="https://airalo.pxf.io/BKKNAVINEW"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="w-full bg-white hover:bg-indigo-100 border border-indigo-300 text-indigo-700 text-[9px] font-bold py-1.5 px-2 rounded-lg transition-colors"
+                                        >
+                                            新規ユーザー 15% OFF
+                                        </a>
+                                        <span className="text-[8px] text-indigo-500 font-medium leading-tight">
+                                            2027/6/30まで・リンクからクーポン自動適用
                                         </span>
-                                    </a>
+                                    </div>
                                 </div>
                             </div>
                         </div>

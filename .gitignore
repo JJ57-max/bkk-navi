@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Local OpenStreetMap audit extracts
+public/data/srt/staging/osm/*.osm.pbf
+
+# Local backup files
+*.bak

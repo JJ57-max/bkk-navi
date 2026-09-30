@@ -153,7 +153,10 @@ export async function GET(request: Request) {
           responseText.slice(0, 500)
       );
 
-      return Response.json([]);
+      return Response.json({
+        ok: false,
+        hotels: [],
+      });
     }
 
     /*
@@ -166,7 +169,10 @@ export async function GET(request: Request) {
     } catch (error) {
       console.error('Failed to parse Agoda API response:', error);
 
-      return Response.json([]);
+      return Response.json({
+        ok: false,
+        hotels: [],
+      });
     }
 
     /*
@@ -175,11 +181,15 @@ export async function GET(request: Request) {
     if (!data || typeof data !== 'object') {
       console.error('Unexpected Agoda API response:', responseText.slice(0, 500));
 
-      return Response.json([]);
+      return Response.json({
+        ok: false,
+        hotels: [],
+      });
     }
 
     const responseData = data as {
       error?: unknown;
+      hotels?: unknown;
       results?: unknown;
       hotelList?: unknown;
     };
@@ -193,7 +203,10 @@ export async function GET(request: Request) {
         responseData.error
       );
 
-      return Response.json([]);
+      return Response.json({
+        ok: false,
+        hotels: [],
+      });
     }
 
     /*
@@ -201,7 +214,9 @@ export async function GET(request: Request) {
      */
     let hotelsArray: unknown[] = [];
 
-    if (Array.isArray(responseData.results)) {
+    if (Array.isArray(responseData.hotels)) {
+      hotelsArray = responseData.hotels;
+    } else if (Array.isArray(responseData.results)) {
       hotelsArray = responseData.results;
     } else if (Array.isArray(responseData.hotelList)) {
       hotelsArray = responseData.hotelList;
@@ -214,10 +229,16 @@ export async function GET(request: Request) {
       hotelsArray.length
     );
 
-    return Response.json(hotelsArray);
+    return Response.json({
+      ok: true,
+      hotels: hotelsArray,
+    });
   } catch (error) {
     console.error('Failed to fetch Agoda hotels:', error);
 
-    return Response.json([]);
+    return Response.json({
+        ok: false,
+        hotels: [],
+      });
   }
 }

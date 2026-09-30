@@ -149,5 +149,6 @@ const AGODA_CID = '1974942';
  * バンコクの都市ページへCID付きで誘導するURLを生成する関数（エラー防止の安定版）
  */
 export const getAgodaSearchUrl = (_keyword?: string) => {
+    void _keyword;
     return `https://www.agoda.com/ja-jp/city/bangkok-th.html?cid=${AGODA_CID}`;
 };

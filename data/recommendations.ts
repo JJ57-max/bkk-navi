@@ -21,64 +21,96 @@ export const bangkokRecommendations: RecommendedSpot[] = [
         name: 'Health Land Asoke (ヘルスランド)',
         category: 'massage',
         area: 'アソーク',
-        description: '清潔で広々とした高級感のある有名スパチェーン。タイ古式マッサージが手頃な価格で受けられます。',
-        coordinate: { latitude: 13.7432, longitude: 100.5621 }
+        description:
+            'アソークエリアにあるHealth Landの大型スパ。タイ古式マッサージをはじめ複数の施術メニューがあります。',
+        coordinate: {
+            latitude: 13.7432,
+            longitude: 100.5621,
+        },
     },
     {
         id: 'let_us_relax_siam',
         name: 'Let’s Relax Spa (サイアム・スクエア1)',
         category: 'massage',
         area: 'サイアム',
-        description: 'アクセスの良い立地で極上のリラクゼーションを提供してくれる大人気スパ。',
-        coordinate: { latitude: 13.7445, longitude: 100.5332 }
+        description:
+            'Siam Square Oneの6階にあるスパ。サイアム中心部で利用しやすく、複数のマッサージ・スパメニューがあります。',
+        coordinate: {
+            latitude: 13.7445,
+            longitude: 100.5332,
+        },
     },
     {
         id: 'asia_herb_phrom_phong',
-        name: 'Asia Herb Association (プロンポン店)',
+        name: 'Asia Herb Association (スクンビット24・プロンポン)',
         category: 'massage',
         area: 'プロンポン',
-        description: '日本人観光客に絶大な支持を誇る、自家製ハーブボールを使ったマッサージが人気のサロン。',
-        coordinate: { latitude: 13.7315, longitude: 100.5710 }
+        description:
+            'スクンビット24にあるマッサージスパ。ハーブボールを使ったトリートメントなどを提供しています。',
+        coordinate: {
+            latitude: 13.7315,
+            longitude: 100.5710,
+        },
     },
     {
         id: 'Yunomori_Onsen',
-        name: '湯の森 温泉＆スパ (ソイ26)',
+        name: '湯の森 温泉＆スパ (スクンビット26)',
         category: 'massage',
         area: 'プロンポン',
-        description: 'バンコクにいながら本格的な日本の温泉や露天風呂、極上マッサージが楽しめる癒やしスポット。',
-        coordinate: { latitude: 13.7225, longitude: 100.5680 }
+        description:
+            'スクンビット26にある日本式温浴施設とスパ。温浴設備に加えてマッサージやボディケアを利用できます。',
+        coordinate: {
+            latitude: 13.7225,
+            longitude: 100.5680,
+        },
     },
     {
         id: 'divana_divine_thonglor',
         name: 'Divana Divine Spa (トンロー)',
         category: 'massage',
         area: 'トンロー',
-        description: '緑豊かな一軒家で極上のアロママッサージやハーバルスパが体験できるラグジュアリー店。',
-        coordinate: { latitude: 13.7320, longitude: 100.5810 }
+        description:
+            'トンロー17にある一軒家スタイルのスパ。アロマ系を含む各種スパトリートメントを提供しています。',
+        coordinate: {
+            latitude: 13.7320,
+            longitude: 100.5810,
+        },
     },
     {
         id: 'health_land_sathorn',
         name: 'Health Land Sathorn (サトーン店)',
         category: 'massage',
         area: 'サトーン',
-        description: 'コロニアル様式の美しい建築が特徴の大型店舗。落ち着いた環境で本格的な施術が受けられます。',
-        coordinate: { latitude: 13.7230, longitude: 100.5315 }
+        description:
+            'サトーンエリアにあるHealth Landの店舗。タイ古式マッサージをはじめ複数の施術メニューがあります。',
+        coordinate: {
+            latitude: 13.7230,
+            longitude: 100.5315,
+        },
     },
     {
-        id: 'rarin_jinda_gaysorn',
-        name: 'Rarin Jinda Wellness Spa (ゲソーンタワー)',
+        id: 'rarin_jinda_ratchadamri',
+        name: 'RarinJinda Wellness Spa (ラチャダムリ)',
         category: 'massage',
-        area: 'チットロム',
-        description: '高級デパート内にあり、最新のウェルネス技術と伝統的なタイマッサージを融合させた極上スパ。',
-        coordinate: { latitude: 13.7440, longitude: 100.5420 }
+        area: 'ラチャダムリ',
+        description:
+            'Grande Centre Point Ratchadamriの8階にあるウェルネススパ。タイマッサージやアロマ、スパトリートメントを提供しています。',
+        coordinate: {
+            latitude: 13.7415,
+            longitude: 100.5403,
+        },
     },
     {
-        id: 'urban_retreat_asoke',
-        name: 'Urban Retreat Spa (アソーク店)',
+        id: 'lets_relax_im_chinatown',
+        name: 'Let’s Relax Spa (I’m Chinatown)',
         category: 'massage',
-        area: 'アソーク',
-        description: '駅近でリーズナブルながら清潔感があり、アロママッサージやスクラブが評判の隠れ家的サロン。',
-        coordinate: { latitude: 13.7378, longitude: 100.5605 }
+        area: 'ヤワラー・チャイナタウン',
+        description:
+            'I’m Chinatownの3階にあるスパ。MRTワット・マンコン駅1番出口から徒歩約170mで、足マッサージなど複数の施術メニューがあります。',
+        coordinate: {
+            latitude: 13.74151,
+            longitude: 100.51119,
+        },
     },
 
     // ==========================================
@@ -86,67 +118,63 @@ export const bangkokRecommendations: RecommendedSpot[] = [
     // ==========================================
     {
         id: 'after_you_siam',
-        name: 'After You Dessert Cafe (パラゴン店)',
+        name: 'After You Dessert Cafe (サイアム・パラゴン)',
         category: 'cafe',
         area: 'サイアム',
-        description: 'タイで大人気の絶品かき氷やハニートーストが楽しめる大行列の有名スイーツカフェ。',
-        coordinate: { latitude: 13.7462, longitude: 100.5350 }
+        description:
+            'タイ発のデザートカフェ。サイアム・パラゴン店では、かき氷やトーストなどのデザートを楽しめます。',
+        coordinate: {
+            latitude: 13.7462,
+            longitude: 100.5350,
+        },
     },
     {
         id: 'blue_whale_cafe',
-        name: 'Blue Whale Cafe (王宮・寺院エリア)',
+        name: 'Blue Whale Cafe (王宮・ワットポー周辺)',
         category: 'cafe',
         area: 'ワット・ポー',
-        description: '青いバタフライピーラテがSNSで大人気の、おしゃれで落ち着いた隠れ家カフェ。',
-        coordinate: { latitude: 13.7442, longitude: 100.4930 }
+        description:
+            'Maha Rat Roadにあるカフェ。王宮やワット・ポー周辺の散策時に立ち寄りやすい場所にあります。',
+        coordinate: {
+            latitude: 13.7442,
+            longitude: 100.4930,
+        },
     },
     {
         id: 'roast_thonglor',
-        name: 'Roast (The Commons トンロー)',
+        name: 'Roast (theCOMMONS Thonglor)',
         category: 'cafe',
         area: 'トンロー',
-        description: 'おしゃれなオープンエア空間で、こだわりの自家焙煎コーヒーや絶品ブランチが楽しめる名店。',
-        coordinate: { latitude: 13.7345, longitude: 100.5822 }
+        description:
+            'theCOMMONS Thonglor内にあるオールデイダイニング。コーヒーのほか、ブランチや食事メニューも提供しています。',
+        coordinate: {
+            latitude: 13.73497,
+            longitude: 100.58216,
+        },
     },
     {
         id: 'factory_coffee_phaya_thai',
-        name: 'Factory Coffee (パヤタイ)',
+        name: 'Factory Coffee (Phaya Thai)',
         category: 'cafe',
         area: 'パヤタイ',
-        description: '数々の世界バリスタチャンピオンシップで受賞した、バンコク最高峰の本格エスプレッソバー。',
-        coordinate: { latitude: 13.7562, longitude: 100.5358 }
+        description:
+            '49 Phaya Thai Roadにあるコーヒーショップ兼ロースタリー。自家焙煎コーヒーやエスプレッソ系メニューを提供しています。',
+        coordinate: {
+            latitude: 13.75934,
+            longitude: 100.53544,
+        },
     },
     {
-        id: 'hands_and_heart_ari',
-        name: 'Hands and Heart (アーリー)',
+        id: 'mother_roaster_talat_noi',
+        name: 'Mother Roaster (Talat Noi)',
         category: 'cafe',
-        area: 'アーリー',
-        description: '白を基調としたミニマルな空間で、こだわりのドリップコーヒーをしっとりと味わえる人気カフェ。',
-        coordinate: { latitude: 13.7820, longitude: 100.5440 }
-    },
-    {
-        id: 'intr_cnx_sathorn',
-        name: 'ORGANIC SUPPLY (サトーン・ソイ)',
-        category: 'cafe',
-        area: 'サトーン',
-        description: 'オーガニック食材にこだわったスムージーやヘルシーなスイーツが楽しめる、緑に囲まれたカフェ。',
-        coordinate: { latitude: 13.7190, longitude: 100.5370 }
-    },
-    {
-        id: 'li_life_cafe_ekamai',
-        name: 'Heals Cafe & Workspace (エカマイ)',
-        category: 'cafe',
-        area: 'エカマイ',
-        description: '静かな住宅街に佇む、木の温もりを感じる落ち着いた雰囲気の隠れ家カフェ。',
-        coordinate: { latitude: 13.7280, longitude: 100.5875 }
-    },
-    {
-        id: 'ici_bkk_sathorn',
-        name: 'ici.bkk (サトーン)',
-        category: 'cafe',
-        area: 'サトーン',
-        description: 'まるで芸術作品のような美しすぎるフレンチデザートと写真映えする空間が人気のパティスリーカフェ。',
-        coordinate: { latitude: 13.7198, longitude: 100.5285 }
+        area: 'タラートノイ',
+        description:
+            'タラートノイのSoi Charoen Krung 22にあるコーヒーショップ。タイ国内外の豆を使ったコーヒーを提供しています。',
+        coordinate: {
+            latitude: 13.73318,
+            longitude: 100.51228,
+        },
     },
 
     // ==========================================
@@ -157,63 +185,95 @@ export const bangkokRecommendations: RecommendedSpot[] = [
         name: 'JODD FAIRS Ratchada (ジョド・フェアーズ・ラチャダー)',
         category: 'food',
         area: 'ラチャダー',
-        description: 'バンコクのナイトマーケット。多彩な屋台グルメやドリンク、衣類・雑貨などを楽しめます。MRTタイランド・カルチャーセンター駅から徒歩約2分です。',
-        coordinate: { latitude: 13.76833, longitude: 100.57094 }
+        description:
+            'ラチャダーにあるナイトマーケット。屋台料理、ドリンク、衣類・雑貨などの店舗が並びます。MRTタイランド・カルチャーセンター駅から徒歩約2分です。',
+        coordinate: {
+            latitude: 13.76833,
+            longitude: 100.57094,
+        },
     },
     {
         id: 'chinatown_yaowarat',
         name: 'ヤワラー (中華街・夜の屋台街)',
         category: 'food',
-        area: 'フワランポーン',
-        description: '夜になるとネオンが輝き、フカヒレや絶品シーフード、中華スイーツの屋台が軒を連ねる美食街。',
-        coordinate: { latitude: 13.7410, longitude: 100.5090 }
+        area: 'ヤワラー',
+        description:
+            'バンコクの中華街として知られるヤワラー通り周辺。夜は中華料理、シーフード、スイーツなどの飲食店や屋台が並びます。',
+        coordinate: {
+            latitude: 13.7410,
+            longitude: 100.5090,
+        },
+    },
+    {
+        id: 'nai_ek_roll_noodles',
+        name: 'Nai Ek Roll Noodles (陳億粿條)',
+        category: 'food',
+        area: 'ヤワラー',
+        description:
+            'ヤワラー通り442番地にあるクイジャップ（巻いた米麺）の店。胡椒を効かせたスープや豚肉を使った料理を提供しています。',
+        coordinate: {
+            latitude: 13.74026,
+            longitude: 100.50998,
+        },
     },
     {
         id: 'go_ang_pratunam',
-        name: 'ピンクのカオマンガイ (ガイトーン・プラトゥーナム)',
+        name: 'Go-Ang Pratunam Chicken Rice (カオマンガイ)',
         category: 'food',
         area: 'プラトゥーナム',
-        description: '言わずと知れた超有名店。ジューシーな鶏肉と特製ピリ辛ダレが絶品の絶品カオマンガイ。',
-        coordinate: { latitude: 13.7505, longitude: 100.5392 }
+        description:
+            '海南鶏飯（カオマンガイ）を提供する店として知られるGo-Ang Pratunam Chicken Rice。鶏肉、ご飯、タレを組み合わせた料理が中心です。',
+        coordinate: {
+            latitude: 13.7505,
+            longitude: 100.5392,
+        },
     },
     {
         id: 'thipsamai_padthai',
-        name: 'ティップサマイ (パッタイ専門店)',
+        name: 'Thipsamai Pratoopee (パッタイ専門店)',
         category: 'food',
-        area: '旧市街・民主記念塔',
-        description: '「タイで一番美味しいパッタイ」と称される老舗行列店。卵で包まれた元祖エビパッタイは必食。',
-        coordinate: { latitude: 13.7538, longitude: 100.5042 }
+        area: '旧市街・プラトゥーピー',
+        description:
+            '313-315 Maha Chai Roadにあるパッタイ専門店。1939年創業の歴史を持ち、パッタイを中心に提供しています。',
+        coordinate: {
+            latitude: 13.7538,
+            longitude: 100.5042,
+        },
     },
     {
         id: 'iconsiam_sook_siam',
-        name: 'アイコンサイアム (SOOKSIAM)',
+        name: 'ICONSIAM (SOOKSIAM)',
         category: 'food',
-        area: 'トンブリー（チャオプラヤー川沿い）',
-        description: '超巨大ショッピングモール内の、屋内型水上マーケットを模した一大フードテーマパーク。',
-        coordinate: { latitude: 13.7265, longitude: 100.5108 }
+        area: 'クローンサーン（チャオプラヤー川沿い）',
+        description:
+            'ICONSIAM館内にあるタイ各地の食や文化をテーマにしたエリア。飲食店や食品・物販の店舗があります。',
+        coordinate: {
+            latitude: 13.7265,
+            longitude: 100.5108,
+        },
     },
     {
         id: 'wattana_panich_beef_noodle',
-        name: 'ワッタナー・パーニット (エカマイ)',
+        name: 'Wattana Panich (エカマイ)',
         category: 'food',
         area: 'エカマイ',
-        description: '何十年も継ぎ足されてきた伝説のスープが絶品の、牛肉ビーフヌードル（クッティオ・ヌア）の名店。',
-        coordinate: { latitude: 13.7262, longitude: 100.5850 }
+        description:
+            'エカマイ通りにあるタイ料理店。牛肉の煮込みやビーフヌードルなどを提供しています。',
+        coordinate: {
+            latitude: 13.7262,
+            longitude: 100.5850,
+        },
     },
     {
         id: 'asiatique_the_riverfront',
-        name: 'アジアティーク・ザ・リバーフロント',
+        name: 'Asiatique The Riverfront Destination',
         category: 'food',
-        area: 'チャルンクルン通り',
-        description: 'チャオプラヤー川沿いの倉庫街を改装した、夜景と観覧車、グルメが楽しめるおしゃれなナイトスポット。',
-        coordinate: { latitude: 13.7025, longitude: 100.5038 }
+        area: 'チャルンクルン（チャオプラヤー川沿い）',
+        description:
+            'チャオプラヤー川沿いの複合施設。レストラン、ショップ、観覧車などがあり、サトーン桟橋との無料シャトルボートも運行されています。',
+        coordinate: {
+            latitude: 13.7025,
+            longitude: 100.5038,
+        },
     },
-    {
-        id: 'baan_ice_thonglor',
-        name: 'Baan Ice (トンロー店)',
-        category: 'food',
-        area: 'トンロー',
-        description: '南タイの本格的でスパイシーな家庭料理を落ち着いたモダンな空間で味わえる大人気レストラン。',
-        coordinate: { latitude: 13.7350, longitude: 100.5795 }
-    }
 ];
