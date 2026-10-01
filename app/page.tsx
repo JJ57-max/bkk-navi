@@ -19,6 +19,7 @@ import { RecommendedSpot } from '@/data/recommendations';
 import { allBangkokStations } from '@/data/stations';
 import { getBoatServiceNotice } from '@/utils/boatServiceNotice';
 import BoatServiceNotice from '@/components/BoatServiceNotice';
+import LegalModal from '@/components/LegalModal';
 
 type CoordinateCandidate = {
     id?: string;
@@ -269,6 +270,9 @@ function MainContent() {
         >(null);
 
     const [showEmergencyModal, setShowEmergencyModal] =
+        useState<boolean>(false);
+
+    const [showLegalModal, setShowLegalModal] =
         useState<boolean>(false);
 
     const [agodaHotels, setAgodaHotels] =
@@ -1815,6 +1819,17 @@ function MainContent() {
                     >
                         📖 マナー
                     </button>
+
+                    <button
+                        onClick={() =>
+                            setShowLegalModal(
+                                true
+                            )
+                        }
+                        className="whitespace-nowrap px-3 py-1.5 rounded-xl bg-gray-50 text-gray-700 border border-gray-200 text-xs font-bold shadow-sm shrink-0"
+                    >
+                        ℹ️ プライバシー・免責
+                    </button>
                 </div>
 
                 <div className="pointer-events-auto horizontal-scroll-safe flex gap-2 overflow-x-auto px-2 max-w-md mx-auto w-full">
@@ -2609,6 +2624,17 @@ function MainContent() {
                 }
                 currentLocation={
                     userLocation
+                }
+            />
+
+            <LegalModal
+                isOpen={
+                    showLegalModal
+                }
+                onClose={() =>
+                    setShowLegalModal(
+                        false
+                    )
                 }
             />
         </main>
