@@ -40,7 +40,7 @@ export default function RootLayout({
         {children}
       </body>
       {/* Googleアナリティクスの測定IDを設定[cite: 13] */}
-      <GoogleAnalytics gaId="G-9KLS8XGZ7N" />
+      <GoogleAnalytics gaId="G-KS7BKWDDSW" />
 
       {/* バリューコマース LinkSwitchタグ[cite: 13] */}
       <Script id="valuecommerce-linkswitch" strategy="afterInteractive">
