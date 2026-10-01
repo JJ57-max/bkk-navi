@@ -2,6 +2,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { getAgodaSearchUrl } from '@/data/hotels';
 
 export interface ItineraryItem {
     id: string;
@@ -122,7 +123,7 @@ export default function TravelPlanDrawer({
                 <div className="border-t pt-3 mt-2 flex flex-col gap-2">
                     <p className="text-[10px] font-bold text-gray-400 tracking-wider">💡 ホテル・現地オプショナルツアー (PR)</p>
                     <a
-                        href="https://www.agoda.com"
+                        href={getAgodaSearchUrl()}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="bg-blue-50 hover:bg-blue-100 text-blue-700 p-2.5 rounded-xl text-center text-xs font-bold flex items-center justify-center gap-1 transition-colors"
