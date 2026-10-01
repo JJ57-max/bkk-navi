@@ -65,7 +65,7 @@ export const bangkokEmergencyContacts: EmergencyContact[] = [
         addressTh: '133 สุขุมวิท 49 แขวงคลองตันเหนือ เขตวัฒนา กรุงเทพมหานคร 10110',
         addressEn: '133 Sukhumvit 49, Khlong Tan Nuea, Watthana, Bangkok 10110',
         description: '日本人向け医療サービスや日本語通訳に対応する総合病院です。日本語対応の可否・時間帯は受診時に病院へ確認してください。',
-        coordinate: { latitude: 13.7368, longitude: 100.5772 },
+        coordinate: { latitude: 13.7348727, longitude: 100.5765805 },
     },
     {
         id: 'bumrungrad',

@@ -7,9 +7,13 @@ import React, {
 } from 'react';
 
 import { createPortal } from 'react-dom';
+import type { DestinationAddress } from '@/hooks/useDestinationAddress';
+import DestinationAddressBlock from '@/components/DestinationAddressBlock';
 
 interface DetailSheetProps {
     title: string;
+    destinationAddress: DestinationAddress;
+    onRetryAddress: () => void;
     distanceKm: number;
     agodaHotelId?: string;
     onClose: () => void;
@@ -18,6 +22,8 @@ interface DetailSheetProps {
 
 export default function DetailSheet({
     title,
+    destinationAddress,
+    onRetryAddress,
     distanceKm,
     agodaHotelId,
     onClose,
@@ -387,6 +393,7 @@ export default function DetailSheet({
                     "
                 >
                     <div className="flex flex-col gap-3">
+                        <DestinationAddressBlock address={destinationAddress} onRetry={onRetryAddress} />
                         {/*
                          * アクセス概要
                          */}
@@ -898,17 +905,17 @@ export default function DetailSheet({
                                 <div className="grid grid-cols-2 gap-2">
                                     <label className="flex flex-col gap-1 text-[10px] font-bold text-gray-600">
                                         チェックイン
-                                        <input type="date" value={checkIn} min={getBangkokDateString(0)} onChange={(event) => setCheckIn(event.target.value)} className="w-full rounded-lg border border-gray-300 px-2 py-2 text-xs text-gray-900" />
+                                        <input id="hotel-check-in" name="checkIn" type="date" value={checkIn} min={getBangkokDateString(0)} onChange={(event) => setCheckIn(event.target.value)} className="w-full rounded-lg border border-gray-300 px-2 py-2 text-xs text-gray-900" />
                                     </label>
                                     <label className="flex flex-col gap-1 text-[10px] font-bold text-gray-600">
                                         チェックアウト
-                                        <input type="date" value={checkOut} min={checkIn || getBangkokDateString(0)} onChange={(event) => setCheckOut(event.target.value)} className="w-full rounded-lg border border-gray-300 px-2 py-2 text-xs text-gray-900" />
+                                        <input id="hotel-check-out" name="checkOut" type="date" value={checkOut} min={checkIn || getBangkokDateString(0)} onChange={(event) => setCheckOut(event.target.value)} className="w-full rounded-lg border border-gray-300 px-2 py-2 text-xs text-gray-900" />
                                     </label>
                                 </div>
 
                                 <label className="flex flex-col gap-1 text-[10px] font-bold text-gray-600">
                                     宿泊人数（大人）
-                                    <select value={adults} onChange={(event) => setAdults(Number(event.target.value))} className="w-full rounded-lg border border-gray-300 px-2 py-2 text-xs text-gray-900 bg-white">
+                                    <select id="hotel-adults" name="adults" value={adults} onChange={(event) => setAdults(Number(event.target.value))} className="w-full rounded-lg border border-gray-300 px-2 py-2 text-xs text-gray-900 bg-white">
                                         {Array.from({ length: 10 }, (_, index) => index + 1).map((count) => (
                                             <option key={count} value={count}>{count}名</option>
                                         ))}

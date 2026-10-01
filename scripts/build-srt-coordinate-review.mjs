@@ -172,7 +172,6 @@ function buildIndex(
 
 function evaluateEvidence({
   anomaly,
-  station,
   rail,
   transport,
 }) {
@@ -552,7 +551,6 @@ async function main() {
     const evaluation =
       evaluateEvidence({
         anomaly,
-        station,
         rail,
         transport,
       });

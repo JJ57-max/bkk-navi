@@ -22,6 +22,9 @@ export default function SearchBar({ onSelectStation }: SearchBarProps) {
         <div className="absolute top-4 left-4 z-30 w-80 max-w-full">
             <div className="relative">
                 <input
+                    id="station-search"
+                    name="stationSearch"
+                    aria-label="駅名・船着場を検索"
                     type="text"
                     value={query}
                     onChange={(e) => {

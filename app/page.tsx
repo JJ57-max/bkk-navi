@@ -2,9 +2,11 @@
 
 import React, { useState, useEffect, Suspense } from 'react';
 import Image from 'next/image';
+import { getSecureHotelImageUrl } from '@/utils/hotelImageUrl';
 import GoogleMapComponent from '@/components/GoogleMap';
 import DetailSheet from '@/components/DetailSheet';
 import ThaiDriverCardModal from '@/components/ThaiDriverCardModal';
+import { useDestinationAddress } from '@/hooks/useDestinationAddress';
 import GuideModal from '@/components/GuideModal';
 import EmergencyModal from '@/components/EmergencyModal';
 import TravelPlanDrawer, {
@@ -188,6 +190,10 @@ function MainContent() {
         useState<string>(
             'サイアム・パラゴン (デモモード)'
         );
+
+    const { address: destinationAddress, retryAddress } = useDestinationAddress(
+        destinationCoordinate.lat, destinationCoordinate.lng,
+    );
 
     const [searchText, setSearchText] =
         useState<string>('');
@@ -1554,103 +1560,13 @@ function MainContent() {
                     onSelectStation={
                         handleSelectStation
                     }
-                    onSelectArbitraryPoint={async (
-                        title,
-                        lat,
-                        lng
-                    ) => {
-                        const tempTitle =
-                            '指定エリア (' +
-                            lat.toFixed(4) +
-                            ', ' +
-                            lng.toFixed(4) +
-                            ')';
-
-                        /*
-                         * 地図クリックは目的地変更。
-                         *
-                         * userLocation は変更しない。
-                         */
-                        setDestinationCoordinate(
-                            {
-                                lat,
-                                lng,
-                            }
-                        );
-
-                        setDestinationTitle(
-                            tempTitle
-                        );
-
-                        setIsDemoMode(
-                            false
-                        );
-
-                        try {
-                            const res =
-                                await fetch(
-                                    '/api/geocode?lat=' +
-                                        encodeURIComponent(
-                                            lat.toString()
-                                        ) +
-                                        '&lng=' +
-                                        encodeURIComponent(
-                                            lng.toString()
-                                        )
-                                );
-
-                            if (res.ok) {
-                                const data =
-                                    await res.json();
-
-                                let resolvedAddress =
-                                    data.address ||
-                                    tempTitle;
-
-                                resolvedAddress =
-                                    resolvedAddress
-                                        .replace(
-                                            /タイ王国|タイ$|タイ、|Thailand|,\s*Thailand/g,
-                                            ''
-                                        )
-                                        .replace(
-                                            /,\s*$/,
-                                            ''
-                                        )
-                                        .trim();
-
-                                setDestinationTitle(
-                                    resolvedAddress
-                                );
-
-                                updateUrlParams(
-                                    resolvedAddress,
-                                    lat,
-                                    lng
-                                );
-
-                                showToast(
-                                    '📍 取得した地点を設定しました'
-                                );
-                            } else {
-                                updateUrlParams(
-                                    tempTitle,
-                                    lat,
-                                    lng
-                                );
-                            }
-                        } catch (err) {
-                            console.error(
-                                'Geocode fetch error:',
-                                err
-                            );
-
-                            updateUrlParams(
-                                tempTitle,
-                                lat,
-                                lng
-                            );
-                        }
+                    onSelectArbitraryPoint={(title, lat, lng) => {
+                        const pointTitle = title || `指定地点 (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
+                        setDestinationCoordinate({ lat, lng });
+                        setDestinationTitle(pointTitle);
+                        setIsDemoMode(false);
+                        updateUrlParams(pointTitle, lat, lng);
+                        showToast('📍 選択した地点を目的地に設定しました');
                     }}
                 />
             </div>
@@ -1701,6 +1617,9 @@ function MainContent() {
                             </span>
 
                             <input
+                                id="destination-search"
+                                name="destinationSearch"
+                                aria-label="スポット・駅・ホテルを検索"
                                 type="text"
                                 placeholder="スポット・駅・ホテルを自由検索..."
                                 value={
@@ -2256,10 +2175,9 @@ function MainContent() {
                                         hotel.name ||
                                         'バンコクのホテル';
 
-                                    const rawImage =
-                                        hotel.imageURL ||
-                                        hotel.imageUrl ||
-                                        '';
+                                    const rawImage = getSecureHotelImageUrl(
+                                        hotel.imageURL || hotel.imageUrl || '',
+                                    );
 
                                     const hasHotelImage =
                                         Boolean(
@@ -2621,6 +2539,8 @@ function MainContent() {
 
             {showDetailSheet && (
                 <DetailSheet
+                    destinationAddress={destinationAddress}
+                    onRetryAddress={retryAddress}
                     title={
                         destinationTitle
                     }
@@ -2648,6 +2568,9 @@ function MainContent() {
 
             {showThaiCard && (
                 <ThaiDriverCardModal
+                    key={`${destinationCoordinate.lat},${destinationCoordinate.lng}`}
+                    destinationAddress={destinationAddress}
+                    onRetryAddress={retryAddress}
                     destinationTitle={
                         destinationTitle
                     }
