@@ -6,6 +6,7 @@ import { createPortal } from 'react-dom';
 import { getThaiInfo } from '@/data/thaiInfo';
 import type { DestinationAddress } from '@/hooks/useDestinationAddress';
 import DestinationAddressBlock from '@/components/DestinationAddressBlock';
+import BoatServiceNotice from '@/components/BoatServiceNotice';
 
 // SSRと初回hydrationではPortalを描画せず、クライアントでのみ有効にする。
 const subscribeToClient = () => () => {};
@@ -130,6 +131,7 @@ export default function ThaiDriverCardModal({
                     </h2>
                     <div className="mt-3">
                         <DestinationAddressBlock address={destinationAddress} onRetry={onRetryAddress} />
+                        <BoatServiceNotice latitude={destinationAddress.latitude} longitude={destinationAddress.longitude} />
                     </div>
                     {thaiNote && (
                         <p className="text-sm font-bold text-blue-600">

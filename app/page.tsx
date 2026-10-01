@@ -17,6 +17,8 @@ import { bangkokHotels } from '@/data/hotels';
 import { ExchangeShop } from '@/data/guides';
 import { RecommendedSpot } from '@/data/recommendations';
 import { allBangkokStations } from '@/data/stations';
+import { getBoatServiceNotice } from '@/utils/boatServiceNotice';
+import BoatServiceNotice from '@/components/BoatServiceNotice';
 
 type CoordinateCandidate = {
     id?: string;
@@ -2005,7 +2007,7 @@ function MainContent() {
                                                     serviceStatus ===
                                                         'inactive' && (
                                                         <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-gray-200 text-gray-700 border border-gray-300">
-                                                            現在利用不可
+                                                            通常便では利用不可
                                                         </span>
                                                     )}
                                             </div>
@@ -2364,6 +2366,11 @@ function MainContent() {
 
             {!showDetailSheet && (
                 <div className="absolute bottom-20 left-0 right-0 z-10 px-4 flex justify-center pointer-events-none">
+                    <div className="max-w-md w-full flex flex-col gap-2 pointer-events-auto">
+                        <BoatServiceNotice
+                            latitude={destinationCoordinate.lat}
+                            longitude={destinationCoordinate.lng}
+                        />
                     <button
                         onClick={() =>
                             setShowDetailSheet(
@@ -2387,6 +2394,7 @@ function MainContent() {
                             ▲
                         </span>
                     </button>
+                    </div>
                 </div>
             )}
 
@@ -2491,6 +2499,8 @@ function MainContent() {
                         lat,
                         lng
                     );
+                    const notice = getBoatServiceNotice(lat, lng);
+                    if (notice) showToast(`⚠️ ${notice.label}`);
                 }}
             />
 

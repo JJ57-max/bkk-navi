@@ -1067,7 +1067,7 @@ export default function GoogleMapComponent({
         if (status === 'inactive') {
             return {
                 status,
-                label: '休止中',
+                label: station.line === 'Boat' ? '通常便では利用不可' : '休止中',
                 note:
                     serviceStation.serviceNote ??
                     '現在利用できません。',

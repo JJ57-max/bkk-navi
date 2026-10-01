@@ -9,6 +9,7 @@ import React, {
 import { createPortal } from 'react-dom';
 import type { DestinationAddress } from '@/hooks/useDestinationAddress';
 import DestinationAddressBlock from '@/components/DestinationAddressBlock';
+import BoatServiceNotice from '@/components/BoatServiceNotice';
 
 interface DetailSheetProps {
     title: string;
@@ -394,6 +395,7 @@ export default function DetailSheet({
                 >
                     <div className="flex flex-col gap-3">
                         <DestinationAddressBlock address={destinationAddress} onRetry={onRetryAddress} />
+                        <BoatServiceNotice latitude={destinationAddress.latitude} longitude={destinationAddress.longitude} />
                         {/*
                          * アクセス概要
                          */}

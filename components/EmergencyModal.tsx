@@ -68,7 +68,7 @@ export default function EmergencyModal({ isOpen, onClose, onSelectLocation }: Em
                 <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain flex flex-col gap-3 pr-1 text-xs text-gray-700">
                     <div className="bg-red-50 border border-red-200 p-3 rounded-2xl text-red-900 text-[11px] leading-relaxed">
                         <span className="font-bold block mb-1">⚠️ 緊急時は状況に合った番号へ</span>
-                        警察191、救急医療1669、バンコクの救急医療1646、消防199。旅行中のトラブルは24時間対応の観光警察1155（8言語対応）も利用できます。
+                        警察191、救急医療1669、バンコクの健康・医療相談1646、消防199。旅行中のトラブルは24時間対応の観光警察1155（8言語対応）も利用できます。
                     </div>
 
                     {bangkokEmergencyContacts.map((contact) => {
